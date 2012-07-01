@@ -686,7 +686,7 @@ function Game()
 							this.x -= this.xmove;
 						}
 						this.telebomb += Math.round(Math.random() * 4) + 1;
-						if(this.telebomb == 3)
+						if(this.telebomb >= 3)
 						{
 							this.shoot(101);
 							this.telebomb = -1;
