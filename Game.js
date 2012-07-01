@@ -1601,6 +1601,16 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				}
 				break;
 			}
+			case 4:
+			{// Level Up Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					currentGui = NULL_GUI_STATE;
+					self.softReset();
+				}
+				break;
+			}
 		}
 	}
     
@@ -2664,6 +2674,23 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			case 3:
 			{// Game Over Menu
 				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
+										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
+										 
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Continue", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				} else
+				{
+					guiText[1] = new GUIText("Continue", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				}
+				break;
+			}
+			case 4:
+			{// Level Up Menu
+				guiText[0] = new GUIText("Level Up! Now on level: " + gco.level, _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
 										 
         		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
