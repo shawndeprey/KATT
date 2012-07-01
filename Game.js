@@ -125,7 +125,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 1;//Starting at 1
+		this.level = 5;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -465,11 +465,12 @@ function Game()
 							}
 							case 4:
 							{//Enemy Type 5
-								theLife = Math.round(Math.random() * 10) + 7;
+								theLife = Math.round(Math.random() * 25) + 15;
 								theSpeed = Math.round(Math.random() * 35) + 35;
 								theDmg = Math.round(Math.random() * 17) + 17;
 								if(theDmg >= 28)
 								{
+									theLife = Math.round(Math.random() * 25) + 25;
 									model = 11;
 									Cores = Math.round(Math.random() * 30) + 20;
 									width = 26;
@@ -517,9 +518,11 @@ function Game()
 		this.startLife = this.life;
 		this.tele = 0;
 		this.xmove = 0;
-		this.teletime = 0;
-		this.telebomb = 0;
 		this.ystop = 0;
+		this.canFire = [];
+		this.readyForTeleport = false;
+		this.teleportTimer = 2;
+		this.didTeleport = false;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -531,7 +534,17 @@ function Game()
 			}
 			case 4:
 			{
-				this.ystop = Math.round(Math.random() * 301) + 100;		
+				this.ystop = Math.round(Math.random() * 301) + 100;
+				if(this.Model == 11)
+				{
+					for(var i = 0; i < 3; i++)
+					{
+						this.canFire.push(true);
+					}
+				} else
+				{
+					this.canFire.push(true);
+				}
 			}
 			case 50:
 			{
@@ -682,46 +695,54 @@ function Game()
 				}
 				case 4:
 				{//Teleporters
-				if(this.y < this.ystop)
-				{
 					this.y += this.speed * delta;
-					if((this.y + (this.speed * 8) > this.yStop))
+					if(!this.didTeleport){ this.speed = this.ystop - this.y; }
+					if(this.speed < 50 && this.speed > 35 && this.canFire[0])
 					{
-						this.speed = (this.yStop - this.y) / 8;
-					}
-				}
-				this.teletime += this.timeAlive;
-					if(this.teletime > 500)
-					{	
-						this.tele = Math.round(Math.random() * 301);
-						this.xmove = this.tele;
-						if(this.x <= 400)
-						{
-							this.x += this.xmove;
-						} else
-						{
-							this.x -= this.xmove;
-						}
-						this.telebomb += Math.round(Math.random() * 4) + 1;
-						if(this.telebomb >= 3)
-						{
-							this.shoot(101);
-							this.telebomb = -1;
-						}
-						this.teletime = 0;
-						this.timeAlive = 0;
+						this.canFire[0] = false;
+						this.shoot(100);
+					} else
+					if(this.speed < 35 && this.speed > 25 && this.canFire[1])
+					{
+						this.canFire[1] = false;
+						this.shoot(100);
+					} else
+					if(this.speed < 25 && this.canFire[2])
+					{
+						this.canFire[2] = false;
+						this.shoot(100);
 					}
 					
-					else if(this.telebomb < 0)
+					if(this.speed < 25){ this.readyForTeleport = true; }
+					
+					if(this.readyForTeleport)
 					{
-						this.y += this.speed * delta;
+						if(this.teleportTimer <= 0)
+						{
+							this.y += 10;
+							this.readyForTeleport = false;
+							this.didTeleport = true;
+							explosions.push(new Explosion(this.x, this.y, 50, 1, 500, 0.1, 0.1, 3));
+							if(Math.round(Math.random() * 1) == 1)
+							{//teleport left
+								this.x -= Math.round(Math.random() * 100) + 50;
+								if(this.x < 0){this.x = 5;}
+							} else
+							{//teleport right
+								this.x += Math.round(Math.random() * 100) + 50;
+								if(this.x > _buffer.width){this.x = _buffer.width - 5;}
+							}
+							explosions.push(new Explosion(this.x, this.y, 50, 1, 500, 0.1, 0.1, 3));
+						}
+						this.teleportTimer -= delta;
 					}
 					
+					if(this.didTeleport){ this.speed = this.y - this.ystop;	}
 					
 					if(this.life <= 0)
 					{
 						destroys += 1;
-						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 0.1);
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
 						//Update Mission Data
 						gco.levelMission.UpdateProgress(this.type);
@@ -1282,14 +1303,14 @@ function Game()
 					case 50:
 					{
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
 						break;
 					}
 					case 51:
 					{
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
 						break;
 					}
