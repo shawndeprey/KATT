@@ -13,7 +13,7 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 4;// Should always be above current state limit
+	var NULL_GUI_STATE = 5;// Should always be above current state limit
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
@@ -125,7 +125,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 5;//Starting at 1
+		this.level = 1;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -254,8 +254,15 @@ function Game()
 				{//Update Fuel
 					if(player.currentFuel == 0)
 					{
-						self.softReset();
-						this.GoToUpgradeMenu();
+						if(this.levelMission.CheckCompletion())
+						{
+							currentGui = 4;//Go to level up menu
+							gameState = 0;
+						} else
+						{
+							self.softReset();
+							this.GoToUpgradeMenu();	
+						}
 					}
 					player.currentFuel -= 1;
 				}
@@ -1619,6 +1626,7 @@ function Game()
 		// 1 = Pause Menu
 		// 2 = Level Up Menu
 		// 3 = Game Over Menu
+		// 4 = Continue Menu
 		switch(currentGui)
 		{
 			case 0:
@@ -1695,8 +1703,8 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
 				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
-					currentGui = NULL_GUI_STATE;
 					self.softReset();
+					gco.GoToUpgradeMenu();	
 				}
 				break;
 			}
@@ -1886,14 +1894,14 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 		// Stars
         self.drawStars();
 		
-		//Money
-		self.drawMoney();
-		
-		//Random Items
-		self.drawItems();
-		
         if(gameState == 1)
         {
+			//Money
+			self.drawMoney();
+			
+			//Random Items
+			self.drawItems();
+			
             // Player
             if(player.isAlive())
             {
@@ -2792,7 +2800,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			}
 			case 4:
 			{// Level Up Menu
-				guiText[0] = new GUIText("Level Up! Now on level: " + gco.level, _canvas.width / 2, _canvas.height / 2 - 100, 
+				guiText[0] = new GUIText("Level Up! Now on level: " + (gco.level + 1), _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
 										 
         		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
