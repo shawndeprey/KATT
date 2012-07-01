@@ -125,7 +125,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 4;//Starting at 1
+		this.level = 5;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -456,6 +456,26 @@ function Game()
 								}//Missiles 15 x 31
 								break;
 							}
+							case 4:
+							{//Enemy Type 5
+								theLife = Math.round(Math.random() * 10) + 7;
+								theSpeed = Math.round(Math.random() * 35) + 35;
+								theDmg = Math.round(Math.random() * 17) + 17;
+								if(theDmg >= 28)
+								{
+									model = 11;
+									Cores = Math.round(Math.random() * 30) + 20;
+									width = 26;
+									height = 21;
+								}else 
+								{
+									model = 10;
+									Cores = Math.round(Math.random() * 25) + 10;
+									width = 26;
+									height = 21;
+								}//Missiles 15 x 31
+								break;
+							}
 						}
 						
 						enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType);
@@ -488,6 +508,10 @@ function Game()
 		this.direction = 2;
 		this.lastDirection = 2;//0 = left;
 		this.startLife = this.life;
+		this.tele = 0;
+		this.xmove = 0;
+		this.teletime = 0;
+		this.telebomb = 0;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -644,6 +668,53 @@ function Game()
 					}
 					return 0;
 				}
+				case 4:
+				{//Teleporters
+					if(this.y < 100){this.y += this.speed * delta;}
+					this.teletime += this.timeAlive;
+					
+						if(this.teletime > 500)
+						{	
+							this.tele = Math.round(Math.random() * 301);
+							this.xmove = this.tele;
+							if(this.x <= 400)
+							{
+								this.x += this.xmove;
+							} else
+							{
+								this.x -= this.xmove;
+							}
+							this.telebomb += 1;
+							if(this.telebomb == 3)
+							{
+								this.shoot(101);
+								this.telebomb += 1;
+							}
+							this.teletime = 0;
+							this.timeAlive = 0;
+						}
+					
+					else if(this.telebomb >= 4)
+					{
+						this.y += this.speed * delta;
+					}
+					
+					
+					if(this.life <= 0)
+					{
+						destroys += 1;
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 0.1);
+						explosions.push(explosion);
+						//Update Mission Data
+						gco.levelMission.UpdateProgress(this.type);
+						return 1;
+					}
+					else if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
 				case 50:
 				{//Splitter Small
 					this.y += this.speed * delta;
@@ -695,6 +766,13 @@ function Game()
 				{
 					this.totalMissiles += 1;
 					missile = new Missile(missiles.length, 300, missileType, this.x, this.y + 25, this.damage / 2);
+					missiles.push(missile);
+					break;
+				}
+				case 101:
+				{
+					this.totalMissiles += 1;
+					missile = new Missile(missiles.length, 300, missileType, this.x, this.y + 25, this.damage * 2);
 					missiles.push(missile);
 					break;
 				}
@@ -960,6 +1038,17 @@ function Game()
 				}
 				case 100:
 				{//Level 2 enemy bullet
+					this.x1 = this.x;
+					this.y1 = this.y + (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y - (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y - (this.height / 2);
+					this.y += this.speed * delta;
+					break;
+				}
+				case 101:
+				{//Level 5 enemy bomb
 					this.x1 = this.x;
 					this.y1 = this.y + (this.height / 2);
 					this.x2 = this.x - (this.width / 2);
@@ -2089,6 +2178,18 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					buffer.closePath();
 					break;
 				}
+				case 101:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 0)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
 			}
         }
     }
@@ -2355,6 +2456,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				case 1:{outText += "Weaver Kills: "; break;}
 				case 2:{outText += "Kamakaze Kills: "; break;}
 				case 3:{outText += "Splitter Kills: "; break;}
+				case 4:{outText += "Teleporter Kills: "; break;}
 				default:{outText += "Level Not Added: "; break;}
 			}
 			gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
