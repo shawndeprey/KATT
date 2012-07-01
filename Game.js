@@ -1,3 +1,4 @@
+//authors mostly shawn and justin i helped a weeeeeeeeeeeeeeeeeeeeee bit
 function Game()
 {
     this.gameLoop = null;
