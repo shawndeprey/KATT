@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 //authors mostly shawn and justin i helped a weeeeeeeeeeeeeeeeeeeeee bit
-=======
 //Authors: Shawn Deprey, Justin Hammond, Drew Muller
->>>>>>> f8fd37ffc6f7abf6a4650a2ea63603425863a843
 function Game()
 {
     this.gameLoop = null;
