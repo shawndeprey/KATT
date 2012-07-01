@@ -1,4 +1,3 @@
-//authors mostly shawn and justin i helped a weeeeeeeeeeeeeeeeeeeeee bit
 //Authors: Shawn Deprey, Justin Hammond, Drew Muller
 function Game()
 {
