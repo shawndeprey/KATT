@@ -2,3 +2,7 @@ Game over implementation.
 Add level up screen.
 Add level 5: Phaser
 Add 3 more main weps and 3 more secondary weps
+
+Future Wanted Additions:
+Boss level
+add boss
