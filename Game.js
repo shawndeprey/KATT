@@ -512,7 +512,7 @@ function Game()
 		this.xmove = 0;
 		this.teletime = 0;
 		this.telebomb = 0;
-		this.yrandom = 0;
+		this.ystop = 0;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -521,6 +521,10 @@ function Game()
 				this.xMoveSpeed = Math.round(Math.random() * 25) + 25;
 				if(this.x < player.x){this.direction = this.lastDirection = 1;} else if(this.x > player.x){this.direction = this.lastDirection = 0;} else {}
 				break;	
+			}
+			case 4:
+			{
+				this.ystop = Math.round(Math.random() * 301) + 100;		
 			}
 			case 50:
 			{
@@ -670,9 +674,15 @@ function Game()
 					return 0;
 				}
 				case 4:
-				{//Teleporters			
-				this.yrandom = Math.round(Math.random() * 301) + 1;
-				if(this.y < this.yrandom){this.y += this.speed * delta;}
+				{//Teleporters
+				if(this.y < this.ystop)
+				{
+					this.y += this.speed * delta;
+					if((this.y + (this.speed * 8) > this.yStop))
+					{
+						this.speed = (this.yStop - this.y) / 8;
+					}
+				}
 				this.teletime += this.timeAlive;
 					if(this.teletime > 500)
 					{	
