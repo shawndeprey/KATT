@@ -67,7 +67,7 @@ function Game()
         }
 		
 		var enemyImages = [];
-		for(var i = 0; i < 6; i++)
+		for(var i = 0; i < 14; i++)
 		{
 			enemyImages[i] = new Image();
 			enemyImages[i].src = ('Graphics/ship_' + i + '.png');
@@ -125,7 +125,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 3;//Starting at 1
+		this.level = 4;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -409,12 +409,12 @@ function Game()
 								theDmg = Math.round(Math.random() * 7) + 7;
 								Cores = Math.round(Math.random() * 5) + 1;
 								if(theDmg > 10){model = 3;} else {model = 2;}
-								width = 15;
-								height = 25;
+								width = 31;
+								height = 21;
 								break;
 							}
 							case 2:
-							{
+							{//Enemy Type 3
 								theLife = Math.round(Math.random() * 15) + 10;
 								theSpeed = Math.round(Math.random() * 100) + 100;
 								theDmg = Math.round(Math.random() * 10) + 10;
@@ -429,8 +429,29 @@ function Game()
 									theDmg = Math.round(Math.random() * 9) + 9;
 									Cores = Math.round(Math.random() * 5) + 1;
 								}
-								width = 15;
-								height = 25;
+								width = 21;
+								height = 31;
+								break;
+							}
+							case 3:
+							{//Enemy Type 4
+								theLife = Math.round(Math.random() * 20) + 20;
+								theSpeed = Math.round(Math.random() * 35) + 35;
+								theDmg = Math.round(Math.random() * 15) + 15;
+								if(theDmg >= 23)
+								{
+									model = 8;
+									theDmg = Math.round(Math.random() * 17) + 17;
+									Cores = Math.round(Math.random() * 30) + 20;
+									width = 37;
+									height = 31;
+								}else 
+								{
+									model = 6;
+									Cores = Math.round(Math.random() * 25) + 10;
+									width = 29;
+									height = 30;
+								}//Missiles 15 x 31
 								break;
 							}
 						}
@@ -464,10 +485,17 @@ function Game()
 		this.momentum = 0;
 		this.direction = 2;
 		this.lastDirection = 2;//0 = left;
+		this.startLife = this.life;
 		
 		switch(this.type)
 		{//Special Case Initialization
 			case 2:
+			{
+				this.xMoveSpeed = Math.round(Math.random() * 25) + 25;
+				if(this.x < player.x){this.direction = this.lastDirection = 1;} else if(this.x > player.x){this.direction = this.lastDirection = 0;} else {}
+				break;	
+			}
+			case 50:
 			{
 				this.xMoveSpeed = Math.round(Math.random() * 25) + 25;
 				if(this.x < player.x){this.direction = this.lastDirection = 1;} else if(this.x > player.x){this.direction = this.lastDirection = 0;} else {}
@@ -481,7 +509,7 @@ function Game()
 			switch(this.type)
 			{
 				case 0:
-				{
+				{//Drones
 					this.y += this.speed * delta;
 					if(this.life <= 0)
 					{
@@ -499,7 +527,7 @@ function Game()
 					return 0;
 				}
 				case 1:
-				{
+				{//Weavers
 					this.y += this.speed * delta;
 					this.x = this.startX + (30 * Math.sin(6 * 3.14 * 100 * (this.timeAlive / 1000)));
 					if(this.x <= this.startX)
@@ -531,7 +559,7 @@ function Game()
 					return 0;
 				}
 				case 2:
-				{
+				{//Kamakaze Ships
 					if(this.x < player.x){this.direction = 1;} else if(this.x > player.x){this.direction = 0;} else {}
 					if(this.direction != this.lastDirection){this.momentum = this.xMoveSpeed * 2; this.lastDirection = this.direction;}
 					this.y += this.speed * delta;
@@ -556,6 +584,96 @@ function Game()
 							this.shoot(100);
 						}
 					} else{}
+					if(this.life <= 0)
+					{
+						destroys += 1;
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+						explosions.push(explosion);
+						//Update Mission Data
+						gco.levelMission.UpdateProgress(this.type);
+						return 1;
+					}
+					else if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
+				case 3:
+				{//Splitters
+					this.y += this.speed * delta;
+					if(this.Model == 6)
+					{//Normal Ship
+						if(Math.round(Math.random() * 500) == 1){ this.shoot(100); }
+						if(this.life <= 0)
+						{
+							destroys += 1;
+							explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+							explosions.push(explosion);
+							//Update Mission Data
+							gco.levelMission.UpdateProgress(this.type);
+							for(var i = 0; i < 2; i++)
+							{
+								var xStart = Math.round(Math.random() * 40) + 10;
+								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
+								if(LOR == 0){xStart *= -1;}
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 7, this.x + xStart, this.y, 50);
+								enemies.push(enemy);
+							}
+							return 1;
+						}
+					} else
+					{//Elite Ship
+						if(Math.round(Math.random() * 400) == 1){ this.shoot(100); }
+						if(this.life <= 0)
+						{
+							destroys += 1;
+							explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+							explosions.push(explosion);
+							//Update Mission Data
+							gco.levelMission.UpdateProgress(this.type);
+							for(var i = 0; i < 3; i++)
+							{
+								var xStart = Math.round(Math.random() * 40) + 10;
+								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
+								if(LOR == 0){xStart *= -1;}
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 9, this.x + xStart, this.y, 50);
+								enemies.push(enemy);
+							}
+							return 1;
+						}
+					}
+					if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
+				case 50:
+				{//Splitter Small
+					this.y += this.speed * delta;
+					if(this.Model == 7)
+					{
+						if(Math.round(Math.random() * 700) == 1){ this.shoot(100); }
+					} else
+					{
+						if(this.x < player.x){this.direction = 1;} else if(this.x > player.x){this.direction = 0;} else {}
+						if(this.direction != this.lastDirection){this.momentum = this.xMoveSpeed * 2; this.lastDirection = this.direction;}
+						if(this.y < player.y)
+						{
+							if(this.x < player.x)
+							{
+								this.x += (this.xMoveSpeed - this.momentum) * delta;
+							}
+							else if(this.x > player.x)
+							{
+								this.x -= (this.xMoveSpeed - this.momentum) * delta;
+							} else { }
+							this.momentum -= delta * 100;
+							if(this.momentum < 0){this.momentum = 0;}
+						}
+						if(Math.round(Math.random() * 700) == 1){ this.shoot(100); }
+					}
 					if(this.life <= 0)
 					{
 						destroys += 1;
@@ -2188,6 +2306,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				case 0:{outText += "Drone Kills: "; break;}
 				case 1:{outText += "Weaver Kills: "; break;}
 				case 2:{outText += "Kamakaze Kills: "; break;}
+				case 3:{outText += "Splitter Kills: "; break;}
 				default:{outText += "Level Not Added: "; break;}
 			}
 			gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
