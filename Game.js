@@ -60,7 +60,7 @@ function Game()
         
         // Graphics
         var images = [];//Gui Images
-        for(var i = 0; i < 7; i++)
+        for(var i = 0; i < 8; i++)
         {
             images[i] = new Image();
             images[i].src = ('Graphics/GUI_0' + i + '.png');
@@ -146,11 +146,13 @@ function Game()
 			
 			this.weaponsOwned[0] = false;//Pea Shooter
 			this.weaponsOwned[1] = false;//Pea Shooter Pro
+			this.weaponsOwned[2] = false;//Master Pea Shooter
 			this.weaponsOwned[50] = false;//Missile
 			this.weaponsOwned[51] = false;//Homing Missile
 			
 			this.weaponPrice[0] = 0;//Pea Shooter
 			this.weaponPrice[1] = 25;//Pea Shooter Pro
+			this.weaponPrice[2] = 250;//Master Pea Shooter
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
 		}
@@ -554,13 +556,6 @@ function Game()
 				{//Weavers
 					this.y += this.speed * delta;
 					this.x = this.startX + (30 * Math.sin(6 * 3.14 * 100 * (this.timeAlive / 1000)));
-					if(this.x <= this.startX)
-					{
-						this.moveVar += 1;
-					} else
-					{
-						this.moveVar -= 1;
-					}
 					
 					if(Math.round(Math.random() * 1000) == 1)
 					{
@@ -922,11 +917,19 @@ function Game()
         this.life = 1;
 		this.damage = dmg;
 		this.missileType = missType;
+		this.moveVar = 0;
+		this.startX = this.x;
+		this.timeAlive = 0;
+		this.sinOffset = 1;
 		
 		//Special Init logic
 		this.missileTarget = 1000;//missile target will remain 1000 is no target selected
 		switch(this.missileType)
 		{
+			case 2:
+			{
+				if(this.damage == 3){this.sinOffset = -1;}	
+			}
 			case 51:
 			{
 				var distance = 1000;
@@ -952,6 +955,7 @@ function Game()
 		
         this.Update = function(i)
         {
+			this.timeAlive += delta;
 			if(this.y < 0)
             {
                 self.popArray(missiles, i);
@@ -971,6 +975,18 @@ function Game()
 				}
 				case 1:
 				{//Pea Shooter pro
+					this.x1 = this.x;
+					this.y1 = this.y - (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y + (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y + (this.height / 2);
+					this.y -= this.speed * delta;
+					break;
+				}
+				case 2:
+				{//Master Pea Shooter
+					this.x = this.startX + (30 * Math.sin(30 * 3.14 * 100 * (this.timeAlive / 1000))) * this.sinOffset;
 					this.x1 = this.x;
 					this.y1 = this.y - (this.height / 2);
 					this.x2 = this.x - (this.width / 2);
@@ -1154,21 +1170,7 @@ function Game()
 				if(this.shield <= 0)
 				{
 					this.shield = 0;
-					/*this.recharge = false;
-					this.shieldCharge++;
-					if(this.shieldCharge >= 1500)
-					{
-						this.recharge = true;
-					}*/
 				}
-				/*if(this.shield < 100 && this.recharge == true)
-				{
-					this.shield += 0.1;
-				}
-				if(this.shield >= 100)
-				{
-					this.shieldCharge = 0;
-				}*/
 			}
         }
 		
@@ -1220,11 +1222,30 @@ function Game()
 					this.totalMissiles += 1;
 					if(this.weaponFunc)
 					{
-						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 1);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 2);
 						missiles.push(missile);
 					} else
 					{
-						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 1);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+					}
+					this.weaponFunc = !this.weaponFunc;
+					break;
+				}
+				case 2:
+				{
+					this.totalMissiles += 1;
+					if(this.weaponFunc)
+					{
+						missile = new Missile(missiles.length, 300, 1, this.x - 5, this.y - 25, 2);
+						missiles.push(missile);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+					} else
+					{
+						missile = new Missile(missiles.length, 300, 1, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 3);
 						missiles.push(missile);
 					}
 					this.weaponFunc = !this.weaponFunc;
@@ -1629,6 +1650,10 @@ if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
 if(mouseX > 60 && mouseX < 108 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter Pro, Weapon ID: 1
 	if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); }}
+}
+if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
+{//Master Pea Shooter, Weapon ID: 2
+	if(gco.weaponsOwned[2]){ gco.EquipWeapon(2); } else { if(player.money >= gco.weaponPrice[2]){ gco.PurchaseWeapon(2); }}
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
 {//Boom Bullet, Weapon ID: 50
@@ -2072,7 +2097,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			switch(missiles[i].missileType)
 			{
 				case 0:
-				{//Standard Bullet
+				{//Pea Shooter
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(255, 255, 255)";
 						buffer.moveTo(missiles[i].x1, missiles[i].y1);
@@ -2084,7 +2109,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					break;
 				}
 				case 1:
-			    {//Standard Bullet 2
+			    {//Pea Shooter Pro
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(255, 255, 255)";
 						buffer.moveTo(missiles[i].x1, missiles[i].y1);
@@ -2093,7 +2118,19 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 						buffer.lineTo(missiles[i].x1, missiles[i].y1);
 						buffer.stroke();
 					buffer.closePath();
-					break
+					break;
+				}
+				case 2:
+				{//Pea Shooter Ultra
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(255, 255, 255)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
 				}
 				case 50:
 				{
@@ -2542,6 +2579,36 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 {
 					buffer.globalAlpha = 0.5;
                     buffer.drawImage(images[1], 60, 280, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
+				
+// NEW WEAPON Master Pea Shooter
+                if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
+                {//Master Pea Shooter, Weapon ID: 2
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
+                    buffer.shadowBlur = 0;
+                    if(gco.weaponsOwned[2])
+                    {
+                        guiText[6].text = "You already own Master Pea Shooter.";
+                    } else
+                    {
+                        guiText[6].text = "Master Pea Shooter costs 250 cores.";
+                    }
+                }
+                if(gco.weaponsOwned[2] && player.weapon == 2)
+                {
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 150, 250)';
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
