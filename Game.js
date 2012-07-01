@@ -2124,7 +2124,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
         var guiText  = new GUIText("It's over 9000!!!!", this.x + 15, this.y - 6, 
                                     "18px Helvetica", "left", "top", "rgb(230, 230, 255)");
 		//var guiText  = new GUIText("x" + player.secondaryAmmo, this.x + 15, this.y - 6, 
-                                    "18px Helvetica", "left", "top", "rgb(230, 230, 255)");
+                                    //"18px Helvetica", "left", "top", "rgb(230, 230, 255)");
 		buffer.beginPath();
 			buffer.fillStyle = guiText.color;
 			buffer.font = guiText.fontStyle;
