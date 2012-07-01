@@ -1265,7 +1265,7 @@ function Game()
 		randomItems = [];
 		totalDestroys += destroys;
 		destroys = 0;
-        //player.life = 100;
+        if(!player.isAlive()){player.life = 100;}
 		initStars();
 		player.shield = 100;
 		player.recharge = true;
@@ -1413,29 +1413,30 @@ function Game()
 								explosions.push(explosion);
 								enemies[a].life = 0;
 							}
-                        }
-                        for(var b = 0; b < missiles.length; b++)
-                        {
-							if(missiles[b].missileType > 99)
+                        
+							for(var b = 0; b < missiles.length; b++)
 							{
-								if(self.Collision(player, missiles[b]))
+								if(missiles[b].missileType > 99)
 								{
-									explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-									explosions.push(explosion);
-									player.DamagePlayer(missiles[b].damage);
-									this.popArray(missiles, b);
-								}
-							} else
-							{
-								if(self.Collision(missiles[b], enemies[a]))
+									if(self.Collision(player, missiles[b]))
+									{
+										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+										explosions.push(explosion);
+										player.DamagePlayer(missiles[b].damage);
+										this.popArray(missiles, b);
+									}
+								} else
 								{
-									explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-									explosions.push(explosion);
-									enemies[a].life -= missiles[b].damage;
-									this.popArray(missiles, b);
+									if(self.Collision(missiles[b], enemies[a]))
+									{
+										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+										explosions.push(explosion);
+										enemies[a].life -= missiles[b].damage;
+										this.popArray(missiles, b);
+									}
 								}
 							}
-                        }
+						}
                     }
                 }
                 else
