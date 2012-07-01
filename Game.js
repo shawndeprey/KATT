@@ -1,3 +1,4 @@
+//Authors: Shawn Deprey, Justin Hammond, Drew Muller
 function Game()
 {
     this.gameLoop = null;
