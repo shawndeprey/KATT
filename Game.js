@@ -13,12 +13,14 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 5;// Should always be above current state limit
+	var NULL_GUI_STATE = 6;// Should always be above current state limit
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
 	// 2 = Level Up Menu
-	// 3 = Game Over Menu
+	// 3 = Continue Menu
+	// 4 = Level Up Menu
+	// 5 = Game Over Menu
 	//Non-State Guis
 	// Debug
 	// Life & other ingame info(can't be on any state gui's)
@@ -236,7 +238,14 @@ function Game()
 		
 		this.ShowContinueScreen = function()
 		{
-			currentGui = 3;//Show continue screen
+			player.lives -= 1;
+			if(player.lives < 0)
+			{
+				currentGui = 5;//Game Over Gui
+			} else
+			{
+				currentGui = 3;//Continue Screen
+			}
 		}
 		
 		this.TogglePauseGame = function()
@@ -1151,12 +1160,11 @@ function Game()
         this.height = Height;
         this.totalMissiles = 0;
         this.life = 100;
+		this.lives = 3;
         this.maxLife = 100;
 		this.shieldLevel = 0;
         this.shield = 100;
 		this.maxShield = this.shield * this.shieldLevel;
-        //this.shieldCharge = 0;
-        //this.recharge = false;
 		this.hasShield = false;
 		
 		this.weapon = 49;// 0 - 48
@@ -1397,12 +1405,9 @@ function Game()
 		player.shield = 100;
 		player.recharge = true;
 		totalShots = 0;
-        player.totalMissiles = 0;
-        player.x = _buffer.width / 2;
-        player.y = _buffer.height / 2;
-        player.shield = 100;
-		player.shieldLevel = 1;
-		player.maxShield = 100;
+        player = new Player(24, 40);
+		gco = new GameControlObject();
+		gco.Init();
     }
 	
 	this.softReset = function()
@@ -1721,7 +1726,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				break;
 			}
 			case 3:
-			{// Game Over Menu
+			{// Continue Menu
 				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
 				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
@@ -1737,6 +1742,17 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				{
 					self.softReset();
 					gco.GoToUpgradeMenu();	
+				}
+				break;
+			}
+			case 5:
+			{// Game Over Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					currentGui = 0;
+					gameState = 0;
+					self.hardReset();
 				}
 				break;
 			}
@@ -2814,8 +2830,8 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 break;
 			}
 			case 3:
-			{// Game Over Menu
-				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
+			{// Continue Menu
+				guiText[0] = new GUIText("You Died! :(", _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
 										 
         		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
@@ -2843,6 +2859,23 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				} else
 				{
 					guiText[1] = new GUIText("Continue", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				}
+				break;
+			}
+			case 5:
+			{// Game Over Menu
+				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
+										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
+										 
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				} else
+				{
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, 
 										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
 				}
 				break;
