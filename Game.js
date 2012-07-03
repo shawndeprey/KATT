@@ -155,13 +155,10 @@ function Game()
 			this.weaponPrice[2] = 250;//Master Pea Shooter
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
-			
-			swapBGM();
 		}
 		
 		this.init_audio = function()
 		{
-			//this.bgm.loop = true;
 			this.bgm.volume = 0.05;
 			this.bgm.play();
 		}
@@ -305,6 +302,12 @@ function Game()
 			}
 			default:{}
 		}
+		gco.init_audio();
+	}
+	
+	this.InitSounds = function()
+	{
+		gco.bgm = document.getElementById('bgm_square');
 		gco.init_audio();
 	}
 	
@@ -1433,6 +1436,7 @@ function Game()
 		player.recharge = true;
 		totalShots = 0;
         player = new Player(24, 40);
+		gco.bgm.pause();
 		gco = new GameControlObject();
 		gco.Init();
     }
@@ -2059,13 +2063,6 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 	{
 		for(var i = 0; i < money.length; i++)
 		{
-			/*buffer.fillStyle = 'rgb(200, 200, 255)';
-			buffer.shadowBlur = money[i].amount * 2;
-            buffer.beginPath();
-                buffer.arc(money[i].x, money[i].y, money[i].amount * 2, 0, Math.PI * 2, true);
-            buffer.closePath();
-            buffer.fill();
-			buffer.shadowBlur = 0;*/
 			buffer.drawImage(itemImages[0], money[i].x - (money[i].width / 2), money[i].y - (money[i].height / 2), money[i].width, money[i].height);
 		}
 	}
@@ -2307,7 +2304,18 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
         self.drawLifeMeter();
         self.drawShieldMeter();
         self.drawFuelMeter();
+		self.drawPlayerLives();
     }
+	
+	this.drawPlayerLives = function()
+	{
+		var xOffset = 0;
+		for(var i = 0; i < player.lives; i++)
+		{
+			buffer.drawImage(playerImages[0], _buffer.width - (60 - xOffset), _buffer.height - 25, player.width / 2, player.height / 2);
+			xOffset += 20;
+		}
+	}
 	
 	this.drawAmmoGui = function()
 	{
@@ -2968,7 +2976,15 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
 			guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, 
 								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			buffer.beginPath();
+		} else
+		{
+			if(gameState == 1)
+			{
+				guiText[0] = new GUIText("[E] Player Info", 105, _canvas.height - 28, 
+										 "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			}
+		}
+		buffer.beginPath();
 			for(var i = 0; i < guiText.length; i++)
 			{
 				buffer.fillStyle = guiText[i].color;
@@ -2977,8 +2993,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				buffer.textBaseline = guiText[i].alignY;
 				buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
 			}
-			buffer.closePath();
-		}
+		buffer.closePath();
 		
 		delete guiText;
 		// End Player Info

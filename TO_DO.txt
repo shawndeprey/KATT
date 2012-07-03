@@ -1,6 +1,5 @@
 -Add Space Mines and Laser Secondary
 -Add buy health to upgrade menu
--Add player life tracker to GUI
 -Add Boss Level, add boss
 -Make sounds browser independant
--Add text "[E] For Player Info" to GUI when player info is off
+-Fix level completion %. It seems to be calculating the % wrong.
