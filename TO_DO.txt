@@ -1,8 +1,6 @@
-Game over implementation.
-Add level up screen.
-Add level 5: Phaser
-Add 3 more main weps and 3 more secondary weps
-
-Future Wanted Additions:
-Boss level
-add boss
+-Add Space Mines and Laser Secondary
+-Add buy health to upgrade menu
+-Add player life tracker to GUI
+-Add Boss Level, add boss
+-Make sounds browser independant
+-Add text "[E] For Player Info" to GUI when player info is off

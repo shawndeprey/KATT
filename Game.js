@@ -48,8 +48,6 @@ function Game()
     
     // Resources
         // Audio
-        var bgm = document.getElementById('bgm_02');
-        bgm.volume = 0.05;
         var sfxIndex = 0;
         var sfxChannels = [];
         for(var i = 0; i < 4; i++)
@@ -119,7 +117,6 @@ function Game()
     // World
     var numStars = 100;
 	var numEnemies = 0;
-	
 
     /******************************************************/
     // Objects
@@ -127,7 +124,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 5;//Starting at 1
+		this.level = 1;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -141,6 +138,7 @@ function Game()
 		this.onTick = 0;
         this.missionText = [];
 		this.secondaryAmmoPrice = 25;
+		this.bgm = null;
 		
 		this.Init = function()
 		{
@@ -157,6 +155,15 @@ function Game()
 			this.weaponPrice[2] = 250;//Master Pea Shooter
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
+			
+			swapBGM();
+		}
+		
+		this.init_audio = function()
+		{
+			//this.bgm.loop = true;
+			this.bgm.volume = 0.05;
+			this.bgm.play();
 		}
 		
 		this.CheckLevelCompletion = function()
@@ -279,6 +286,28 @@ function Game()
 			}
 		}
 	}
+	//Sound Event Listener
+	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_02").addEventListener("ended",swapBGM,false);
+	function swapBGM()
+	{
+		switch(Math.round(Math.random() * 2))
+		{
+			case 0:
+			{
+				gco.bgm = document.getElementById('bgm_square');
+				break;	
+			}
+			case 1:
+			{
+				gco.bgm = document.getElementById('bgm_02');
+				break;	
+			}
+			default:{}
+		}
+		gco.init_audio();
+	}
+	
 	
 	function LevelMission()
 	{
@@ -1378,9 +1407,7 @@ function Game()
             buffer.font = "bold 25px sans-serif";
         }
 
-        bgm.loop = true;
-        //sfx.loop = false;
-        bgm.play();
+        
 
         player = new Player(24, 40);
 		enemyGeneration = new EnemyGeneration();
