@@ -13,7 +13,7 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 6;// Should always be above current state limit
+	var NULL_GUI_STATE = 7;// Should always be above current state limit
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
@@ -21,6 +21,7 @@ function Game()
 	// 3 = Continue Menu
 	// 4 = Level Up Menu
 	// 5 = Game Over Menu
+	// 6 = Options Menu
 	//Non-State Guis
 	// Debug
 	// Life & other ingame info(can't be on any state gui's)
@@ -28,6 +29,9 @@ function Game()
 	//Input Info
 	var mouseX = 0;
 	var mouseY = 0;
+	
+	//Options
+	var particleOffset = 1;
 	
     // Timing
     var prevTime = Date.now();
@@ -124,7 +128,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 1;//Starting at 1
+		this.level = 5;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -1156,7 +1160,7 @@ function Game()
     function Explosion(X, Y, NumParticles, Size, MaxAge, R, G, B)
     {
         this.particles = [];
-        this.numParticles = NumParticles;
+        this.numParticles = NumParticles / particleOffset;
         this.size = Size;
         this.age = 0;
         this.maxAge = MaxAge;
@@ -1699,10 +1703,13 @@ function Game()
 		{
 			case 0:
 			{//Main Menu
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 &&
-				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
 					currentGui = 2;//default case will Trigger
+				}
+				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+				{
+					currentGui = 6; lastGui = 0;	
 				}
 				break;
 			}
@@ -1718,6 +1725,10 @@ function Game()
 if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (280) && mouseY > (250))
 {//Start Level
 	if(player.weapon != 49){ gco.StartLevel(); }
+}
+if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
+{//Options Menu
+	currentGui = 6; lastGui = 2;
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter, Weapon ID: 0
@@ -1786,6 +1797,21 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					self.hardReset();
 				}
 				break;
+			}
+			case 6:
+			{//Options Menu
+				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
+				{//Back
+					currentGui = lastGui; lastGui = 6;
+				}
+				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
+					particleOffset += 1;
+					if(particleOffset > 5){particleOffset = 5;}
+				}
+				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+					particleOffset -= 1;
+					if(particleOffset < 1){particleOffset = 1;}
+				}
 			}
 		}
 	}
@@ -2485,19 +2511,16 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			{// Main Menu
 				guiText[0] = new GUIText("Kill All the Things!", _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 255)");
-				//guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
-				//						 "28px Helvetica", "center", "top");
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 &&
-				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
-					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
-				} else
-				{
-					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
 				}
-        		
+				guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+				{
+					guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				}
 				break;
 			}
 			case 1:
@@ -2859,6 +2882,14 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 }
                 //END WEAPON
 
+				// Options Menu Selection
+				if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
+                {//Options Menu
+                    guiText[7] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+                } else
+                {
+                    guiText[7] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                }
                 //**********************************************************************//
                 //					  END UPGRADE MENU SECTION							//
                 //**********************************************************************//
@@ -2903,17 +2934,46 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
 										 
-        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
-				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
-					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
 				} else
 				{
-					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
 				}
 				break;
+			}
+			case 6:
+			{//Options Menu
+				guiText[0] = new GUIText("Options", _canvas.width / 2, 25, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
+				{
+					guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				//particleOffset
+				guiText[2] = new GUIText("Particles", 10, 55, "20px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
+					guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+					guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				switch(particleOffset)
+				{
+					case 1:{guiText[5] = new GUIText("5", 43, 80, "26px Helvetica", "left", "top", "rgb(255, 0, 0)");
+							guiText[6] = new GUIText("OMFG SPARKLES!", 51, 110, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
+					case 2:{guiText[5] = new GUIText("4", 43, 80, "26px Helvetica", "left", "top", "rgb(200, 25, 0)");
+							guiText[6] = new GUIText("Shinies!", 51, 110, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
+					case 3:{guiText[5] = new GUIText("3", 43, 80, "26px Helvetica", "left", "top", "rgb(150, 100, 20)");
+							guiText[6] = new GUIText("Less Shinies.", 51, 110, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
+					case 4:{guiText[5] = new GUIText("2", 43, 80, "26px Helvetica", "left", "top", "rgb(120, 200, 60)");
+							guiText[6] = new GUIText("Needs Shinies :(", 51, 110, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
+					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+				}
 			}
 			default:{break;}
 		}
