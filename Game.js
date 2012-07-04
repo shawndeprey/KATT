@@ -51,42 +51,32 @@ function Game()
     var buffer = null;
     
     // Resources
-        // Audio
-        var sfxIndex = 0;
-        var sfxChannels = [];
-        for(var i = 0; i < 4; i++)
-        {
-            var a = new Audio('Audio/sfx_blast_00.wav');
-            a.volume = 0.2;
-            a.preload = 'auto';
-            sfxChannels.push(a);
-        }
         
-        // Graphics
-        var images = [];//Gui Images
-        for(var i = 0; i < 8; i++)
-        {
-            images[i] = new Image();
-            images[i].src = ('Graphics/GUI_0' + i + '.png');
-        }
-		
-		var enemyImages = [];
-		for(var i = 0; i < 14; i++)
-		{
-			enemyImages[i] = new Image();
-			enemyImages[i].src = ('Graphics/ship_' + i + '.png');
-		}
-		
-		var playerImages = [];
-		for(var i = 0; i < 1; i++)
-		{
-			playerImages[i] = new Image();
-			playerImages[i].src = ('Graphics/player_' + i + '.png');
-		}
-		
-		var itemImages = [];
-		for(var i = 0; i < 1; i++)
-		{
+	// Graphics
+	var images = [];//Gui Images
+	for(var i = 0; i < 8; i++)
+	{
+		images[i] = new Image();
+		images[i].src = ('Graphics/GUI_0' + i + '.png');
+	}
+	
+	var enemyImages = [];
+	for(var i = 0; i < 14; i++)
+	{
+		enemyImages[i] = new Image();
+		enemyImages[i].src = ('Graphics/ship_' + i + '.png');
+	}
+	
+	var playerImages = [];
+	for(var i = 0; i < 1; i++)
+	{
+		playerImages[i] = new Image();
+		playerImages[i].src = ('Graphics/player_' + i + '.png');
+	}
+	
+	var itemImages = [];
+	for(var i = 0; i < 1; i++)
+	{
 			itemImages[i] = new Image();
 			itemImages[i].src = ('Graphics/item_' + i + '.png')
 		}
@@ -163,7 +153,7 @@ function Game()
 		
 		this.init_audio = function()
 		{
-			this.bgm.volume = 0.05;
+			this.bgm.volume = 0.1;
 			this.bgm.play();
 		}
 		
@@ -287,7 +277,7 @@ function Game()
 			}
 		}
 	}
-	//Sound Event Listener
+	//Sound Event Listener	
 	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_02").addEventListener("ended",swapBGM,false);
 	function swapBGM()
@@ -313,8 +303,42 @@ function Game()
 	{
 		gco.bgm = document.getElementById('bgm_square');
 		gco.init_audio();
+		if(gco.bgm.canPlayType("audio/mp3") == "" ||  gco.bgm.canPlayType("audio/mp3") == "no") {
+			sfx.soundType = 1;//Play OGG sound effects
+		}
+		sfx.Init();
 	}
 	
+	function SFXObject()
+	{
+		this.soundType = 0;//0 = mp3, 1 = ogg
+		// Audio
+		this.explosion = {}
+		
+		this.Init = function()
+		{
+			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 10;
+			for(var i = 0; i < this.explosion.channels; i++)
+			{
+				var a = null;
+				if(this.soundType == 0){a = new Audio('Audio/Explode.mp3');} else {a = new Audio('Audio/Explode.ogg');}
+				a.volume = 0.1;
+				a.preload = 'auto';
+				this.explosion.channel.push(a);
+			}
+		}
+		
+		this.play = function(playfx)
+		{
+			switch(playfx)
+			{
+				case 0: {//Explode
+					this.explosion.channel[this.explosion.index].play();
+					this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+				}
+			}
+		}
+	}
 	
 	function LevelMission()
 	{
@@ -1424,6 +1448,8 @@ function Game()
 		
 		gco = new GameControlObject();
 		gco.Init();
+		
+		sfx = new SFXObject();
     }
     
     this.hardReset = function()
@@ -1531,6 +1557,7 @@ function Game()
                 {
                     if(enemies[i].Update() != 0)
                     {
+						sfx.play(0);
 						mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
 						money.push(mon);
                         self.popArray(enemies, i);
@@ -1954,12 +1981,6 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				
                 if(Keys[19] == 1) // B
                 {
-                    sfxChannels[sfxIndex].play();
-                    sfxIndex++;
-                    if(sfxIndex > 3)
-                    {
-                        sfxIndex = 0;
-                    }
                     player.shootSecondary();
                 }
             }
