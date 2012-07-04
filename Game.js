@@ -360,7 +360,7 @@ function Game()
 			for(var i = 0; i < gco.level; i++)
 			{
 				total += this.objectives[i];
-				kills += this.progress[i];
+				if(this.progress[i] > this.objectives[i]){kills += this.objectives[i];} else { kills += this.progress[i]; }
 			}
 			return (kills / total);
 		}
@@ -1436,7 +1436,7 @@ function Game()
 		totalDestroys = 0;
 		destroys = 0;
         player.life = 100;
-		player.shield = 100;
+		player.resetShield();
 		player.recharge = true;
 		totalShots = 0;
         player = new Player(24, 40);
@@ -1456,8 +1456,6 @@ function Game()
 		destroys = 0;
         if(!player.isAlive()){player.life = 100;}
 		initStars();
-		player.shield = 100;
-		player.recharge = true;
 		totalShots += player.totalMissiles;
         player.totalMissiles = 0;
         player.x = _buffer.width / 2;
@@ -2885,10 +2883,10 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				// Options Menu Selection
 				if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
                 {//Options Menu
-                    guiText[7] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+                    guiText[10] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
                 } else
                 {
-                    guiText[7] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                    guiText[10] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
                 }
                 //**********************************************************************//
                 //					  END UPGRADE MENU SECTION							//

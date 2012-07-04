@@ -2,4 +2,3 @@
 -Add buy health to upgrade menu
 -Add Boss Level, add boss
 -Make sounds browser independant
--Fix level completion %. It seems to be calculating the % wrong.
