@@ -3,3 +3,6 @@
 -Add Boss Level, add boss
 -Get ogg for BMG_02 from david.
 -Add Options Menu to Pause Menu.
+-High Score and Time to Beat
+-New Core Sprites
+-Credits
