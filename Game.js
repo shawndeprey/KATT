@@ -13,12 +13,15 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 4;// Should always be above current state limit
+	var NULL_GUI_STATE = 7;// Should always be above current state limit
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
 	// 2 = Level Up Menu
-	// 3 = Game Over Menu
+	// 3 = Continue Menu
+	// 4 = Level Up Menu
+	// 5 = Game Over Menu
+	// 6 = Options Menu
 	//Non-State Guis
 	// Debug
 	// Life & other ingame info(can't be on any state gui's)
@@ -26,6 +29,9 @@ function Game()
 	//Input Info
 	var mouseX = 0;
 	var mouseY = 0;
+	
+	//Options
+	var particleOffset = 1;
 	
     // Timing
     var prevTime = Date.now();
@@ -45,44 +51,32 @@ function Game()
     var buffer = null;
     
     // Resources
-        // Audio
-        var bgm = document.getElementById('bgm_02');
-        bgm.volume = 0.05;
-        var sfxIndex = 0;
-        var sfxChannels = [];
-        for(var i = 0; i < 4; i++)
-        {
-            var a = new Audio('Audio/sfx_blast_00.wav');
-            a.volume = 0.2;
-            a.preload = 'auto';
-            sfxChannels.push(a);
-        }
         
-        // Graphics
-        var images = [];//Gui Images
-        for(var i = 0; i < 7; i++)
-        {
-            images[i] = new Image();
-            images[i].src = ('Graphics/GUI_0' + i + '.png');
-        }
-		
-		var enemyImages = [];
-		for(var i = 0; i < 6; i++)
-		{
-			enemyImages[i] = new Image();
-			enemyImages[i].src = ('Graphics/ship_' + i + '.png');
-		}
-		
-		var playerImages = [];
-		for(var i = 0; i < 1; i++)
-		{
-			playerImages[i] = new Image();
-			playerImages[i].src = ('Graphics/player_' + i + '.png');
-		}
-		
-		var itemImages = [];
-		for(var i = 0; i < 1; i++)
-		{
+	// Graphics
+	var images = [];//Gui Images
+	for(var i = 0; i < 8; i++)
+	{
+		images[i] = new Image();
+		images[i].src = ('Graphics/GUI_0' + i + '.png');
+	}
+	
+	var enemyImages = [];
+	for(var i = 0; i < 14; i++)
+	{
+		enemyImages[i] = new Image();
+		enemyImages[i].src = ('Graphics/ship_' + i + '.png');
+	}
+	
+	var playerImages = [];
+	for(var i = 0; i < 1; i++)
+	{
+		playerImages[i] = new Image();
+		playerImages[i].src = ('Graphics/player_' + i + '.png');
+	}
+	
+	var itemImages = [];
+	for(var i = 0; i < 1; i++)
+	{
 			itemImages[i] = new Image();
 			itemImages[i].src = ('Graphics/item_' + i + '.png')
 		}
@@ -117,7 +111,6 @@ function Game()
     // World
     var numStars = 100;
 	var numEnemies = 0;
-	
 
     /******************************************************/
     // Objects
@@ -125,7 +118,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 3;//Starting at 1
+		this.level = 5;//Starting at 1
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -139,6 +132,7 @@ function Game()
 		this.onTick = 0;
         this.missionText = [];
 		this.secondaryAmmoPrice = 25;
+		this.bgm = null;
 		
 		this.Init = function()
 		{
@@ -146,13 +140,21 @@ function Game()
 			
 			this.weaponsOwned[0] = false;//Pea Shooter
 			this.weaponsOwned[1] = false;//Pea Shooter Pro
+			this.weaponsOwned[2] = false;//Master Pea Shooter
 			this.weaponsOwned[50] = false;//Missile
 			this.weaponsOwned[51] = false;//Homing Missile
 			
 			this.weaponPrice[0] = 0;//Pea Shooter
 			this.weaponPrice[1] = 25;//Pea Shooter Pro
+			this.weaponPrice[2] = 250;//Master Pea Shooter
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
+		}
+		
+		this.init_audio = function()
+		{
+			this.bgm.volume = 0.1;
+			this.bgm.play();
 		}
 		
 		this.CheckLevelCompletion = function()
@@ -234,7 +236,14 @@ function Game()
 		
 		this.ShowContinueScreen = function()
 		{
-			currentGui = 3;//Show continue screen
+			player.lives -= 1;
+			if(player.lives < 0)
+			{
+				currentGui = 5;//Game Over Gui
+			} else
+			{
+				currentGui = 3;//Continue Screen
+			}
 		}
 		
 		this.TogglePauseGame = function()
@@ -252,12 +261,81 @@ function Game()
 				{//Update Fuel
 					if(player.currentFuel == 0)
 					{
-						self.softReset();
-						this.GoToUpgradeMenu();
+						if(this.levelMission.CheckCompletion())
+						{
+							currentGui = 4;//Go to level up menu
+							gameState = 0;
+						} else
+						{
+							self.softReset();
+							this.GoToUpgradeMenu();	
+						}
 					}
 					player.currentFuel -= 1;
 				}
 				
+			}
+		}
+	}
+	//Sound Event Listener	
+	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_02").addEventListener("ended",swapBGM,false);
+	function swapBGM()
+	{
+		switch(Math.round(Math.random() * 2))
+		{
+			case 0:
+			{
+				gco.bgm = document.getElementById('bgm_square');
+				break;	
+			}
+			case 1:
+			{
+				gco.bgm = document.getElementById('bgm_02');
+				break;	
+			}
+			default:{}
+		}
+		gco.init_audio();
+	}
+	
+	this.InitSounds = function()
+	{
+		gco.bgm = document.getElementById('bgm_square');
+		gco.init_audio();
+		if(gco.bgm.canPlayType("audio/mp3") == "" ||  gco.bgm.canPlayType("audio/mp3") == "no") {
+			sfx.soundType = 1;//Play OGG sound effects
+		}
+		sfx.Init();
+	}
+	
+	function SFXObject()
+	{
+		this.soundType = 0;//0 = mp3, 1 = ogg
+		// Audio
+		this.explosion = {}
+		
+		this.Init = function()
+		{
+			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 10;
+			for(var i = 0; i < this.explosion.channels; i++)
+			{
+				var a = null;
+				if(this.soundType == 0){a = new Audio('Audio/Explode.mp3');} else {a = new Audio('Audio/Explode.ogg');}
+				a.volume = 0.1;
+				a.preload = 'auto';
+				this.explosion.channel.push(a);
+			}
+		}
+		
+		this.play = function(playfx)
+		{
+			switch(playfx)
+			{
+				case 0: {//Explode
+					this.explosion.channel[this.explosion.index].play();
+					this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+				}
 			}
 		}
 	}
@@ -306,7 +384,7 @@ function Game()
 			for(var i = 0; i < gco.level; i++)
 			{
 				total += this.objectives[i];
-				kills += this.progress[i];
+				if(this.progress[i] > this.objectives[i]){kills += this.objectives[i];} else { kills += this.progress[i]; }
 			}
 			return (kills / total);
 		}
@@ -409,12 +487,12 @@ function Game()
 								theDmg = Math.round(Math.random() * 7) + 7;
 								Cores = Math.round(Math.random() * 5) + 1;
 								if(theDmg > 10){model = 3;} else {model = 2;}
-								width = 15;
-								height = 25;
+								width = 31;
+								height = 21;
 								break;
 							}
 							case 2:
-							{
+							{//Enemy Type 3
 								theLife = Math.round(Math.random() * 15) + 10;
 								theSpeed = Math.round(Math.random() * 100) + 100;
 								theDmg = Math.round(Math.random() * 10) + 10;
@@ -429,8 +507,50 @@ function Game()
 									theDmg = Math.round(Math.random() * 9) + 9;
 									Cores = Math.round(Math.random() * 5) + 1;
 								}
-								width = 15;
-								height = 25;
+								width = 21;
+								height = 31;
+								break;
+							}
+							case 3:
+							{//Enemy Type 4
+								theLife = Math.round(Math.random() * 20) + 20;
+								theSpeed = Math.round(Math.random() * 35) + 35;
+								theDmg = Math.round(Math.random() * 15) + 15;
+								if(theDmg >= 23)
+								{
+									model = 8;
+									theDmg = Math.round(Math.random() * 17) + 17;
+									Cores = Math.round(Math.random() * 30) + 20;
+									width = 37;
+									height = 31;
+								}else 
+								{
+									model = 6;
+									Cores = Math.round(Math.random() * 25) + 10;
+									width = 29;
+									height = 30;
+								}//Missiles 15 x 31
+								break;
+							}
+							case 4:
+							{//Enemy Type 5
+								theLife = Math.round(Math.random() * 25) + 15;
+								theSpeed = Math.round(Math.random() * 35) + 35;
+								theDmg = Math.round(Math.random() * 17) + 17;
+								if(theDmg >= 28)
+								{
+									theLife = Math.round(Math.random() * 25) + 25;
+									model = 11;
+									Cores = Math.round(Math.random() * 30) + 20;
+									width = 26;
+									height = 21;
+								}else 
+								{
+									model = 10;
+									Cores = Math.round(Math.random() * 25) + 10;
+									width = 26;
+									height = 21;
+								}//Missiles 15 x 31
 								break;
 							}
 						}
@@ -464,10 +584,38 @@ function Game()
 		this.momentum = 0;
 		this.direction = 2;
 		this.lastDirection = 2;//0 = left;
+		this.startLife = this.life;
+		this.tele = 0;
+		this.xmove = 0;
+		this.ystop = 0;
+		this.canFire = [];
+		this.readyForTeleport = false;
+		this.teleportTimer = 2;
+		this.didTeleport = false;
 		
 		switch(this.type)
 		{//Special Case Initialization
 			case 2:
+			{
+				this.xMoveSpeed = Math.round(Math.random() * 25) + 25;
+				if(this.x < player.x){this.direction = this.lastDirection = 1;} else if(this.x > player.x){this.direction = this.lastDirection = 0;} else {}
+				break;	
+			}
+			case 4:
+			{
+				this.ystop = Math.round(Math.random() * 301) + 100;
+				if(this.Model == 11)
+				{
+					for(var i = 0; i < 3; i++)
+					{
+						this.canFire.push(true);
+					}
+				} else
+				{
+					this.canFire.push(true);
+				}
+			}
+			case 50:
 			{
 				this.xMoveSpeed = Math.round(Math.random() * 25) + 25;
 				if(this.x < player.x){this.direction = this.lastDirection = 1;} else if(this.x > player.x){this.direction = this.lastDirection = 0;} else {}
@@ -481,7 +629,7 @@ function Game()
 			switch(this.type)
 			{
 				case 0:
-				{
+				{//Drones
 					this.y += this.speed * delta;
 					if(this.life <= 0)
 					{
@@ -499,16 +647,9 @@ function Game()
 					return 0;
 				}
 				case 1:
-				{
+				{//Weavers
 					this.y += this.speed * delta;
 					this.x = this.startX + (30 * Math.sin(6 * 3.14 * 100 * (this.timeAlive / 1000)));
-					if(this.x <= this.startX)
-					{
-						this.moveVar += 1;
-					} else
-					{
-						this.moveVar -= 1;
-					}
 					
 					if(Math.round(Math.random() * 1000) == 1)
 					{
@@ -531,7 +672,7 @@ function Game()
 					return 0;
 				}
 				case 2:
-				{
+				{//Kamakaze Ships
 					if(this.x < player.x){this.direction = 1;} else if(this.x > player.x){this.direction = 0;} else {}
 					if(this.direction != this.lastDirection){this.momentum = this.xMoveSpeed * 2; this.lastDirection = this.direction;}
 					this.y += this.speed * delta;
@@ -571,6 +712,157 @@ function Game()
 					}
 					return 0;
 				}
+				case 3:
+				{//Splitters
+					this.y += this.speed * delta;
+					if(this.Model == 6)
+					{//Normal Ship
+						if(Math.round(Math.random() * 500) == 1){ this.shoot(100); }
+						if(this.life <= 0)
+						{
+							destroys += 1;
+							explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+							explosions.push(explosion);
+							//Update Mission Data
+							gco.levelMission.UpdateProgress(this.type);
+							for(var i = 0; i < 2; i++)
+							{
+								var xStart = Math.round(Math.random() * 40) + 10;
+								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
+								if(LOR == 0){xStart *= -1;}
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 7, this.x + xStart, this.y, 50);
+								enemies.push(enemy);
+							}
+							return 1;
+						}
+					} else
+					{//Elite Ship
+						if(Math.round(Math.random() * 400) == 1){ this.shoot(100); }
+						if(this.life <= 0)
+						{
+							destroys += 1;
+							explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+							explosions.push(explosion);
+							//Update Mission Data
+							gco.levelMission.UpdateProgress(this.type);
+							for(var i = 0; i < 3; i++)
+							{
+								var xStart = Math.round(Math.random() * 40) + 10;
+								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
+								if(LOR == 0){xStart *= -1;}
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 9, this.x + xStart, this.y, 50);
+								enemies.push(enemy);
+							}
+							return 1;
+						}
+					}
+					if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
+				case 4:
+				{//Teleporters
+					this.y += this.speed * delta;
+					if(!this.didTeleport){ this.speed = this.ystop - this.y; }
+					if(this.speed < 50 && this.speed > 35 && this.canFire[0])
+					{
+						this.canFire[0] = false;
+						this.shoot(100);
+					} else
+					if(this.speed < 35 && this.speed > 25 && this.canFire[1])
+					{
+						this.canFire[1] = false;
+						this.shoot(100);
+					} else
+					if(this.speed < 25 && this.canFire[2])
+					{
+						this.canFire[2] = false;
+						this.shoot(100);
+					}
+					
+					if(this.speed < 25){ this.readyForTeleport = true; }
+					
+					if(this.readyForTeleport)
+					{
+						if(this.teleportTimer <= 0)
+						{
+							this.y += 10;
+							this.readyForTeleport = false;
+							this.didTeleport = true;
+							explosions.push(new Explosion(this.x, this.y, 50, 1, 500, 0.1, 0.1, 3));
+							if(Math.round(Math.random() * 1) == 1)
+							{//teleport left
+								this.x -= Math.round(Math.random() * 100) + 50;
+								if(this.x < 0){this.x = 5;}
+							} else
+							{//teleport right
+								this.x += Math.round(Math.random() * 100) + 50;
+								if(this.x > _buffer.width){this.x = _buffer.width - 5;}
+							}
+							explosions.push(new Explosion(this.x, this.y, 50, 1, 500, 0.1, 0.1, 3));
+						}
+						this.teleportTimer -= delta;
+					}
+					
+					if(this.didTeleport){ this.speed = this.y - this.ystop;	}
+					
+					if(this.life <= 0)
+					{
+						destroys += 1;
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
+						explosions.push(explosion);
+						//Update Mission Data
+						gco.levelMission.UpdateProgress(this.type);
+						return 1;
+					}
+					else if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
+				case 50:
+				{//Splitter Small
+					this.y += this.speed * delta;
+					if(this.Model == 7)
+					{
+						if(Math.round(Math.random() * 700) == 1){ this.shoot(100); }
+					} else
+					{
+						if(this.x < player.x){this.direction = 1;} else if(this.x > player.x){this.direction = 0;} else {}
+						if(this.direction != this.lastDirection){this.momentum = this.xMoveSpeed * 2; this.lastDirection = this.direction;}
+						if(this.y < player.y)
+						{
+							if(this.x < player.x)
+							{
+								this.x += (this.xMoveSpeed - this.momentum) * delta;
+							}
+							else if(this.x > player.x)
+							{
+								this.x -= (this.xMoveSpeed - this.momentum) * delta;
+							} else { }
+							this.momentum -= delta * 100;
+							if(this.momentum < 0){this.momentum = 0;}
+						}
+						if(Math.round(Math.random() * 700) == 1){ this.shoot(100); }
+					}
+					if(this.life <= 0)
+					{
+						destroys += 1;
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 0.1, 0.1);
+						explosions.push(explosion);
+						//Update Mission Data
+						gco.levelMission.UpdateProgress(this.type);
+						return 1;
+					}
+					else if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
 			}
         }
 		
@@ -582,6 +874,13 @@ function Game()
 				{
 					this.totalMissiles += 1;
 					missile = new Missile(missiles.length, 300, missileType, this.x, this.y + 25, this.damage / 2);
+					missiles.push(missile);
+					break;
+				}
+				case 101:
+				{
+					this.totalMissiles += 1;
+					missile = new Missile(missiles.length, 300, missileType, this.x, this.y + 25, this.damage * 2);
 					missiles.push(missile);
 					break;
 				}
@@ -726,11 +1025,19 @@ function Game()
         this.life = 1;
 		this.damage = dmg;
 		this.missileType = missType;
+		this.moveVar = 0;
+		this.startX = this.x;
+		this.timeAlive = 0;
+		this.sinOffset = 1;
 		
 		//Special Init logic
 		this.missileTarget = 1000;//missile target will remain 1000 is no target selected
 		switch(this.missileType)
 		{
+			case 2:
+			{
+				if(this.damage == 3){this.sinOffset = -1;}	
+			}
 			case 51:
 			{
 				var distance = 1000;
@@ -756,6 +1063,7 @@ function Game()
 		
         this.Update = function(i)
         {
+			this.timeAlive += delta;
 			if(this.y < 0)
             {
                 self.popArray(missiles, i);
@@ -775,6 +1083,18 @@ function Game()
 				}
 				case 1:
 				{//Pea Shooter pro
+					this.x1 = this.x;
+					this.y1 = this.y - (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y + (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y + (this.height / 2);
+					this.y -= this.speed * delta;
+					break;
+				}
+				case 2:
+				{//Master Pea Shooter
+					this.x = this.startX + (30 * Math.sin(30 * 3.14 * 100 * (this.timeAlive / 1000))) * this.sinOffset;
 					this.x1 = this.x;
 					this.y1 = this.y - (this.height / 2);
 					this.x2 = this.x - (this.width / 2);
@@ -835,6 +1155,17 @@ function Game()
 					this.y += this.speed * delta;
 					break;
 				}
+				case 101:
+				{//Level 5 enemy bomb
+					this.x1 = this.x;
+					this.y1 = this.y + (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y - (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y - (this.height / 2);
+					this.y += this.speed * delta;
+					break;
+				}
 			}
         }
     }
@@ -853,7 +1184,7 @@ function Game()
     function Explosion(X, Y, NumParticles, Size, MaxAge, R, G, B)
     {
         this.particles = [];
-        this.numParticles = NumParticles;
+        this.numParticles = NumParticles / particleOffset;
         this.size = Size;
         this.age = 0;
         this.maxAge = MaxAge;
@@ -889,12 +1220,11 @@ function Game()
         this.height = Height;
         this.totalMissiles = 0;
         this.life = 100;
+		this.lives = 3;
         this.maxLife = 100;
 		this.shieldLevel = 0;
         this.shield = 100;
 		this.maxShield = this.shield * this.shieldLevel;
-        //this.shieldCharge = 0;
-        //this.recharge = false;
 		this.hasShield = false;
 		
 		this.weapon = 49;// 0 - 48
@@ -947,21 +1277,7 @@ function Game()
 				if(this.shield <= 0)
 				{
 					this.shield = 0;
-					/*this.recharge = false;
-					this.shieldCharge++;
-					if(this.shieldCharge >= 1500)
-					{
-						this.recharge = true;
-					}*/
 				}
-				/*if(this.shield < 100 && this.recharge == true)
-				{
-					this.shield += 0.1;
-				}
-				if(this.shield >= 100)
-				{
-					this.shieldCharge = 0;
-				}*/
 			}
         }
 		
@@ -1013,11 +1329,30 @@ function Game()
 					this.totalMissiles += 1;
 					if(this.weaponFunc)
 					{
-						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 1);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 2);
 						missiles.push(missile);
 					} else
 					{
-						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 1);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+					}
+					this.weaponFunc = !this.weaponFunc;
+					break;
+				}
+				case 2:
+				{
+					this.totalMissiles += 1;
+					if(this.weaponFunc)
+					{
+						missile = new Missile(missiles.length, 300, 1, this.x - 5, this.y - 25, 2);
+						missiles.push(missile);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+					} else
+					{
+						missile = new Missile(missiles.length, 300, 1, this.x + 5, this.y - 25, 2);
+						missiles.push(missile);
+						missile = new Missile(missiles.length, 300, this.weapon, this.x - 5, this.y - 25, 3);
 						missiles.push(missile);
 					}
 					this.weaponFunc = !this.weaponFunc;
@@ -1036,14 +1371,14 @@ function Game()
 					case 50:
 					{
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
 						break;
 					}
 					case 51:
 					{
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
 						break;
 					}
@@ -1103,9 +1438,7 @@ function Game()
             buffer.font = "bold 25px sans-serif";
         }
 
-        bgm.loop = true;
-        //sfx.loop = false;
-        bgm.play();
+        
 
         player = new Player(24, 40);
 		enemyGeneration = new EnemyGeneration();
@@ -1115,6 +1448,8 @@ function Game()
 		
 		gco = new GameControlObject();
 		gco.Init();
+		
+		sfx = new SFXObject();
     }
     
     this.hardReset = function()
@@ -1127,15 +1462,13 @@ function Game()
 		totalDestroys = 0;
 		destroys = 0;
         player.life = 100;
-		player.shield = 100;
+		player.resetShield();
 		player.recharge = true;
 		totalShots = 0;
-        player.totalMissiles = 0;
-        player.x = _buffer.width / 2;
-        player.y = _buffer.height / 2;
-        player.shield = 100;
-		player.shieldLevel = 1;
-		player.maxShield = 100;
+        player = new Player(24, 40);
+		gco.bgm.pause();
+		gco = new GameControlObject();
+		gco.Init();
     }
 	
 	this.softReset = function()
@@ -1147,10 +1480,8 @@ function Game()
 		randomItems = [];
 		totalDestroys += destroys;
 		destroys = 0;
-        //player.life = 100;
+        if(!player.isAlive()){player.life = 100;}
 		initStars();
-		player.shield = 100;
-		player.recharge = true;
 		totalShots += player.totalMissiles;
         player.totalMissiles = 0;
         player.x = _buffer.width / 2;
@@ -1226,6 +1557,7 @@ function Game()
                 {
                     if(enemies[i].Update() != 0)
                     {
+						sfx.play(0);
 						mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
 						money.push(mon);
                         self.popArray(enemies, i);
@@ -1295,29 +1627,30 @@ function Game()
 								explosions.push(explosion);
 								enemies[a].life = 0;
 							}
-                        }
-                        for(var b = 0; b < missiles.length; b++)
-                        {
-							if(missiles[b].missileType > 99)
+                        
+							for(var b = 0; b < missiles.length; b++)
 							{
-								if(self.Collision(player, missiles[b]))
+								if(missiles[b].missileType > 99)
 								{
-									explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-									explosions.push(explosion);
-									player.DamagePlayer(missiles[b].damage);
-									this.popArray(missiles, b);
-								}
-							} else
-							{
-								if(self.Collision(missiles[b], enemies[a]))
+									if(self.Collision(player, missiles[b]))
+									{
+										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+										explosions.push(explosion);
+										player.DamagePlayer(missiles[b].damage);
+										this.popArray(missiles, b);
+									}
+								} else
 								{
-									explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-									explosions.push(explosion);
-									enemies[a].life -= missiles[b].damage;
-									this.popArray(missiles, b);
+									if(self.Collision(missiles[b], enemies[a]))
+									{
+										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+										explosions.push(explosion);
+										enemies[a].life -= missiles[b].damage;
+										this.popArray(missiles, b);
+									}
 								}
 							}
-                        }
+						}
                     }
                 }
                 else
@@ -1390,14 +1723,18 @@ function Game()
 		// 1 = Pause Menu
 		// 2 = Level Up Menu
 		// 3 = Game Over Menu
+		// 4 = Continue Menu
 		switch(currentGui)
 		{
 			case 0:
 			{//Main Menu
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 &&
-				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
 					currentGui = 2;//default case will Trigger
+				}
+				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+				{
+					currentGui = 6; lastGui = 0;	
 				}
 				break;
 			}
@@ -1414,6 +1751,10 @@ if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (
 {//Start Level
 	if(player.weapon != 49){ gco.StartLevel(); }
 }
+if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
+{//Options Menu
+	currentGui = 6; lastGui = 2;
+}
 if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter, Weapon ID: 0
 	if(gco.weaponsOwned[0]){ gco.EquipWeapon(0); } else { if(player.money >= gco.weaponPrice[0]){ gco.PurchaseWeapon(0); }}
@@ -1421,6 +1762,10 @@ if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
 if(mouseX > 60 && mouseX < 108 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter Pro, Weapon ID: 1
 	if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); }}
+}
+if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
+{//Master Pea Shooter, Weapon ID: 2
+	if(gco.weaponsOwned[2]){ gco.EquipWeapon(2); } else { if(player.money >= gco.weaponPrice[2]){ gco.PurchaseWeapon(2); }}
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
 {//Boom Bullet, Weapon ID: 50
@@ -1448,7 +1793,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				break;
 			}
 			case 3:
-			{// Game Over Menu
+			{// Continue Menu
 				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
 				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
@@ -1456,6 +1801,42 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					self.softReset();
 				}
 				break;
+			}
+			case 4:
+			{// Level Up Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					self.softReset();
+					gco.GoToUpgradeMenu();	
+				}
+				break;
+			}
+			case 5:
+			{// Game Over Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					currentGui = 0;
+					gameState = 0;
+					self.hardReset();
+				}
+				break;
+			}
+			case 6:
+			{//Options Menu
+				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
+				{//Back
+					currentGui = lastGui; lastGui = 6;
+				}
+				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
+					particleOffset += 1;
+					if(particleOffset > 5){particleOffset = 5;}
+				}
+				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+					particleOffset -= 1;
+					if(particleOffset < 1){particleOffset = 1;}
+				}
 			}
 		}
 	}
@@ -1600,12 +1981,6 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				
                 if(Keys[19] == 1) // B
                 {
-                    sfxChannels[sfxIndex].play();
-                    sfxIndex++;
-                    if(sfxIndex > 3)
-                    {
-                        sfxIndex = 0;
-                    }
                     player.shootSecondary();
                 }
             }
@@ -1643,14 +2018,14 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 		// Stars
         self.drawStars();
 		
-		//Money
-		self.drawMoney();
-		
-		//Random Items
-		self.drawItems();
-		
         if(gameState == 1)
         {
+			//Money
+			self.drawMoney();
+			
+			//Random Items
+			self.drawItems();
+			
             // Player
             if(player.isAlive())
             {
@@ -1733,13 +2108,6 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 	{
 		for(var i = 0; i < money.length; i++)
 		{
-			/*buffer.fillStyle = 'rgb(200, 200, 255)';
-			buffer.shadowBlur = money[i].amount * 2;
-            buffer.beginPath();
-                buffer.arc(money[i].x, money[i].y, money[i].amount * 2, 0, Math.PI * 2, true);
-            buffer.closePath();
-            buffer.fill();
-			buffer.shadowBlur = 0;*/
 			buffer.drawImage(itemImages[0], money[i].x - (money[i].width / 2), money[i].y - (money[i].height / 2), money[i].width, money[i].height);
 		}
 	}
@@ -1864,7 +2232,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			switch(missiles[i].missileType)
 			{
 				case 0:
-				{//Standard Bullet
+				{//Pea Shooter
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(255, 255, 255)";
 						buffer.moveTo(missiles[i].x1, missiles[i].y1);
@@ -1876,7 +2244,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					break;
 				}
 				case 1:
-			    {//Standard Bullet 2
+			    {//Pea Shooter Pro
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(255, 255, 255)";
 						buffer.moveTo(missiles[i].x1, missiles[i].y1);
@@ -1885,7 +2253,19 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 						buffer.lineTo(missiles[i].x1, missiles[i].y1);
 						buffer.stroke();
 					buffer.closePath();
-					break
+					break;
+				}
+				case 2:
+				{//Pea Shooter Ultra
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(255, 255, 255)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
 				}
 				case 50:
 				{
@@ -1912,6 +2292,18 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					break;
 				}
 				case 100:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 0)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
+				case 101:
 				{
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(0, 255, 0)";
@@ -1957,7 +2349,18 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
         self.drawLifeMeter();
         self.drawShieldMeter();
         self.drawFuelMeter();
+		self.drawPlayerLives();
     }
+	
+	this.drawPlayerLives = function()
+	{
+		var xOffset = 0;
+		for(var i = 0; i < player.lives; i++)
+		{
+			buffer.drawImage(playerImages[0], _buffer.width - (60 - xOffset), _buffer.height - 25, player.width / 2, player.height / 2);
+			xOffset += 20;
+		}
+	}
 	
 	this.drawAmmoGui = function()
 	{
@@ -2127,19 +2530,16 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 			{// Main Menu
 				guiText[0] = new GUIText("Kill All the Things!", _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 255)");
-				//guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
-				//						 "28px Helvetica", "center", "top");
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 &&
-				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 				{
-					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
-				} else
-				{
-					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, 
-										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
 				}
-        		
+				guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+				{
+					guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				}
 				break;
 			}
 			case 1:
@@ -2188,6 +2588,8 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				case 0:{outText += "Drone Kills: "; break;}
 				case 1:{outText += "Weaver Kills: "; break;}
 				case 2:{outText += "Kamakaze Kills: "; break;}
+				case 3:{outText += "Splitter Kills: "; break;}
+				case 4:{outText += "Teleporter Kills: "; break;}
 				default:{outText += "Level Not Added: "; break;}
 			}
 			gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
@@ -2206,7 +2608,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 //					   END MISSION MENU SECTION							//
 //**********************************************************************//
 									
-									
+				var xDrawOffset = 160;
                 buffer.beginPath();
                 for(var i = 0; i < gco.missionText.length; i++)
                 {
@@ -2215,6 +2617,13 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                     buffer.textAlign = gco.missionText[i].alignX;
                     buffer.textBaseline = gco.missionText[i].alignY;
                     buffer.fillText(gco.missionText[i].text, gco.missionText[i].x, gco.missionText[i].y);
+					switch(i){
+						case 0:{ buffer.drawImage(enemyImages[0], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[0].width, enemyImages[0].height); break;}
+						case 1:{ buffer.drawImage(enemyImages[2], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[2].width, enemyImages[2].height); break;}
+						case 2:{ buffer.drawImage(enemyImages[4], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[4].width, enemyImages[4].height); break;}
+						case 3:{ buffer.drawImage(enemyImages[6], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[6].width, enemyImages[6].height); break;}
+						case 4:{ buffer.drawImage(enemyImages[11], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[11].width, enemyImages[11].height); break;}
+					}
                 }
                 buffer.closePath();
             // Level Progress Meter
@@ -2320,6 +2729,36 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 {
 					buffer.globalAlpha = 0.5;
                     buffer.drawImage(images[1], 60, 280, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
+				
+// NEW WEAPON Master Pea Shooter
+                if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
+                {//Master Pea Shooter, Weapon ID: 2
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
+                    buffer.shadowBlur = 0;
+                    if(gco.weaponsOwned[2])
+                    {
+                        guiText[6].text = "You already own Master Pea Shooter.";
+                    } else
+                    {
+                        guiText[6].text = "Master Pea Shooter costs 250 cores.";
+                    }
+                }
+                if(gco.weaponsOwned[2] && player.weapon == 2)
+                {
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 150, 250)';
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[7], 110, 280, 48, 48);
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
@@ -2469,14 +2908,22 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 }
                 //END WEAPON
 
+				// Options Menu Selection
+				if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
+                {//Options Menu
+                    guiText[10] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+                } else
+                {
+                    guiText[10] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                }
                 //**********************************************************************//
                 //					  END UPGRADE MENU SECTION							//
                 //**********************************************************************//
                 break;
 			}
 			case 3:
-			{// Game Over Menu
-				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
+			{// Continue Menu
+				guiText[0] = new GUIText("You Died! :(", _canvas.width / 2, _canvas.height / 2 - 100, 
 										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
 										 
         		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
@@ -2490,6 +2937,69 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
 				}
 				break;
+			}
+			case 4:
+			{// Level Up Menu
+				guiText[0] = new GUIText("Level Up! Now on level: " + (gco.level + 1), _canvas.width / 2, _canvas.height / 2 - 100, 
+										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
+										 
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 &&
+				   mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Continue", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				} else
+				{
+					guiText[1] = new GUIText("Continue", _canvas.width / 2, _canvas.height / 2, 
+										 "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				}
+				break;
+			}
+			case 5:
+			{// Game Over Menu
+				guiText[0] = new GUIText("Game Over", _canvas.width / 2, _canvas.height / 2 - 100, 
+										 "28px Helvetica", "center", "top", "rgb(255, 0, 0)");
+										 
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				} else
+				{
+					guiText[1] = new GUIText("Title Screen", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				}
+				break;
+			}
+			case 6:
+			{//Options Menu
+				guiText[0] = new GUIText("Options", _canvas.width / 2, 25, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
+				{
+					guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				//particleOffset
+				guiText[2] = new GUIText("Particles", 10, 55, "20px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
+					guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+					guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+				switch(particleOffset)
+				{
+					case 1:{guiText[5] = new GUIText("5", 43, 80, "26px Helvetica", "left", "top", "rgb(255, 0, 0)");
+							guiText[6] = new GUIText("OMFG SPARKLES!", 51, 110, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
+					case 2:{guiText[5] = new GUIText("4", 43, 80, "26px Helvetica", "left", "top", "rgb(200, 25, 0)");
+							guiText[6] = new GUIText("Shinies!", 51, 110, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
+					case 3:{guiText[5] = new GUIText("3", 43, 80, "26px Helvetica", "left", "top", "rgb(150, 100, 20)");
+							guiText[6] = new GUIText("Less Shinies.", 51, 110, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
+					case 4:{guiText[5] = new GUIText("2", 43, 80, "26px Helvetica", "left", "top", "rgb(120, 200, 60)");
+							guiText[6] = new GUIText("Needs Shinies :(", 51, 110, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
+					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+				}
 			}
 			default:{break;}
 		}
@@ -2552,7 +3062,15 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
 			guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, 
 								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			buffer.beginPath();
+		} else
+		{
+			if(gameState == 1)
+			{
+				guiText[0] = new GUIText("[E] Player Info", 105, _canvas.height - 28, 
+										 "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			}
+		}
+		buffer.beginPath();
 			for(var i = 0; i < guiText.length; i++)
 			{
 				buffer.fillStyle = guiText[i].color;
@@ -2561,8 +3079,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 				buffer.textBaseline = guiText[i].alignY;
 				buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
 			}
-			buffer.closePath();
-		}
+		buffer.closePath();
 		
 		delete guiText;
 		// End Player Info

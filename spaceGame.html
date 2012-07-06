@@ -4,7 +4,23 @@
     <title>Blackmodule's Space Game</title>
 </head>
 <body>
-<audio id="bgm_02" src="Audio/bgm_02.mp3" type="audio/mp3" preload="auto"></audio>
+
+
+
+<!-- The browser will automatically choose the format it supports. -->
+<audio id="bgm_square" onloadeddata="soundsLoaded()" preload="auto">
+	<source src="Audio/bgm_square.mp3" type="audio/mp3"> 
+	<source src="Audio/bgm_square.ogg" type="audio/ogg">
+	HTML5 audio not supported. Please Upgrade your web browser.
+</audio>
+<audio id="bgm_02" preload="auto">
+	<source src="Audio/bgm_02.mp3" type="audio/mp3"> 
+	<!--<source src="demo.ogg" type="audio/ogg">-->
+</audio>
+<!-- End Audio -->
+
+
+
 <script src="Game.js"></script>
 <div align="center">
     <canvas id="canvas" width="800" height="600">
@@ -14,6 +30,7 @@
 	var play = new Game();
 	play.Init();
 	play.Run();
+function soundsLoaded() { play.InitSounds(); }
 </script>
 </div>
 

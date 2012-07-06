@@ -1,0 +1,5 @@
+-Add Space Mines and Laser Secondary
+-Add buy health to upgrade menu
+-Add Boss Level, add boss
+-Get ogg for BMG_02 from david.
+-Add Options Menu to Pause Menu.
