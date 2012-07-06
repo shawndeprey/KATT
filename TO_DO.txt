@@ -2,4 +2,4 @@
 -Add buy health to upgrade menu
 -Add Boss Level, add boss
 -Get ogg for BMG_02 from david.
--Add ship images to mission's menu.
+-Add Options Menu to Pause Menu.

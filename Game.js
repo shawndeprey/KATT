@@ -2608,7 +2608,7 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 //					   END MISSION MENU SECTION							//
 //**********************************************************************//
 									
-									
+				var xDrawOffset = 160;
                 buffer.beginPath();
                 for(var i = 0; i < gco.missionText.length; i++)
                 {
@@ -2617,6 +2617,13 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                     buffer.textAlign = gco.missionText[i].alignX;
                     buffer.textBaseline = gco.missionText[i].alignY;
                     buffer.fillText(gco.missionText[i].text, gco.missionText[i].x, gco.missionText[i].y);
+					switch(i){
+						case 0:{ buffer.drawImage(enemyImages[0], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[0].width, enemyImages[0].height); break;}
+						case 1:{ buffer.drawImage(enemyImages[2], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[2].width, enemyImages[2].height); break;}
+						case 2:{ buffer.drawImage(enemyImages[4], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[4].width, enemyImages[4].height); break;}
+						case 3:{ buffer.drawImage(enemyImages[6], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[6].width, enemyImages[6].height); break;}
+						case 4:{ buffer.drawImage(enemyImages[11], gco.missionText[i].x + xDrawOffset, gco.missionText[i].y - 5, enemyImages[11].width, enemyImages[11].height); break;}
+					}
                 }
                 buffer.closePath();
             // Level Progress Meter
