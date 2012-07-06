@@ -1,6 +1,13 @@
 //Authors: Shawn Deprey, Justin Hammond, Drew Muller
 function Game()
 {
+	//Tracked Data
+	var score = 0;
+	var enemyPoints = 0;
+	var enemiesKilled = 0;
+	var itemsUsed = 0;
+	var totalCores = 0;
+	
     this.gameLoop = null;
     var self = this;
     var gameState = 0;
@@ -8,7 +15,7 @@ function Game()
     var keyPressed;
     var debug = false;
 	var playerInfo = false;
-	var itemsUsed = 0;
+	
 	
 	//GUI Info
 	var currentGui = 0;
@@ -467,6 +474,7 @@ function Game()
 						var height = 0;
 						var width = 0;
 						var model = 0;
+						var points = 0;
 						switch(theType)
 						{
 							case 0:
@@ -475,7 +483,7 @@ function Game()
 								theSpeed = Math.round(Math.random() * 50) + 50;
 								theDmg = Math.round(Math.random() * 5) + 5;
 								Cores = Math.round(Math.random() * 2) + 1;
-								if(theDmg > 7){model = 1;} else {model = 0;}
+								if(theDmg > 7){model = 1; points = 2;} else {model = 0; points = 1;}
 								width = 15;
 								height = 25;
 								break;
@@ -486,7 +494,7 @@ function Game()
 								theSpeed = Math.round(Math.random() * 50) + 50;
 								theDmg = Math.round(Math.random() * 7) + 7;
 								Cores = Math.round(Math.random() * 5) + 1;
-								if(theDmg > 10){model = 3;} else {model = 2;}
+								if(theDmg > 10){model = 3; points = 4;} else {model = 2; points = 3;}
 								width = 31;
 								height = 21;
 								break;
@@ -501,8 +509,10 @@ function Game()
 									model = 5;
 									theDmg = Math.round(Math.random() * 10) + 10;
 									Cores = Math.round(Math.random() * 15) + 10;
+									points = 6;
 								}else 
 								{
+									points = 5;
 									model = 4;
 									theDmg = Math.round(Math.random() * 9) + 9;
 									Cores = Math.round(Math.random() * 5) + 1;
@@ -518,6 +528,7 @@ function Game()
 								theDmg = Math.round(Math.random() * 15) + 15;
 								if(theDmg >= 23)
 								{
+									points = 8;
 									model = 8;
 									theDmg = Math.round(Math.random() * 17) + 17;
 									Cores = Math.round(Math.random() * 30) + 20;
@@ -525,6 +536,7 @@ function Game()
 									height = 31;
 								}else 
 								{
+									points = 7;
 									model = 6;
 									Cores = Math.round(Math.random() * 25) + 10;
 									width = 29;
@@ -539,6 +551,7 @@ function Game()
 								theDmg = Math.round(Math.random() * 17) + 17;
 								if(theDmg >= 28)
 								{
+									points = 10;
 									theLife = Math.round(Math.random() * 25) + 25;
 									model = 11;
 									Cores = Math.round(Math.random() * 30) + 20;
@@ -546,6 +559,7 @@ function Game()
 									height = 21;
 								}else 
 								{
+									points = 9;
 									model = 10;
 									Cores = Math.round(Math.random() * 25) + 10;
 									width = 26;
@@ -555,7 +569,7 @@ function Game()
 							}
 						}
 						
-						enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType);
+						enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType, points);
 						enemies.push(enemy);
 					}
 				}
@@ -563,7 +577,7 @@ function Game()
 		}
 	}
 	
-	function Enemy(spd, dmg, lfe, crs, wdth, hght, mdl, inX, inY, theType)
+	function Enemy(spd, dmg, lfe, crs, wdth, hght, mdl, inX, inY, theType, pts)
     {
 		numEnemies++;
 		this.enemyNum = numEnemies;
@@ -592,6 +606,7 @@ function Game()
 		this.readyForTeleport = false;
 		this.teleportTimer = 2;
 		this.didTeleport = false;
+		this.points = pts;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -730,7 +745,7 @@ function Game()
 								var xStart = Math.round(Math.random() * 40) + 10;
 								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
 								if(LOR == 0){xStart *= -1;}
-								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 7, this.x + xStart, this.y, 50);
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 7, this.x + xStart, this.y, 50, 2);
 								enemies.push(enemy);
 							}
 							return 1;
@@ -750,7 +765,7 @@ function Game()
 								var xStart = Math.round(Math.random() * 40) + 10;
 								var LOR = Math.round(Math.random() * 1) + 1;//Left or Right...1 or 2
 								if(LOR == 0){xStart *= -1;}
-								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 9, this.x + xStart, this.y, 50);
+								enemy = new Enemy(this.speed, this.damage, Math.round(this.startLife / 2) + 1, Math.round(this.Cores / 3) + 1, 15, 31, 9, this.x + xStart, this.y, 50, 2);
 								enemies.push(enemy);
 							}
 							return 1;
@@ -963,7 +978,9 @@ function Game()
 					case 3:
 					{
 						this.used = true;
-						player.money += Math.round(Math.random() * 100) + 150;
+						var newAmount = Math.round(Math.random() * 100) + 150;
+						player.money += newAmount;
+						totalCores += newAmount;
 						break;	
 					}
 				}
@@ -1557,9 +1574,14 @@ function Game()
                 {
                     if(enemies[i].Update() != 0)
                     {
-						sfx.play(0);
-						mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
-						money.push(mon);
+						if(!self.isEnemyAlive(enemies[i].enemyNum))
+						{
+							enemiesKilled += 1;
+							enemyPoints += enemies[i].points;
+							sfx.play(0);
+							mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
+							money.push(mon);
+						}
                         self.popArray(enemies, i);
                     }
                 }
@@ -1600,6 +1622,7 @@ function Game()
 							if(self.Collision(player, money[i]))
 							{
 								player.money += money[i].amount;
+								totalCores += money[i].amount;
 								money[i].used = true;
 							}
 						}
@@ -1655,6 +1678,7 @@ function Game()
                 }
                 else
                 {
+					score = (enemyPoints + enemiesKilled) * 10;
                     colSwap = true;
                 }
             }
@@ -2916,6 +2940,8 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 {
                     guiText[10] = new GUIText("Options", _canvas.width - 100, 20, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
                 }
+				
+				guiText[11] = new GUIText("Score: " + score, 10, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(230, 230, 255)");
                 //**********************************************************************//
                 //					  END UPGRADE MENU SECTION							//
                 //**********************************************************************//
@@ -3052,16 +3078,12 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 		var guiText = [];
 		if(playerInfo)
 		{
-            guiText[0] = new GUIText("Fuel: " + player.currentFuel, 105, _canvas.height - 78, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-            guiText[1] = new GUIText("Shield: " + Math.floor(player.shield), 105, _canvas.height - 53, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[2] = new GUIText("Hull: " + player.life, 105, _canvas.height - 28, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[3] = new GUIText("Destroyed: " + destroys, _canvas.width / 2, _canvas.height - 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+            guiText[0] = new GUIText("Fuel: " + player.currentFuel, 105, _canvas.height - 78, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+            guiText[1] = new GUIText("Shield: " + Math.floor(player.shield), 105, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			guiText[2] = new GUIText("Hull: " + player.life, 105, _canvas.height - 28, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			guiText[3] = new GUIText("Destroyed: " + destroys, _canvas.width / 2, _canvas.height - 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			guiText[5] = new GUIText("Score: " + score, _canvas.width - 100, 20, "12px Helvetica", "left", "top", "rgb(96, 255, 96)");
 		} else
 		{
 			if(gameState == 1)
