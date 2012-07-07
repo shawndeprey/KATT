@@ -12,3 +12,8 @@
 	-Highest Score
 	-Accumulative Score
 	-Items Used
+    
+-Collision detection fixes
+    -Shield
+    -Cores
+    -Power-Ups
