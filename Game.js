@@ -84,9 +84,9 @@ function Game()
 	var itemImages = [];
 	for(var i = 0; i < 1; i++)
 	{
-			itemImages[i] = new Image();
-			itemImages[i].src = ('Graphics/item_' + i + '.png')
-		}
+        itemImages[i] = new Image();
+        itemImages[i].src = ('Graphics/item_' + i + '.png')
+    }
 
     // Containers
     var stars = [];
@@ -150,12 +150,14 @@ function Game()
 			this.weaponsOwned[2] = false;//Master Pea Shooter
 			this.weaponsOwned[50] = false;//Missile
 			this.weaponsOwned[51] = false;//Homing Missile
+            this.weaponsOwned[52] = false;//Space Mine
 			
 			this.weaponPrice[0] = 0;//Pea Shooter
 			this.weaponPrice[1] = 25;//Pea Shooter Pro
 			this.weaponPrice[2] = 250;//Master Pea Shooter
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
+            this.weaponPrice[52] = 250;//Space Mine
 		}
 		
 		this.init_audio = function()
@@ -1166,6 +1168,14 @@ function Game()
 					}
 					break;
 				}
+                case 52:
+				{//Space Mine
+					this.x1 = this.x - (this.width / 2);
+					this.y1 = this.y - (this.height / 2);
+					this.x2 = this.x + (this.width / 2);
+					this.y2 = this.y + (this.height / 2);
+					break;
+				}
 				case 100:
 				{//Level 2 enemy bullet
 					this.x1 = this.x;
@@ -1387,11 +1397,11 @@ function Game()
 		{
 			if(this.secondaryAmmo > 0)
 			{
-				this.secondaryAmmo -= 1;
 				switch(this.secondary)
 				{
 					case 50:
 					{
+                        this.secondaryAmmo -= 1;
 						this.totalMissiles += 1;
 						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
@@ -1399,6 +1409,15 @@ function Game()
 					}
 					case 51:
 					{
+                        this.secondaryAmmo -= 2;
+						this.totalMissiles += 1;
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missiles.push(missile);
+						break;
+					}
+                    case 52:
+					{
+                        this.secondaryAmmo -= 3;
 						this.totalMissiles += 1;
 						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
 						missiles.push(missile);
@@ -1803,6 +1822,10 @@ if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
 if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
 {//Friendly Boom Bullet, Weapon ID: 51
 	if(gco.weaponsOwned[51]){ gco.EquipWeapon(51); } else { if(player.money >= gco.weaponPrice[51]){ gco.PurchaseWeapon(51); }}
+}
+if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
+{//Space Mine, Weapon ID: 52
+	if(gco.weaponsOwned[52]){ gco.EquipWeapon(52); } else { if(player.money >= gco.weaponPrice[52]){ gco.PurchaseWeapon(52); }}
 }
 if(mouseX > _canvas.width - 300 && mouseX < _canvas.width - 252 && mouseY > 448 && mouseY < 496)
 {//Shield
@@ -2324,6 +2347,19 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					buffer.closePath();
 					break;
 				}
+                case 52:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 255)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x1, missiles[i].y2);
+                        buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
 				case 100:
 				{
 					buffer.beginPath();
@@ -2609,34 +2645,34 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 //**********************************************************************//
 //					    MISSION MENU SECTION							//
 //**********************************************************************//
-		var drawX = 10;
-		var drawY = 50;
-		var j = 0;
-		for(var i = 0; i < gco.levelMission.objectives.length; i++)
-		{
-			j++;
-			var outText = "";
-			switch(i)
-			{//Case Cooresponds to enemy types, enemy type missions cooresponds to level.
-				case 0:{outText += "Drone Kills: "; break;}
-				case 1:{outText += "Weaver Kills: "; break;}
-				case 2:{outText += "Kamakaze Kills: "; break;}
-				case 3:{outText += "Splitter Kills: "; break;}
-				case 4:{outText += "Teleporter Kills: "; break;}
-				default:{outText += "Level Not Added: "; break;}
-			}
-			gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
-								drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
-			if(j == 4)
-			{
-				j = 0;
-				drawY = 50;
-				drawX += 200;
-			} else
-			{
-				drawY += 35;
-			}
-		}
+                var drawX = 10;
+                var drawY = 50;
+                var j = 0;
+                for(var i = 0; i < gco.levelMission.objectives.length; i++)
+                {
+                    j++;
+                    var outText = "";
+                    switch(i)
+                    {//Case Cooresponds to enemy types, enemy type missions cooresponds to level.
+                        case 0:{outText += "Drone Kills: "; break;}
+                        case 1:{outText += "Weaver Kills: "; break;}
+                        case 2:{outText += "Kamakaze Kills: "; break;}
+                        case 3:{outText += "Splitter Kills: "; break;}
+                        case 4:{outText += "Teleporter Kills: "; break;}
+                        default:{outText += "Level Not Added: "; break;}
+                    }
+                    gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
+                                        drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
+                    if(j == 4)
+                    {
+                        j = 0;
+                        drawY = 50;
+                        drawX += 200;
+                    } else
+                    {
+                        drawY += 35;
+                    }
+                }
 //**********************************************************************//
 //					   END MISSION MENU SECTION							//
 //**********************************************************************//
@@ -2853,6 +2889,36 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                 {
 					buffer.globalAlpha = 0.5;
                     buffer.drawImage(images[3], 60, 448, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
+
+// NEW WEAPON Space Mine
+                if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
+                {//Friendly Boom Bullet, Weapon ID: 51
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[8], 110, 448, 48, 48);
+                    buffer.shadowBlur = 0;
+                    if(gco.weaponsOwned[52])
+                    {
+                        guiText[6].text = "You already own Space Mine.";
+                    } else
+                    {
+                        guiText[6].text = "Space Mine costs 250 cores.";
+                    }
+                }
+                if(gco.weaponsOwned[52] && player.secondary == 52)
+                {
+					buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[8], 110, 448, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[8], 110, 448, 48, 48);
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
