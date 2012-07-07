@@ -1611,7 +1611,7 @@ function Game()
     this.Update = function()
     {
 		//Stop Sound Check
-		if(currentGui == 2 && sfx.laserPlaying){sfx.laser.pause();}
+		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.laser.pause();}
 		
         if(levelStart){ bgm.play(); }
         // Input
