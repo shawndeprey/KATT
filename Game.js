@@ -7,6 +7,7 @@ function Game()
 	var enemiesKilled = 0;
 	var itemsUsed = 0;
 	var totalCores = 0;
+	var overNineThousand = false;
 	
     this.gameLoop = null;
     var self = this;
@@ -1409,17 +1410,17 @@ function Game()
 					}
 					case 51:
 					{
-                        this.secondaryAmmo -= 2;
+                        this.secondaryAmmo -= 1;
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 15);
 						missiles.push(missile);
 						break;
 					}
                     case 52:
 					{
-                        this.secondaryAmmo -= 3;
+                        this.secondaryAmmo -= 1;
 						this.totalMissiles += 1;
-						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 20);
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 25);
 						missiles.push(missile);
 						break;
 					}
