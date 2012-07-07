@@ -1,7 +1,5 @@
--Add Laser Secondary
 -Create 48 x 48 sprites for gui menu.
 -Create Sprites for bullets, missiles, and mines. Height and width should be the height and width of ingame objects.
--Add buy health to upgrade menu
 -Add Boss Level, add boss
 -Add Options Menu to Pause Menu.
 -New Core Sprites
