@@ -13,7 +13,7 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 4;// Should always be above current state limit
+	var NULL_GUI_STATE = -1;
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
@@ -60,7 +60,7 @@ function Game()
         
         // Graphics
         var images = [];//Gui Images
-        for(var i = 0; i < 7; i++)
+        for(var i = 0; i < 8; i++)
         {
             images[i] = new Image();
             images[i].src = ('Graphics/GUI_0' + i + '.png');
@@ -148,11 +148,13 @@ function Game()
 			this.weaponsOwned[1] = false;//Pea Shooter Pro
 			this.weaponsOwned[50] = false;//Missile
 			this.weaponsOwned[51] = false;//Homing Missile
+            this.weaponsOwned[52] = false;//Space Mine
 			
 			this.weaponPrice[0] = 0;//Pea Shooter
 			this.weaponPrice[1] = 25;//Pea Shooter Pro
 			this.weaponPrice[50] = 50;//Missile
 			this.weaponPrice[51] = 100;//Homing Missile
+            this.weaponPrice[52] = 250;//Space Mine
 		}
 		
 		this.CheckLevelCompletion = function()
@@ -942,6 +944,14 @@ function Game()
 					}
 					break;
 				}
+                case 52:
+				{//Space Mine
+					this.x1 = this.x - (this.width / 2);
+					this.y1 = this.y - (this.height / 2);
+					this.x2 = this.x + (this.width / 2);
+					this.y2 = this.y + (this.height / 2);
+					break;
+				}
 				case 100:
 				{//Level 2 enemy bullet
 					this.x1 = this.x;
@@ -1148,11 +1158,11 @@ function Game()
 		{
 			if(this.secondaryAmmo > 0)
 			{
-				this.secondaryAmmo -= 1;
 				switch(this.secondary)
 				{
 					case 50:
 					{
+                        this.secondaryAmmo -= 1;
 						this.totalMissiles += 1;
 						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
 						missiles.push(missile);
@@ -1160,6 +1170,15 @@ function Game()
 					}
 					case 51:
 					{
+                        this.secondaryAmmo -= 2;
+						this.totalMissiles += 1;
+						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
+						missiles.push(missile);
+						break;
+					}
+                    case 52:
+					{
+                        this.secondaryAmmo -= 3;
 						this.totalMissiles += 1;
 						missile = new Missile(missiles.length, 200, this.secondary, this.x, this.y - 25, 10);
 						missiles.push(missile);
@@ -1525,44 +1544,48 @@ function Game()
 			}
 			case 2:
 			{//Level up Menu
-//**********************************************************************//
-//						UPGRADE MENU SECTION							//
-//**********************************************************************//
-if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (280) && mouseY > (250))
-{//Start Level
-	if(player.weapon != 49){ gco.StartLevel(); }
-}
-if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
-{//Pea Shooter, Weapon ID: 0
-	if(gco.weaponsOwned[0]){ gco.EquipWeapon(0); } else { if(player.money >= gco.weaponPrice[0]){ gco.PurchaseWeapon(0); }}
-}
-if(mouseX > 60 && mouseX < 108 && mouseY > 280 && mouseY < 328)
-{//Pea Shooter Pro, Weapon ID: 1
-	if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); }}
-}
-if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
-{//Boom Bullet, Weapon ID: 50
-	if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); }}
-}
-if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
-{//Friendly Boom Bullet, Weapon ID: 51
-	if(gco.weaponsOwned[51]){ gco.EquipWeapon(51); } else { if(player.money >= gco.weaponPrice[51]){ gco.PurchaseWeapon(51); }}
-}
-if(mouseX > _canvas.width - 300 && mouseX < _canvas.width - 252 && mouseY > 448 && mouseY < 496)
-{//Shield
-	if(player.money >= (player.shieldLevel + 1) * 250){gco.PurchaseExtras(0);}
-}
-if(mouseX > _canvas.width - 250 && mouseX < _canvas.width - 202 && mouseY > 448 && mouseY < 496)
-{//Max Ammo
-	if(player.money >= (player.secondaryAmmoLevel + 1) * 50){gco.PurchaseExtras(2);}
-}
-if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 && mouseY < 496)
-{//Buy Secondary Ammo
-	if(player.money >= gco.secondaryAmmoPrice && player.secondaryAmmo < player.maxSecondaryAmmo){gco.PurchaseExtras(3);}
-}
-//**********************************************************************//
-//					  END UPGRADE MENU SECTION							//
-//**********************************************************************//
+    //**********************************************************************//
+    //						UPGRADE MENU SECTION							//
+    //**********************************************************************//
+                if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (280) && mouseY > (250))
+                {//Start Level
+                    if(player.weapon != 49){ gco.StartLevel(); }
+                }
+                if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
+                {//Pea Shooter, Weapon ID: 0
+                    if(gco.weaponsOwned[0]){ gco.EquipWeapon(0); } else { if(player.money >= gco.weaponPrice[0]){ gco.PurchaseWeapon(0); }}
+                }
+                if(mouseX > 60 && mouseX < 108 && mouseY > 280 && mouseY < 328)
+                {//Pea Shooter Pro, Weapon ID: 1
+                    if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); }}
+                }
+                if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
+                {//Boom Bullet, Weapon ID: 50
+                    if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); }}
+                }
+                if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
+                {//Friendly Boom Bullet, Weapon ID: 51
+                    if(gco.weaponsOwned[51]){ gco.EquipWeapon(51); } else { if(player.money >= gco.weaponPrice[51]){ gco.PurchaseWeapon(51); }}
+                }
+                if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
+                {//Space Mine, Weapon ID: 52
+                    if(gco.weaponsOwned[52]){ gco.EquipWeapon(52); } else { if(player.money >= gco.weaponPrice[52]){ gco.PurchaseWeapon(52); }}
+                }
+                if(mouseX > _canvas.width - 300 && mouseX < _canvas.width - 252 && mouseY > 448 && mouseY < 496)
+                {//Shield
+                    if(player.money >= (player.shieldLevel + 1) * 250){gco.PurchaseExtras(0);}
+                }
+                if(mouseX > _canvas.width - 250 && mouseX < _canvas.width - 202 && mouseY > 448 && mouseY < 496)
+                {//Max Ammo
+                    if(player.money >= (player.secondaryAmmoLevel + 1) * 50){gco.PurchaseExtras(2);}
+                }
+                if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 && mouseY < 496)
+                {//Buy Secondary Ammo
+                    if(player.money >= gco.secondaryAmmoPrice && player.secondaryAmmo < player.maxSecondaryAmmo){gco.PurchaseExtras(3);}
+                }
+    //**********************************************************************//
+    //					  END UPGRADE MENU SECTION							//
+    //**********************************************************************//
 				break;
 			}
 			case 3:
@@ -2029,6 +2052,19 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					buffer.closePath();
 					break;
 				}
+                case 52:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 255)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x1, missiles[i].y2);
+                        buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
 				case 100:
 				{
 					buffer.beginPath();
@@ -2291,39 +2327,39 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                                     "18px Helvetica", "left", "top", "rgb(0, 0, 0)");
 
 
-//**********************************************************************//
-//					    MISSION MENU SECTION							//
-//**********************************************************************//
-		var drawX = 10;
-		var drawY = 50;
-		var j = 0;
-		for(var i = 0; i < gco.levelMission.objectives.length; i++)
-		{
-			j++;
-			var outText = "";
-			switch(i)
-			{//Case Cooresponds to enemy types, enemy type missions cooresponds to level.
-				case 0:{outText += "Drone Kills: "; break;}
-				case 1:{outText += "Weaver Kills: "; break;}
-				case 2:{outText += "Kamakaze Kills: "; break;}
-				case 3:{outText += "Splitter Kills: "; break;}
-				default:{outText += "Level Not Added: "; break;}
-			}
-			gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
-								drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
-			if(j == 4)
-			{
-				j = 0;
-				drawY = 50;
-				drawX += 200;
-			} else
-			{
-				drawY += 35;
-			}
-		}
-//**********************************************************************//
-//					   END MISSION MENU SECTION							//
-//**********************************************************************//
+    //**********************************************************************//
+    //					    MISSION MENU SECTION							//
+    //**********************************************************************//
+                var drawX = 10;
+                var drawY = 50;
+                var j = 0;
+                for(var i = 0; i < gco.levelMission.objectives.length; i++)
+                {
+                    j++;
+                    var outText = "";
+                    switch(i)
+                    {//Case Cooresponds to enemy types, enemy type missions cooresponds to level.
+                        case 0:{outText += "Drone Kills: "; break;}
+                        case 1:{outText += "Weaver Kills: "; break;}
+                        case 2:{outText += "Kamakaze Kills: "; break;}
+                        case 3:{outText += "Splitter Kills: "; break;}
+                        default:{outText += "Level Not Added: "; break;}
+                    }
+                    gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
+                                        drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
+                    if(j == 4)
+                    {
+                        j = 0;
+                        drawY = 50;
+                        drawX += 200;
+                    } else
+                    {
+                        drawY += 35;
+                    }
+                }
+    //**********************************************************************//
+    //					   END MISSION MENU SECTION							//
+    //**********************************************************************//
 									
 									
                 buffer.beginPath();
@@ -2500,6 +2536,36 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 {
 					buffer.globalAlpha = 0.5;
                     buffer.drawImage(images[3], 60, 448, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
+
+// NEW WEAPON Space Mine
+                if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
+                {//Friendly Boom Bullet, Weapon ID: 51
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[7], 110, 448, 48, 48);
+                    buffer.shadowBlur = 0;
+                    if(gco.weaponsOwned[52])
+                    {
+                        guiText[6].text = "You already own Space Mine.";
+                    } else
+                    {
+                        guiText[6].text = "Space Mine costs 250 cores.";
+                    }
+                }
+                if(gco.weaponsOwned[52] && player.secondary == 52)
+                {
+					buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[7], 110, 448, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[7], 110, 448, 48, 48);
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
