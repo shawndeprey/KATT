@@ -61,7 +61,7 @@ function Game()
         
 	// Graphics
 	var images = [];//Gui Images
-	for(var i = 0; i < 8; i++)
+	for(var i = 0; i < 10; i++)
 	{
 		images[i] = new Image();
 		images[i].src = ('Graphics/GUI_0' + i + '.png');
@@ -160,7 +160,7 @@ function Game()
 		
 		this.init_audio = function()
 		{
-			this.bgm.volume = 0.1;
+			this.bgm.volume = 0.2;
 			this.bgm.play();
 		}
 		
@@ -217,6 +217,11 @@ function Game()
 					player.money -= this.secondaryAmmoPrice;
 					player.secondaryAmmo += 25;
 					if(player.secondaryAmmo > player.maxSecondaryAmmo){player.secondaryAmmo = player.maxSecondaryAmmo;}
+				}
+				case 4:
+				{
+					player.money -= ((100 - player.life) * 2);
+					player.life = 100;
 				}
 			}
 		}
@@ -286,7 +291,7 @@ function Game()
 	}
 	//Sound Event Listener	
 	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
-	document.querySelector("#bgm_02").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
 	function swapBGM()
 	{
 		switch(Math.round(Math.random() * 2))
@@ -329,7 +334,7 @@ function Game()
 			{
 				var a = null;
 				if(this.soundType == 0){a = new Audio('Audio/Explode.mp3');} else {a = new Audio('Audio/Explode.ogg');}
-				a.volume = 0.1;
+				a.volume = 0.2;
 				a.preload = 'auto';
 				this.explosion.channel.push(a);
 			}
@@ -1811,6 +1816,10 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 {//Buy Secondary Ammo
 	if(player.money >= gco.secondaryAmmoPrice && player.secondaryAmmo < player.maxSecondaryAmmo){gco.PurchaseExtras(3);}
 }
+if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 && mouseY < 496)
+{//Buy Fill Health
+	if(player.money >= ((100 - player.life) * 2)){gco.PurchaseExtras(4);}
+}
 //**********************************************************************//
 //					  END UPGRADE MENU SECTION							//
 //**********************************************************************//
@@ -2931,6 +2940,36 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
+				
+// NEW POWERUP Buy Fill Health
+                if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 && mouseY < 496)
+                {//Buy Fill Health
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[9], _canvas.width - 150, 448, 48, 48);
+                    buffer.shadowBlur = 0;
+					if(player.life < 100)
+					{
+                    	guiText[6].text = "Hull(" + player.life + "/100) Repair Hull: " + ((100 - player.life) * 2) + " cores.";
+					} else
+					{
+						guiText[6].text = "Hull is operating at 100%";
+					}
+                }
+                if(player.life < 100)
+                {
+					buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[9], _canvas.width - 150, 448, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[9], _canvas.width - 150, 448, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
 
 				// Options Menu Selection
 				if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (55) && mouseY > (15))
@@ -2942,9 +2981,9 @@ if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 
                 }
 				
 				guiText[11] = new GUIText("Score: " + score, 10, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(230, 230, 255)");
-                //**********************************************************************//
-                //					  END UPGRADE MENU SECTION							//
-                //**********************************************************************//
+//**********************************************************************//
+//					  END UPGRADE MENU SECTION							//
+//**********************************************************************//
                 break;
 			}
 			case 3:
