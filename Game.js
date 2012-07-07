@@ -16,7 +16,7 @@ function Game()
     var keyPressed;
     var debug = false;
 	var playerInfo = false;
-	
+	var FIRE_THE_LASER = false;
 	
 	//GUI Info
 	var currentGui = 0;
@@ -39,7 +39,7 @@ function Game()
 	var mouseY = 0;
 	
 	//Options
-	var particleOffset = 1;
+	var particleOffset = 3;
 	
     // Timing
     var prevTime = Date.now();
@@ -62,7 +62,7 @@ function Game()
         
 	// Graphics
 	var images = [];//Gui Images
-	for(var i = 0; i < 10; i++)
+	for(var i = 0; i < 11; i++)
 	{
 		images[i] = new Image();
 		images[i].src = ('Graphics/GUI_0' + i + '.png');
@@ -130,6 +130,8 @@ function Game()
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
+		this.ownLaser = false;
+		this.laserPrice = 500;
 		this.levelProgress = 0.0; // Percentage
 		this.levelMission = new LevelMission();
 		this.extras = [];
@@ -180,9 +182,17 @@ function Game()
 		
 		this.PurchaseWeapon = function(wepID)
 		{//assumes player has the cash/doesn't own weapon
-			this.weaponsOwned[wepID] = true;
-			player.money -= this.weaponPrice[wepID];
-			this.EquipWeapon(wepID);
+			if(wepID < 9000)
+			{
+				this.weaponsOwned[wepID] = true;
+				player.money -= this.weaponPrice[wepID];
+				this.EquipWeapon(wepID);
+			} else
+			{
+				this.ownLaser = true;
+				player.money -= gco.laserPrice;
+				this.EquipWeapon(wepID);
+			}
 		}
 		
 		this.EquipWeapon = function(wepID)
@@ -241,6 +251,7 @@ function Game()
 			playerInfo = false;
 			this.levelProgress = this.levelMission.GetCompletionPercent();
 			this.CheckLevelCompletion();
+			sfx.pause(1);
 		}
 		
 		this.StartLevel = function()
@@ -288,7 +299,6 @@ function Game()
 					}
 					player.currentFuel -= 1;
 				}
-				
 			}
 		}
 	}
@@ -306,7 +316,7 @@ function Game()
 			}
 			case 1:
 			{
-				gco.bgm = document.getElementById('bgm_02');
+				gco.bgm = document.getElementById('bgm_fast');
 				break;	
 			}
 			default:{}
@@ -329,9 +339,12 @@ function Game()
 		this.soundType = 0;//0 = mp3, 1 = ogg
 		// Audio
 		this.explosion = {}
+		this.laser = 0;
+		this.laserPlaying = false;
 		
 		this.Init = function()
 		{
+		//Explosions
 			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 10;
 			for(var i = 0; i < this.explosion.channels; i++)
 			{
@@ -341,6 +354,11 @@ function Game()
 				a.preload = 'auto';
 				this.explosion.channel.push(a);
 			}
+		//Lasers
+			if(this.soundType == 0){this.laser = new Audio('Audio/laser.mp3');} else {this.laser = new Audio('Audio/laser.ogg');}
+			this.laser.volume = 0.5;
+			this.laser.preload = 'auto';
+			this.laser.loop = true;
 		}
 		
 		this.play = function(playfx)
@@ -350,6 +368,23 @@ function Game()
 				case 0: {//Explode
 					this.explosion.channel[this.explosion.index].play();
 					this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+				}
+				case 1: {//Laser
+					this.laser.play();
+					this.laserPlaying = true;
+				}
+			}
+		}
+		
+		this.pause = function(stopfx)
+		{
+			switch(stopfx)
+			{
+				case 0: {//Explode
+				}
+				case 1: {//Laser
+					this.laser.pause();
+					this.laserPlaying = false;
 				}
 			}
 		}
@@ -1261,7 +1296,8 @@ function Game()
 		this.hasShield = false;
 		
 		this.weapon = 49;// 0 - 48
-		this.secondary = 49;//Starts at 50, 49 = no secondary.
+		//this.secondary = 49;//Starts at 50, 49 = no secondary.
+		this.secondary = 9000;
 		this.secondaryAmmo = 50;
 		this.secondaryAmmoLevel = 1;
 		this.maxSecondaryAmmo = 50 * this.secondaryAmmoLevel;
@@ -1272,6 +1308,12 @@ function Game()
 		this.money = 3000;
 		this.currentFuel = 60;
         this.MAX_FUEL = 60;
+		
+		this.laser = false;//true if laser is on
+		this.laserX = this.x;
+		this.laserY = this.y - 25;
+		this.laserWidth = 20;
+		this.laserHeight = this.y - 25;
         
         this.isAlive = function()
         {
@@ -1293,6 +1335,7 @@ function Game()
 				gco.ShowContinueScreen();
 				explosion = new Explosion(player.x, player.y, 350, 5, 200, 0.1, 3, 0.1);
                 explosions.push(explosion);
+				this.laser = false;
 			}
 		}
 
@@ -1305,6 +1348,18 @@ function Game()
             this.x3 = this.x + (this.width / 2);
             this.y3 = this.y + (this.height / 2);
 
+			//Laser Updating
+			if(this.secondary >= 9000) {
+				if(Keys[19] != 0 && this.secondaryAmmo > 0) {
+					if(!sfx.laserPlaying){ sfx.play(1); }
+					this.laser = true;
+					this.laserX = this.x;
+					this.laserY = 0;
+					this.laserHeight = this.y - 25;
+					if(ticks == 0){ this.secondaryAmmo -= 3; if(this.secondaryAmmo < 0){this.secondaryAmmo = 0;} }
+				} else { if(sfx.laserPlaying){ sfx.pause(1); } this.laser = false; }
+			}
+			
 			if(this.hasShield)
 			{
 				if(this.shield <= 0)
@@ -1396,7 +1451,7 @@ function Game()
         }
 		this.shootSecondary = function()
 		{
-			if(this.secondaryAmmo > 0)
+			if(this.secondaryAmmo > 0 && this.secondary < 9000)
 			{
 				switch(this.secondary)
 				{
@@ -1511,6 +1566,7 @@ function Game()
 		gco.bgm.pause();
 		gco = new GameControlObject();
 		gco.Init();
+		sfx.pause(1);
     }
 	
 	this.softReset = function()
@@ -1531,6 +1587,7 @@ function Game()
 		gco.ResetFuel();
 		gco.GoToUpgradeMenu();
 		player.resetShield();
+		sfx.pause(1);//Pause laser sound on round end
 	}
     /******************************************************/
 
@@ -1553,10 +1610,10 @@ function Game()
     /******************************************************/
     this.Update = function()
     {
-        if(levelStart)
-        {
-            bgm.play();
-        }
+		//Stop Sound Check
+		if(currentGui == 2 && sfx.laserPlaying){sfx.laser.pause();}
+		
+        if(levelStart){ bgm.play(); }
         // Input
         self.doInput();
         self.getInput();
@@ -1668,6 +1725,16 @@ function Game()
                     {
                         if(player.isAlive())
                         {
+							if(ticks % 2 == 0)
+							{
+								if(self.LaserCollision(enemies[a]))
+								{
+									enemies[a].life -= 5;
+									explosion = new Explosion(enemies[a].x, enemies[a].y, 2, 4, 50, 0.1, 0.1, 3.0);
+									explosions.push(explosion);
+								}
+							}
+							
                             if(self.Collision(player, enemies[a]))
 							{
 								player.DamagePlayer(enemies[a].damage);
@@ -1765,6 +1832,19 @@ function Game()
         return false;
     }
 	
+	this.LaserCollision = function(Target)
+	{
+		if((player.laserY <= (Target.y + Target.height / 2) && player.laserHeight >= (Target.y - Target.height / 2)))
+        {
+            if(((player.laserX - 10) <= (Target.x + Target.width / 2) && (player.laserX + 10) >= (Target.x - Target.width / 2)))
+            {
+                return true;
+            }
+            return false;
+        }
+        return false;
+	}
+	
 	function doMouseClick(e)
 	{
 		//State GUIs
@@ -1827,6 +1907,10 @@ if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
 if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
 {//Space Mine, Weapon ID: 52
 	if(gco.weaponsOwned[52]){ gco.EquipWeapon(52); } else { if(player.money >= gco.weaponPrice[52]){ gco.PurchaseWeapon(52); }}
+}
+if(mouseX > 160 && mouseX < 208 && mouseY > 448 && mouseY < 496)
+{//Laser: Weapon ID: 9000
+	if(gco.ownLaser){ gco.EquipWeapon(9000); } else { if(player.money >= gco.laserPrice){ gco.PurchaseWeapon(9000); } }
 }
 if(mouseX > _canvas.width - 300 && mouseX < _canvas.width - 252 && mouseY > 448 && mouseY < 496)
 {//Shield
@@ -2099,6 +2183,9 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
             // Missile
             self.drawMissiles();
 
+			//Laser
+			if(player.laser){ self.drawLaser(); }
+			
             // Explosion
             self.drawExplosions();
             
@@ -2389,6 +2476,27 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         }
     }
     
+	this.drawLaser = function()
+	{
+		/* Data
+		this.laser = false;//true if laser is on
+		this.laserX = this.x;
+		this.laserY = this.y - 25;
+		this.laserWidth = 20;
+		this.laserHeight = this.y - 25;
+		this.laserGlowWidth = 5;
+		this.glowDirection = 0;//0=out, 1=in;
+		*/
+		buffer.shadowBlur = 20;
+		buffer.shadowColor = 'rgb(0, 128, 255)';
+		buffer.beginPath();
+			buffer.fillStyle = "rgb(0, 128, 255)";
+			buffer.fillRect(player.laserX - 10, player.laserY, player.laserWidth, player.laserHeight);
+			buffer.fillStyle = "rgb(0, 200, 255)";
+			buffer.fillRect(player.laserX - 5, player.laserY, player.laserWidth / 2, player.laserHeight);
+		buffer.closePath();
+		buffer.shadowBlur = 0;
+	}
     this.drawExplosions = function()
     {
 		buffer.fillStyle = "rgb(0, 0, 0)";
@@ -2404,11 +2512,11 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                 var r = 255 - explosions[a].age * explosions[a].size / rand;
                 var g = 255 - explosions[a].age * explosions[a].size / rand1;
                 var b = 255 - explosions[a].age * explosions[a].size / rand2;
-                buffer.beginPath();
+                //buffer.beginPath();
                     buffer.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
                     var rand3 = Math.floor(Math.random() * 6) + 1;
                     buffer.fillRect(p.x, p.y, rand3, rand3);
-                buffer.closePath();
+                //buffer.closePath();
             }
         }
     }
@@ -2896,7 +3004,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 
 // NEW WEAPON Space Mine
                 if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
-                {//Friendly Boom Bullet, Weapon ID: 51
+                {//Friendly Boom Bullet, Weapon ID: 52
                     buffer.shadowBlur = 1;
                     buffer.shadowColor = 'rgb(0, 173, 239)';
                     buffer.drawImage(images[8], 110, 448, 48, 48);
@@ -2920,6 +3028,36 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                 {
 					buffer.globalAlpha = 0.5;
                     buffer.drawImage(images[8], 110, 448, 48, 48);
+					buffer.globalAlpha = 1.0;
+                }
+                //END WEAPON
+				
+// NEW WEAPON Laser
+                if(mouseX > 160 && mouseX < 208 && mouseY > 448 && mouseY < 496)
+                {//Laser: Weapon ID: 9000
+                    buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[10], 160, 448, 48, 48);
+                    buffer.shadowBlur = 0;
+                    if(gco.ownLaser)
+                    {
+                        guiText[6].text = "You already own the Phaser Laser.";
+                    } else
+                    {
+                        guiText[6].text = "Phaser Laser costs 500 cores.";
+                    }
+                }
+                if(gco.ownLaser && player.secondary == 9000)
+                {
+					buffer.shadowBlur = 1;
+                    buffer.shadowColor = 'rgb(0, 173, 239)';
+                    buffer.drawImage(images[10], 160, 448, 48, 48);
+					buffer.shadowBlur = 0;
+                }
+                else
+                {
+					buffer.globalAlpha = 0.5;
+                    buffer.drawImage(images[10], 160, 448, 48, 48);
 					buffer.globalAlpha = 1.0;
                 }
                 //END WEAPON
