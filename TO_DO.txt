@@ -1,4 +1,15 @@
-Game over implementation.
-Add level up screen.
-Add level 5: Phaser
-Add 3 more main weps and 3 more secondary weps
+-Add Space Mines and Laser Secondary
+-Add buy health to upgrade menu
+-Add Boss Level, add boss
+-Get ogg for BMG_02 from david.
+-Add Options Menu to Pause Menu.
+-New Core Sprites
+-Credits
+-Easter Eggs?
+
+-Items to track
+	-Number of Kills
+	-Number of Cores Acquired
+	-Highest Score
+	-Accumulative Score
+	-Items Used
