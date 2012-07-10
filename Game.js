@@ -69,7 +69,7 @@ function Game()
 	}
 	
 	var enemyImages = [];
-	for(var i = 0; i < 14; i++)
+	for(var i = 0; i < 15; i++)
 	{
 		enemyImages[i] = new Image();
 		enemyImages[i].src = ('Graphics/ship_' + i + '.png');
@@ -305,9 +305,10 @@ function Game()
 	//Sound Event Listener	
 	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
 	function swapBGM()
 	{
-		switch(Math.round(Math.random() * 2))
+		switch(Math.round(Math.random() * 3))
 		{
 			case 0:
 			{
@@ -318,6 +319,10 @@ function Game()
 			{
 				gco.bgm = document.getElementById('bgm_fast');
 				break;	
+			}
+			case 2:
+			{
+				gco.bgm = document.getElementById('bgm_soar');
 			}
 			default:{}
 		}
@@ -493,6 +498,7 @@ function Game()
         }
     }
 
+	
 	function EnemyGeneration()
 	{
 		this.onTick = 0;
@@ -1639,7 +1645,8 @@ function Game()
 				gco.Update();
 				
 				// Random Enemy Generation
-                enemyGeneration.generate(gco.level);
+				enemyGeneration.generate(gco.level);
+				
 				// Random Item Generation
 				itemGeneration.generate();
 				
