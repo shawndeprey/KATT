@@ -213,7 +213,8 @@ function Game()
 				case 0:
 				{//Shield
 					player.money -= (player.shieldLevel + 1) * 250;
-					player.upgradeShield();break;
+					player.upgradeShield();
+					break;
 				}
 				case 1:
 				{//Fuel
@@ -230,11 +231,13 @@ function Game()
 					player.money -= this.secondaryAmmoPrice;
 					player.secondaryAmmo += 25;
 					if(player.secondaryAmmo > player.maxSecondaryAmmo){player.secondaryAmmo = player.maxSecondaryAmmo;}
+					break;
 				}
 				case 4:
 				{
 					player.money -= ((100 - player.life) * 2);
 					player.life = 100;
+					break;
 				}
 			}
 		}
@@ -323,6 +326,7 @@ function Game()
 			case 2:
 			{
 				gco.bgm = document.getElementById('bgm_soar');
+				break;
 			}
 			default:{}
 		}
@@ -373,10 +377,12 @@ function Game()
 				case 0: {//Explode
 					this.explosion.channel[this.explosion.index].play();
 					this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+					break;
 				}
 				case 1: {//Laser
 					this.laser.play();
 					this.laserPlaying = true;
+					break;
 				}
 			}
 		}
@@ -386,10 +392,12 @@ function Game()
 			switch(stopfx)
 			{
 				case 0: {//Explode
+					break;
 				}
 				case 1: {//Laser
 					this.laser.pause();
 					this.laserPlaying = false;
+					break;
 				}
 			}
 		}
@@ -678,6 +686,7 @@ function Game()
 				{
 					this.canFire.push(true);
 				}
+				break;
 			}
 			case 50:
 			{
@@ -1103,6 +1112,7 @@ function Game()
 			case 2:
 			{
 				if(this.damage == 3){this.sinOffset = -1;}	
+				break;
 			}
 			case 51:
 			{
@@ -1364,6 +1374,10 @@ function Game()
 					this.laserHeight = this.y - 25;
 					if(ticks == 0){ this.secondaryAmmo -= 3; if(this.secondaryAmmo < 0){this.secondaryAmmo = 0;} }
 				} else { if(sfx.laserPlaying){ sfx.pause(1); } this.laser = false; }
+			} else
+			{
+				this.laser = false;
+				if(sfx.laserPlaying){ sfx.pause(1); }
 			}
 			
 			if(this.hasShield)
@@ -1617,7 +1631,7 @@ function Game()
     this.Update = function()
     {
 		//Stop Sound Check
-		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.laser.pause();}
+		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.pause(1);}
 		
         if(levelStart){ bgm.play(); }
         // Input
@@ -1985,6 +1999,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					particleOffset -= 1;
 					if(particleOffset < 1){particleOffset = 1;}
 				}
+				break;
 			}
 		}
 	}
@@ -2369,6 +2384,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					buffer.shadowBlur = 10;
 						buffer.drawImage(itemImages[0], randomItems[i].x - (randomItems[i].width / 2), randomItems[i].y - (randomItems[i].height / 2), 25, 25);
 					buffer.shadowBlur = 0;
+					break;
 				}
                 default:break;
 			}
@@ -3277,6 +3293,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
 							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
 				}
+				break;
 			}
 			default:{break;}
 		}
