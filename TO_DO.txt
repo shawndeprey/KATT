@@ -1,6 +1,5 @@
 -Create 48 x 48 sprites for gui menu.
 -Create Sprites for bullets, missiles, and mines. Height and width should be the height and width of ingame objects.
--Add Boss Level, add boss
 -Add Options Menu to Pause Menu.
 -New Core Sprites
 -Credits
@@ -17,3 +16,11 @@
     -Shield
     -Cores
     -Power-Ups
+	
+	The base boss level and boss have been implemented. He needs logic to make him badass.
+-Boss Level
+	-Make boss go back and forth in a sinwave if he is inCenter.
+	-Create explosion finale around boss on game win.
+	-Make screen fade to black with overlay on game win.
+		-When screen fades to black be sure to delete all game objects.
+	-Create credit roll which starts with the story ending.

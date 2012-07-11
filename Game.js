@@ -126,7 +126,8 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 5;//Starting at 1
+		this.level = 6;//Starting at 1
+		this.win = false;
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
@@ -143,6 +144,7 @@ function Game()
         this.missionText = [];
 		this.secondaryAmmoPrice = 25;
 		this.bgm = null;
+		this.playingBossMusic = false;
 		
 		this.Init = function()
 		{
@@ -261,6 +263,14 @@ function Game()
 		{
 			currentGui = NULL_GUI_STATE;//default case will Trigger
 			gameState = 1;//Put Game in live mode
+			if(this.level > 5 && !this.playingBossMusic)
+			{
+				this.playingBossMusic = true;
+				this.bgm.pause();
+				this.bgm = document.getElementById('bgm_boss');
+				this.bgm.loop = true;
+				this.init_audio();
+			}
 		}
 		
 		this.ShowContinueScreen = function()
@@ -286,7 +296,7 @@ function Game()
 			{
 				this.onTick = ticks;
 				
-				if(this.onTick == 19 && player.isAlive())
+				if(this.onTick == 19 && player.isAlive() && this.level < 6)
 				{//Update Fuel
 					if(player.currentFuel == 0)
 					{
@@ -509,6 +519,7 @@ function Game()
 	
 	function EnemyGeneration()
 	{
+		this.hasBoss = false;
 		this.onTick = 0;
 		this.generate = function(lev)
 		{
@@ -521,9 +532,23 @@ function Game()
 					var rand = Math.floor(Math.random() * 30);
 					if(rand == 10)
 					{
-						//1% chance per tick to get an enemy.
+						var theType = -1;
+						while(true)
+						{//logic to only generate 1 boss
+							theType = Math.round(Math.random() * (lev - 1));
+							if(gco.level > 5)
+							{
+								if(theType == 5 && this.hasBoss)
+								{
+									continue;
+								} else {
+									break;
+								}
+							} else {
+								break;
+							}
+						}
 						var startingX = Math.floor(Math.random() * _buffer.width);
-						var theType = Math.round(Math.random() * (lev - 1));
 						var theSpeed = 0;
 						var theDmg = 0;
 						var theLife = 0;
@@ -624,6 +649,19 @@ function Game()
 								}//Missiles 15 x 31
 								break;
 							}
+							case 5:
+							{//Boss
+								this.hasBoss = true;
+								theLife = 500;
+								theSpeed = 75;
+								theDmg = 75;
+								model = 14;
+								points = 1000;
+								Cores = 1000;
+								width = 116;
+								height = 72;
+								break;
+							}
 						}
 						
 						enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType, points);
@@ -664,6 +702,7 @@ function Game()
 		this.teleportTimer = 2;
 		this.didTeleport = false;
 		this.points = pts;
+		this.inCenter = false;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -686,6 +725,12 @@ function Game()
 				{
 					this.canFire.push(true);
 				}
+				break;
+			}
+			case 5:
+			{
+				this.ystop = 150;
+				this.xMoveSpeed = 25;
 				break;
 			}
 			case 50:
@@ -888,6 +933,46 @@ function Game()
 						explosions.push(explosion);
 						//Update Mission Data
 						gco.levelMission.UpdateProgress(this.type);
+						return 1;
+					}
+					else if(this.y > _canvas.height)
+					{
+						return 1;
+					}
+					return 0;
+				}
+				case 5:
+				{//Boss
+					if(!this.didTeleport){ this.y += this.speed * delta; this.speed = this.ystop - this.y; }
+					if(!this.inCenter)
+					{
+						if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; if(this.x - (_buffer.width / 2) < 15){this.inCenter = true;}
+						} else {this.x += this.xMoveSpeed * delta;if(this.x > (_buffer.width / 2) - 15){this.inCenter = true;}}
+					}
+					if(this.speed < 25){ this.readyForTeleport = true; }
+					if(this.readyForTeleport)
+					{//using this same timer data for the boss to start shooting.
+						if(this.teleportTimer <= 0)
+						{
+							this.readyForTeleport = false;
+							this.didTeleport = true;
+						}
+						this.teleportTimer -= delta;
+					}
+					
+					if(this.didTeleport)
+					{
+						this.shoot(100);
+					}
+
+					if(this.life <= 0)
+					{
+						destroys += 1;
+						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
+						explosions.push(explosion);
+						//Update Mission Data
+						gco.levelMission.UpdateProgress(this.type);
+						gco.win = true;
 						return 1;
 					}
 					else if(this.y > _canvas.height)
@@ -1651,7 +1736,7 @@ function Game()
 			}
 		}
 				
-        if(gameState == 1)
+        if(gameState == 1 && !gco.win)
         {
             if(!paused)
             {
@@ -1685,7 +1770,9 @@ function Game()
 							mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
 							money.push(mon);
 						}
-                        self.popArray(enemies, i);
+						if(!gco.win){
+							self.popArray(enemies, i);
+						}
                     }
                 }
 				
@@ -1796,6 +1883,10 @@ function Game()
                 }
             }
         }
+		else if(gameState == 1 && gco.win)
+		{//The game is won at this point. Do what happens exactly after game is beat here.
+			if(sfx.laserPlaying){sfx.pause(1);}
+		}
     }
 
     this.popArray = function(Array, popThis)
@@ -2114,7 +2205,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				}
 				playerInfo = !playerInfo;
 			}
-            if(player.isAlive() && gameState == 1)
+            if(player.isAlive() && gameState == 1 && !gco.win)
             {
                 if(Keys[0] >= 1) // W || Up
                 {
@@ -2791,10 +2882,17 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         case 2:{outText += "Kamakaze Kills: "; break;}
                         case 3:{outText += "Splitter Kills: "; break;}
                         case 4:{outText += "Teleporter Kills: "; break;}
+						case 5:{outText += "Drone Core... Time to Kill all the Things! Ready yourself, there is no turning back! "; break;}
                         default:{outText += "Level Not Added: "; break;}
                     }
-                    gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
+					if(i != 5)
+					{
+						gco.missionText[i] = new GUIText(outText + gco.levelMission.progress[i] + "/" + gco.levelMission.objectives[i],
                                         drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
+					} else
+					{
+						gco.missionText[i] = new GUIText(outText, drawX, drawY, "16px Helvetica", "left", "top", "rgb(230, 230, 255)");
+					}
                     if(j == 4)
                     {
                         j = 0;
