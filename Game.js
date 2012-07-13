@@ -167,6 +167,7 @@ function Game()
 		
 		this.init_audio = function()
 		{
+			this.bgm.currentTime = 0;
 			this.bgm.volume = 0.2;
 			this.bgm.play();
 		}
@@ -353,6 +354,12 @@ function Game()
 		sfx.Init();
 	}
 	
+	this.RefreshSoundsOnGameLoss = function()
+	{
+		gco.bgm = document.getElementById('bgm_square');
+		gco.init_audio();
+	}
+	
 	function SFXObject()
 	{
 		this.soundType = 0;//0 = mp3, 1 = ogg
@@ -360,6 +367,8 @@ function Game()
 		this.explosion = {}
 		this.laser = 0;
 		this.laserPlaying = false;
+		this.bossLaser = 0;
+		this.bossLaserPlaying = false;
 		
 		this.Init = function()
 		{
@@ -378,6 +387,11 @@ function Game()
 			this.laser.volume = 0.5;
 			this.laser.preload = 'auto';
 			this.laser.loop = true;
+			
+			if(this.soundType == 0){this.bossLaser = new Audio('Audio/laser.mp3');} else {this.bossLaser = new Audio('Audio/laser.ogg');}
+			this.bossLaser.volume = 0.5;
+			this.bossLaser.preload = 'auto';
+			this.bossLaser.loop = true;
 		}
 		
 		this.play = function(playfx)
@@ -394,6 +408,11 @@ function Game()
 					this.laserPlaying = true;
 					break;
 				}
+				case 2: {//Boss Laser
+					this.bossLaser.play();
+					this.bossLaserPlaying = true;
+					break;
+				}
 			}
 		}
 		
@@ -407,6 +426,11 @@ function Game()
 				case 1: {//Laser
 					this.laser.pause();
 					this.laserPlaying = false;
+					break;
+				}
+				case 2: {//Boss Laser
+					this.bossLaser.pause();
+					this.bossLaserPlaying = false;
 					break;
 				}
 			}
@@ -675,6 +699,7 @@ function Game()
 	function Enemy(spd, dmg, lfe, crs, wdth, hght, mdl, inX, inY, theType, pts)
     {
 		numEnemies++;
+		this.onTick = 0;
 		this.enemyNum = numEnemies;
         this.x = inX;
         this.y = inY;
@@ -703,6 +728,15 @@ function Game()
 		this.didTeleport = false;
 		this.points = pts;
 		this.inCenter = false;
+		this.xstop = _buffer.width / 2;
+		this.isBoss = false;
+		
+		this.laserTimer = 0;
+		this.laser = false;
+		this.laserX = this.x;
+		this.laserY = this.y + 25;
+		this.laserWidth = 10;
+		this.laserHeight = _canvas.height - this.y + 25;
 		
 		switch(this.type)
 		{//Special Case Initialization
@@ -730,7 +764,8 @@ function Game()
 			case 5:
 			{
 				this.ystop = 150;
-				this.xMoveSpeed = 25;
+				this.xMoveSpeed = this.speed;
+				this.isBoss = true;
 				break;
 			}
 			case 50:
@@ -946,8 +981,8 @@ function Game()
 					if(!this.didTeleport){ this.y += this.speed * delta; this.speed = this.ystop - this.y; }
 					if(!this.inCenter)
 					{
-						if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; if(this.x - (_buffer.width / 2) < 15){this.inCenter = true;}
-						} else {this.x += this.xMoveSpeed * delta;if(this.x > (_buffer.width / 2) - 15){this.inCenter = true;}}
+						if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true;}
+						} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true;}}
 					}
 					if(this.speed < 25){ this.readyForTeleport = true; }
 					if(this.readyForTeleport)
@@ -962,7 +997,29 @@ function Game()
 					
 					if(this.didTeleport)
 					{
-						this.shoot(100);
+						if(this.laser)
+						{
+							if(!sfx.bossLaserPlaying){ sfx.play(2); }
+							this.laserX = this.x;
+							this.laserY = this.y + 25;
+							this.laserHeight = _canvas.height - this.y + 25;
+						} else
+						{
+							if(sfx.bossLaserPlaying){ sfx.pause(2); }
+						}
+						if(this.onTick == 0)
+						{
+							this.laserTimer += 1;
+							if(this.laserTimer >= 5 && !this.laser)
+							{
+								this.laser = true;
+							} else
+							if(this.laserTimer >= 8)
+							{
+								this.laser = false;
+								this.laserTimer = 0;
+							}
+						}
 					}
 
 					if(this.life <= 0)
@@ -1434,6 +1491,7 @@ function Game()
 			if(!this.isAlive())
 			{ 
 				gco.ShowContinueScreen();
+				sfx.play(0);
 				explosion = new Explosion(player.x, player.y, 350, 5, 200, 0.1, 3, 0.1);
                 explosions.push(explosion);
 				this.laser = false;
@@ -1672,6 +1730,8 @@ function Game()
 		gco = new GameControlObject();
 		gco.Init();
 		sfx.pause(1);
+		self.RefreshSoundsOnGameLoss();
+		enemyGeneration = new EnemyGeneration();
     }
 	
 	this.softReset = function()
@@ -1693,6 +1753,7 @@ function Game()
 		gco.GoToUpgradeMenu();
 		player.resetShield();
 		sfx.pause(1);//Pause laser sound on round end
+		enemyGeneration.hasBoss = false;
 	}
     /******************************************************/
 
@@ -1717,6 +1778,7 @@ function Game()
     {
 		//Stop Sound Check
 		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.pause(1);}
+		if((gameState != 1) && sfx.bossLaserPlaying){sfx.pause(2);}
 		
         if(levelStart){ bgm.play(); }
         // Input
@@ -1760,6 +1822,7 @@ function Game()
                 
                 for(var i = 0; i < enemies.length; i++)
                 {
+					if(enemies[i].onTick != ticks){ enemies[i].onTick = ticks; }
                     if(enemies[i].Update() != 0)
                     {
 						if(!self.isEnemyAlive(enemies[i].enemyNum))
@@ -1834,21 +1897,38 @@ function Game()
                         if(player.isAlive())
                         {
 							if(ticks % 2 == 0)
-							{
-								if(self.LaserCollision(enemies[a]))
+							{//LASERS!
+								if(enemies[a].laser)
+								{//Boss Laser
+									if(self.BossLaserCollision(player, enemies[a]))
+									{
+										player.DamagePlayer(2);
+									}
+								}
+								if(player.laser)
 								{
-									enemies[a].life -= 5;
-									explosion = new Explosion(enemies[a].x, enemies[a].y, 2, 4, 50, 0.1, 0.1, 3.0);
-									explosions.push(explosion);
+									if(self.LaserCollision(enemies[a]))
+									{
+										enemies[a].life -= 5;
+										explosion = new Explosion(enemies[a].x, enemies[a].y, 2, 4, 50, 0.1, 0.1, 3.0);
+										explosions.push(explosion);
+									}
 								}
 							}
 							
                             if(self.Collision(player, enemies[a]))
 							{
-								player.DamagePlayer(enemies[a].damage);
-								explosion = new Explosion(player.x, player.y, 5, 10, 60, 0.1, 3, 0.1);
-								explosions.push(explosion);
-								enemies[a].life = 0;
+								if(enemies[a].isBoss)
+								{
+									player.DamagePlayer(9000);//once to ensure shield is gone
+									player.DamagePlayer(9000);//once to ensure player death
+								} else
+								{
+									player.DamagePlayer(enemies[a].damage);
+									explosion = new Explosion(player.x, player.y, 5, 10, 60, 0.1, 3, 0.1);
+									explosions.push(explosion);
+									enemies[a].life = 0;
+								}
 							}
                         
 							for(var b = 0; b < missiles.length; b++)
@@ -1949,6 +2029,19 @@ function Game()
 		if((player.laserY <= (Target.y + Target.height / 2) && player.laserHeight >= (Target.y - Target.height / 2)))
         {
             if(((player.laserX - 10) <= (Target.x + Target.width / 2) && (player.laserX + 10) >= (Target.x - Target.width / 2)))
+            {
+                return true;
+            }
+            return false;
+        }
+        return false;
+	}
+	
+	this.BossLaserCollision = function(Target, Boss)
+	{
+		if((Boss.laserY <= (Target.y + Target.height / 2) && (Boss.laserHeight + Boss.y) >= (Target.y - Target.height / 2)))
+        {
+            if(((Boss.laserX - 5) <= (Target.x + Target.width / 2) && (Boss.laserX + 5) >= (Target.x - Target.width / 2)))
             {
                 return true;
             }
@@ -2353,12 +2446,16 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 	
 	this.drawEnemies = function()
     {
+		var drawLaser = false;
+		var x = 0, y = 0, h = 0, w = 0;
 		buffer.beginPath();
         for(var i = 0; i < enemies.length; i++)
         {
 			buffer.drawImage(enemyImages[enemies[i].Model], enemies[i].x - (enemies[i].width / 2), enemies[i].y - (enemies[i].height / 2), enemies[i].width, enemies[i].height);
+			if(enemies[i].laser == true){ drawLaser = true; x = enemies[i].laserX; y = enemies[i].laserY; h = enemies[i].laserHeight; w = enemies[i].laserWidth; }
         }
 		buffer.closePath();
+		if(drawLaser){ this.drawBossLaser(x, y, w, h); }
     }
 	
 	this.drawMoney = function()
@@ -2608,6 +2705,24 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			buffer.fillRect(player.laserX - 10, player.laserY, player.laserWidth, player.laserHeight);
 			buffer.fillStyle = "rgb(0, 200, 255)";
 			buffer.fillRect(player.laserX - 5, player.laserY, player.laserWidth / 2, player.laserHeight);
+		buffer.closePath();
+		buffer.shadowBlur = 0;
+	}
+	
+	this.drawBossLaser = function(x, y, width, height)
+	{
+		/* Data
+		this.laser = false;//true if laser is on
+		this.laserX = this.x;
+		this.laserY = this.y - 25;
+		this.laserWidth = 20;
+		this.laserHeight = this.y - 25;
+		*/
+		buffer.shadowBlur = 10;
+		buffer.shadowColor = 'rgb(255, 60, 0)';
+		buffer.beginPath();
+			buffer.fillStyle = 'rgb(255, 60, 0)';
+			buffer.fillRect(x - 5, y, width, height);
 		buffer.closePath();
 		buffer.shadowBlur = 0;
 	}

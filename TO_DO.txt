@@ -24,3 +24,6 @@
 	-Make screen fade to black with overlay on game win.
 		-When screen fades to black be sure to delete all game objects.
 	-Create credit roll which starts with the story ending.
+
+-If game has been won
+	-Don't let any more explosions happen. Specifically you can still hit e after winning the game, which creates explosions upon hitting e again.
