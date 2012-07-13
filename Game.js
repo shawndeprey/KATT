@@ -59,35 +59,34 @@ function Game()
     var buffer = null;
     
     // Resources
+        // Graphics
+        var images = [];
+        for(var i = 0; i < 11; i++)
+        {
+            images[i] = new Image();
+            images[i].src = ('Graphics/GUI_0' + i + '.png');
+        }
         
-	// Graphics
-	var images = [];//Gui Images
-	for(var i = 0; i < 11; i++)
-	{
-		images[i] = new Image();
-		images[i].src = ('Graphics/GUI_0' + i + '.png');
-	}
-	
-	var enemyImages = [];
-	for(var i = 0; i < 15; i++)
-	{
-		enemyImages[i] = new Image();
-		enemyImages[i].src = ('Graphics/ship_' + i + '.png');
-	}
-	
-	var playerImages = [];
-	for(var i = 0; i < 1; i++)
-	{
-		playerImages[i] = new Image();
-		playerImages[i].src = ('Graphics/player_' + i + '.png');
-	}
-	
-	var itemImages = [];
-	for(var i = 0; i < 1; i++)
-	{
-        itemImages[i] = new Image();
-        itemImages[i].src = ('Graphics/item_' + i + '.png')
-    }
+        var enemyImages = [];
+        for(var i = 0; i < 15; i++)
+        {
+            enemyImages[i] = new Image();
+            enemyImages[i].src = ('Graphics/ship_' + i + '.png');
+        }
+        
+        var playerImages = [];
+        for(var i = 0; i < 1; i++)
+        {
+            playerImages[i] = new Image();
+            playerImages[i].src = ('Graphics/player_' + i + '.png');
+        }
+        
+        var itemImages = [];
+        for(var i = 0; i < 1; i++)
+        {
+            itemImages[i] = new Image();
+            itemImages[i].src = ('Graphics/item_' + i + '.png')
+        }
 
     // Containers
     var stars = [];
@@ -97,6 +96,8 @@ function Game()
     var explosions = [];
 	var money = [];
 	var randomItems = [];
+    var keysDown = {};
+    
 	var NUM_OF_RANDOM_ITEMS = 4;
 	//0 = Health
 	//1 = Shield
@@ -120,6 +121,134 @@ function Game()
     var numStars = 100;
 	var numEnemies = 0;
 
+    /******************************************************/
+    // Listeners
+    /******************************************************/
+
+    addEventListener("keydown", function(e)
+    {
+        keysDown[e.keyCode] = true;
+        keyPressed = e.keyCode;
+    }, false);
+
+    addEventListener("keyup", function(e)
+    {
+        keysDown[e.keyCode] = false;
+    }, false);
+	
+	addEventListener("mousemove", function(e){
+        getMousePos(_canvas, e);
+    }, false);
+    
+	addEventListener("click", doMouseClick, false);
+    
+    //Sound Event Listener	
+	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
+    
+    /******************************************************/
+    
+    
+    /******************************************************/
+    // Global Functions
+    /******************************************************/
+
+    this.InitSounds = function()
+	{
+		gco.bgm = document.getElementById('bgm_square');
+		gco.init_audio();
+		if(gco.bgm.canPlayType("audio/mp3") == "" ||  gco.bgm.canPlayType("audio/mp3") == "no") {
+			sfx.soundType = 1;//Play OGG sound effects
+		}
+		sfx.Init();
+	}
+	
+	this.RefreshSoundsOnGameLoss = function()
+	{
+		gco.bgm = document.getElementById('bgm_square');
+		gco.init_audio();
+	}
+	
+	this.isEnemyAlive = function(enemyNumber)
+	{
+		for(var i = 0; i < enemies.length; i++)
+		{
+			if(enemies[i].enemyNum == enemyNumber && enemies[i].life > 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	this.getEnemy = function(enemyNumber)
+	{
+		for(var i = 0; i < enemies.length; i++)
+		{
+			if(enemies[i].enemyNum == enemyNumber)
+			{
+				return enemies[i];
+			}
+		}
+	}
+   
+    this.hardReset = function()
+    {
+        missiles = [];
+		enemies = [];
+		explosions = [];
+		money = [];
+		randomItems = [];
+		totalDestroys = 0;
+		destroys = 0;
+        player.life = 100;
+		player.resetShield();
+		player.recharge = true;
+		totalShots = 0;
+        player = new Player(24, 40);
+		gco.bgm.pause();
+		gco = new GameControlObject();
+		gco.Init();
+		sfx.pause(1);
+		self.RefreshSoundsOnGameLoss();
+		enemyGeneration = new EnemyGeneration();
+    }
+	
+	this.softReset = function()
+	{
+		missiles = [];
+		enemies = [];
+		explosions = [];
+		money = [];
+		randomItems = [];
+		totalDestroys += destroys;
+		destroys = 0;
+        if(!player.isAlive()){player.life = 100;}
+		initStars();
+		totalShots += player.totalMissiles;
+        player.totalMissiles = 0;
+        player.x = _buffer.width / 2;
+        player.y = _buffer.height / 2;
+		gco.ResetFuel();
+		gco.GoToUpgradeMenu();
+		player.resetShield();
+		sfx.pause(1);//Pause laser sound on round end
+		enemyGeneration.hasBoss = false;
+	}
+    
+    this.popArray = function(Array, popThis)
+    {
+        for(var i = popThis; i < Array.length - 1; i++)
+        {
+            Array[i] = Array[i + 1];
+        }
+        Array.pop();
+    }
+	
+    /******************************************************/
+    
+    
     /******************************************************/
     // Objects
     /******************************************************/
@@ -316,10 +445,7 @@ function Game()
 			}
 		}
 	}
-	//Sound Event Listener	
-	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
-	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
-	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
+	
 	function swapBGM()
 	{
 		switch(Math.round(Math.random() * 3))
@@ -341,22 +467,6 @@ function Game()
 			}
 			default:{}
 		}
-		gco.init_audio();
-	}
-	
-	this.InitSounds = function()
-	{
-		gco.bgm = document.getElementById('bgm_square');
-		gco.init_audio();
-		if(gco.bgm.canPlayType("audio/mp3") == "" ||  gco.bgm.canPlayType("audio/mp3") == "no") {
-			sfx.soundType = 1;//Play OGG sound effects
-		}
-		sfx.Init();
-	}
-	
-	this.RefreshSoundsOnGameLoss = function()
-	{
-		gco.bgm = document.getElementById('bgm_square');
 		gco.init_audio();
 	}
 	
@@ -540,7 +650,6 @@ function Game()
         }
     }
 
-	
 	function EnemyGeneration()
 	{
 		this.hasBoss = false;
@@ -701,9 +810,29 @@ function Game()
 		numEnemies++;
 		this.onTick = 0;
 		this.enemyNum = numEnemies;
+        
+        // Position and movement
         this.x = inX;
         this.y = inY;
         this.speed = spd;
+        this.waveLength = 0;
+        this.moveVar = 0;
+        this.xMoveSpeed = 0;
+		this.momentum = 0;
+		this.direction = 2;
+		this.lastDirection = 2;//0 = left;
+        this.tele = 0;
+		this.xmove = 0;
+        this.startX = this.x;
+        this.startY = this.y;
+		this.xstop = _buffer.width / 2;
+        this.ystop = 0;
+        this.readyForTeleport = false;
+		this.teleportTimer = 2;
+		this.didTeleport = false;
+		this.points = pts;
+		this.inCenter = false;
+		
         this.width = wdth;
         this.height = hght;
 		this.damage = dmg;
@@ -711,26 +840,15 @@ function Game()
 		this.type = theType;
 		this.Cores = crs;
 		this.Model = mdl;
-		this.moveVar = 0;
-		this.startX = this.x;
 		this.timeAlive = 0;
-		this.xMoveSpeed = 0;
-		this.momentum = 0;
-		this.direction = 2;
-		this.lastDirection = 2;//0 = left;
 		this.startLife = this.life;
-		this.tele = 0;
-		this.xmove = 0;
-		this.ystop = 0;
 		this.canFire = [];
-		this.readyForTeleport = false;
-		this.teleportTimer = 2;
-		this.didTeleport = false;
-		this.points = pts;
-		this.inCenter = false;
-		this.xstop = _buffer.width / 2;
 		this.isBoss = false;
-		
+		this.readyToShoot = false;
+		this.shootTimer = 2;
+		this.didShoot = false;
+        this.phase = 0;
+        
 		this.laserTimer = 0;
 		this.laser = false;
 		this.laserX = this.x;
@@ -765,7 +883,10 @@ function Game()
 			{
 				this.ystop = 150;
 				this.xMoveSpeed = this.speed;
+                this.waveLength = 100;
 				this.isBoss = true;
+                this.phase = -1;
+                this.sinOffset = -1;
 				break;
 			}
 			case 50:
@@ -978,63 +1099,129 @@ function Game()
 				}
 				case 5:
 				{//Boss
-					if(!this.didTeleport){ this.y += this.speed * delta; this.speed = this.ystop - this.y; }
-					if(!this.inCenter)
-					{
-						if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true;}
-						} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true;}}
-					}
-					if(this.speed < 25){ this.readyForTeleport = true; }
-					if(this.readyForTeleport)
-					{//using this same timer data for the boss to start shooting.
-						if(this.teleportTimer <= 0)
-						{
-							this.readyForTeleport = false;
-							this.didTeleport = true;
-						}
-						this.teleportTimer -= delta;
-					}
-					
-					if(this.didTeleport)
-					{
-						if(this.laser)
-						{
-							if(!sfx.bossLaserPlaying){ sfx.play(2); }
-							this.laserX = this.x;
-							this.laserY = this.y + 25;
-							this.laserHeight = _canvas.height - this.y + 25;
-						} else
-						{
-							if(sfx.bossLaserPlaying){ sfx.pause(2); }
-						}
-						if(this.onTick == 0)
-						{
-							this.laserTimer += 1;
-							if(this.laserTimer >= 5 && !this.laser)
-							{
-								this.laser = true;
-							} else
-							if(this.laserTimer >= 8)
-							{
-								this.laser = false;
-								this.laserTimer = 0;
-							}
-						}
-					}
+                    switch(this.phase)
+                    {
+                        case -1:
+                            // Move to proper position
+                            if(!this.didTeleport){this.y += this.speed * delta; this.speed = this.ystop - this.y;}
+                            
+                            // Center boss
+                            if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase++; this.startX = this.x;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase++; this.startX = this.x;}}}
+                        break;
+                        
+                        case 0:
+                            // Weapons
+                            if(this.laser)
+                            {
+                                if(!sfx.bossLaserPlaying){ sfx.play(2); }
+                                this.laserX = this.x;
+                                this.laserY = this.y + 25;
+                                this.laserHeight = _canvas.height - this.y + 25;
+                            } else
+                            {
+                                if(sfx.bossLaserPlaying){ sfx.pause(2); }
+                            }
+                            if(this.onTick == 0)
+                            {
+                                this.laserTimer += 1;
+                                if(this.laserTimer >= 5 && !this.laser)
+                                {
+                                    this.laser = true;
+                                } else
+                                if(this.laserTimer >= 8)
+                                {
+                                    this.laser = false;
+                                    this.laserTimer = 0;
+                                }
+                            }
+                            
+                            // Movement
+                            this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                        break;
+                        
+                        case 1:
+                            // Weapons
+                            if(this.laser)
+                            {
+                                if(!sfx.bossLaserPlaying){ sfx.play(2); }
+                                this.laserX = this.x;
+                                this.laserY = this.y + 25;
+                                this.laserHeight = _canvas.height - this.y + 25;
+                            } else
+                            {
+                                if(sfx.bossLaserPlaying){ sfx.pause(2); }
+                            }
+                            if(this.onTick == 0)
+                            {
+                                this.laserTimer += 1;
+                                if(this.laserTimer >= 1 && !this.laser)
+                                {
+                                    this.laser = true;
+                                } else
+                                if(this.laserTimer >= 2)
+                                {
+                                    this.laser = false;
+                                    this.laserTimer = 0;
+                                }
+                            }
+                            
+                            // Movement
+                            this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                            this.y = this.startY + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                            
+                        break;
+                        
+                        case 2:
+                            // Weapons
+                            
+                            // Movement
+                            this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                        break;
+                        
+                        case 3:
+                            // Weapons
+                            
+                            // Movement
+                            this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                            this.y = this.startY + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                        break;
+                        
+                        case 4:
+                            // Weapons
+                            
+                            // Movement
+                        break;
+                        
+                        case 5:
+                            // Weapons
+                            
+                            // Movement
+                        break;
+                    }
 
 					if(this.life <= 0)
 					{
 						destroys += 1;
+                        this.phase++;
 						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
-						//Update Mission Data
-						gco.levelMission.UpdateProgress(this.type);
-						gco.win = true;
-						return 1;
-					}
-					else if(this.y > _canvas.height)
-					{
-						return 1;
+                        
+                        if(this.phase >= 6)
+                        {
+                            //Update Mission Data
+                            gco.levelMission.UpdateProgress(this.type);
+                            gco.win = true;
+                            return 3;
+                        }
+                        else
+                        {
+                            this.startX = this.x;
+                            this.startY = this.y;
+                            console.log(this.phase);
+                            this.life = 500 * this.phase;
+                            console.log("Boss Life: " + this.life);
+                        }
+						return 2;
 					}
 					return 0;
 				}
@@ -1205,29 +1392,6 @@ function Game()
 				return 1;
 			}
 			return 0;
-		}
-	}
-	
-	this.isEnemyAlive = function(enemyNumber)
-	{
-		for(var i = 0; i < enemies.length; i++)
-		{
-			if(enemies[i].enemyNum == enemyNumber && enemies[i].life > 0)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	this.getEnemy = function(enemyNumber)
-	{
-		for(var i = 0; i < enemies.length; i++)
-		{
-			if(enemies[i].enemyNum == enemyNumber)
-			{
-				return enemies[i];
-			}
 		}
 	}
 
@@ -1657,30 +1821,14 @@ function Game()
 		this.alignY = aY;
 		this.color = col;
     }
+    
     /******************************************************/
     
-    var keysDown = {};
-
-    addEventListener("keydown", function(e)
-    {
-        keysDown[e.keyCode] = true;
-        keyPressed = e.keyCode;
-    }, false);
-
-    addEventListener("keyup", function(e)
-    {
-        keysDown[e.keyCode] = false;
-    }, false);
-	
-	addEventListener("mousemove", function(e){
-        getMousePos(_canvas, e);
-    }, false);
-	addEventListener("click", doMouseClick, false);
-
 
     /******************************************************/
     // Initialization
     /******************************************************/
+    
     this.Init = function()
     {
         _canvas = document.getElementById('canvas');
@@ -1711,56 +1859,14 @@ function Game()
 		
 		sfx = new SFXObject();
     }
-    
-    this.hardReset = function()
-    {
-        missiles = [];
-		enemies = [];
-		explosions = [];
-		money = [];
-		randomItems = [];
-		totalDestroys = 0;
-		destroys = 0;
-        player.life = 100;
-		player.resetShield();
-		player.recharge = true;
-		totalShots = 0;
-        player = new Player(24, 40);
-		gco.bgm.pause();
-		gco = new GameControlObject();
-		gco.Init();
-		sfx.pause(1);
-		self.RefreshSoundsOnGameLoss();
-		enemyGeneration = new EnemyGeneration();
-    }
-	
-	this.softReset = function()
-	{
-		missiles = [];
-		enemies = [];
-		explosions = [];
-		money = [];
-		randomItems = [];
-		totalDestroys += destroys;
-		destroys = 0;
-        if(!player.isAlive()){player.life = 100;}
-		initStars();
-		totalShots += player.totalMissiles;
-        player.totalMissiles = 0;
-        player.x = _buffer.width / 2;
-        player.y = _buffer.height / 2;
-		gco.ResetFuel();
-		gco.GoToUpgradeMenu();
-		player.resetShield();
-		sfx.pause(1);//Pause laser sound on round end
-		enemyGeneration.hasBoss = false;
-	}
+
     /******************************************************/
 
 
     /******************************************************/
     // Run
     /******************************************************/
+    
     this.Run = function()
     {	
         if(canvas != null)
@@ -1768,12 +1874,14 @@ function Game()
             self.gameLoop = setInterval(self.Loop, 1);
         }	
     }
+    
     /******************************************************/
 
 
     /******************************************************/
     // Update
     /******************************************************/
+    
     this.Update = function()
     {
 		//Stop Sound Check
@@ -1823,19 +1931,38 @@ function Game()
                 for(var i = 0; i < enemies.length; i++)
                 {
 					if(enemies[i].onTick != ticks){ enemies[i].onTick = ticks; }
-                    if(enemies[i].Update() != 0)
+                    switch(enemies[i].Update())
                     {
-						if(!self.isEnemyAlive(enemies[i].enemyNum))
-						{
-							enemiesKilled += 1;
-							enemyPoints += enemies[i].points;
-							sfx.play(0);
-							mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
-							money.push(mon);
-						}
-						if(!gco.win){
-							self.popArray(enemies, i);
-						}
+                        case 0:
+                        break;
+                        
+                        case 1:
+                            if(!self.isEnemyAlive(enemies[i].enemyNum))
+                            {
+                                enemiesKilled += 1;
+                                enemyPoints += enemies[i].points;
+                                sfx.play(0);
+                                mon = new MoneyEntity(enemies[i].Cores, enemies[i].x, enemies[i].y);
+                                money.push(mon);
+                            }
+                            if(!gco.win){
+                                self.popArray(enemies, i);
+                            }
+                        break;
+                        
+                        case 2:
+                            if(enemies[i].isBoss)
+                            {
+                                console.log("Boss Phase " + enemies[i].phase + " complete!");
+                            }
+                        break;
+                        
+                        case 3:
+                            if(enemies[i].isBoss)
+                            {
+                                console.log("Boss defeated!");
+                            }
+                        break;
                     }
                 }
 				
@@ -1969,15 +2096,6 @@ function Game()
 		}
     }
 
-    this.popArray = function(Array, popThis)
-    {
-        for(var i = popThis; i < Array.length - 1; i++)
-        {
-            Array[i] = Array[i + 1];
-        }
-        Array.pop();
-    }
-	
 	this.PlayerCollision = function(Player, Target)
     {
         if(
@@ -2726,6 +2844,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		buffer.closePath();
 		buffer.shadowBlur = 0;
 	}
+    
     this.drawExplosions = function()
     {
 		buffer.fillStyle = "rgb(0, 0, 0)";
@@ -3587,11 +3706,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		delete guiText;
 		// End Player Info
     }
+    
     /******************************************************/
+    
     
     /******************************************************/
     // Game Loop
     /******************************************************/
+    
     this.Loop = function()
     {
         frame++;
@@ -3620,5 +3742,6 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         self.Update();
         self.Draw();	
     }
+    
     /******************************************************/
 }

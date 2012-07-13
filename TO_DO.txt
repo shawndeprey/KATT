@@ -1,9 +1,8 @@
 -Create 48 x 48 sprites for gui menu.
 -Create Sprites for bullets, missiles, and mines. Height and width should be the height and width of ingame objects.
--Add Options Menu to Pause Menu.
 -New Core Sprites
 -Credits
--Easter Eggs?
+-Easter Eggs
 
 -Items to track
 	-Number of Kills
@@ -27,3 +26,8 @@
 
 -If game has been won
 	-Don't let any more explosions happen. Specifically you can still hit e after winning the game, which creates explosions upon hitting e again.
+    
+    
+*** Bugs ***
+- In IE9 when bgm.currentTime is set to 0 (like when going from menu to in game) game crashes
+- Game freeze once gco.win == true;
