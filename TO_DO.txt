@@ -17,8 +17,8 @@
     -Cores
     -Power-Ups
 	
-	The base boss level and boss have been implemented. He needs logic to make him badass.
 -Boss Level
+	-If on boss Level, make all other objectives 0/0 and make level 6 always read 100% on level meter.
 	-Make boss go back and forth in a sinwave if he is inCenter.
 	-Create explosion finale around boss on game win.
 	-Make screen fade to black with overlay on game win.

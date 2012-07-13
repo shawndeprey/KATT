@@ -2,6 +2,10 @@
 <html>
 <head>
     <title>Blackmodule's Space Game</title>
+	<script src="Game.js"></script>
+	<script type="text/javascript">
+		function soundsLoaded() { play.InitSounds(); }
+	</script>
 </head>
 <body>
 
@@ -28,9 +32,6 @@
 </audio>
 <!-- End Audio -->
 
-
-
-<script src="Game.js"></script>
 <div align="center">
     <canvas id="canvas" width="800" height="600">
         Your browser does not support the canvas element, sorry.
@@ -39,7 +40,6 @@
 	var play = new Game();
 	play.Init();
 	play.Run();
-function soundsLoaded() { play.InitSounds(); }
 </script>
 </div>
 
