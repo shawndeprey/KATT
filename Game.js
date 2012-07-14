@@ -656,152 +656,155 @@ function Game()
 		this.onTick = 0;
 		this.generate = function(lev)
 		{
-			if(ticks != this.onTick)
-			{
-				this.onTick = ticks;
-				//Random enemy spawning with random levels
-				for(var i = 0; i <= lev; i++)
-				{
-					var rand = Math.floor(Math.random() * 30);
-					if(rand == 10)
-					{
-						var theType = -1;
-						while(true)
-						{//logic to only generate 1 boss
-							theType = Math.round(Math.random() * (lev - 1));
-							if(gco.level > 5)
-							{
-								if(theType == 5 && this.hasBoss)
-								{
-									continue;
-								} else {
-									break;
-								}
-							} else {
-								break;
-							}
-						}
-						var startingX = Math.floor(Math.random() * _buffer.width);
-						var theSpeed = 0;
-						var theDmg = 0;
-						var theLife = 0;
-						var Cores = 0;
-						var height = 0;
-						var width = 0;
-						var model = 0;
-						var points = 0;
-						switch(theType)
-						{
-							case 0:
-							{//2 - 6 life, 50 - 100 speed, 5 - 10 damage, 1 - 3 cores
-								theLife = Math.round(Math.random() * 4) + 2;
-								theSpeed = Math.round(Math.random() * 50) + 50;
-								theDmg = Math.round(Math.random() * 5) + 5;
-								Cores = Math.round(Math.random() * 2) + 1;
-								if(theDmg > 7){model = 1; points = 2;} else {model = 0; points = 1;}
-								width = 15;
-								height = 25;
-								break;
-							}
-							case 1:
-							{//Enemy type 2
-								theLife = Math.round(Math.random() * 10) + 7;
-								theSpeed = Math.round(Math.random() * 50) + 50;
-								theDmg = Math.round(Math.random() * 7) + 7;
-								Cores = Math.round(Math.random() * 5) + 1;
-								if(theDmg > 10){model = 3; points = 4;} else {model = 2; points = 3;}
-								width = 31;
-								height = 21;
-								break;
-							}
-							case 2:
-							{//Enemy Type 3
-								theLife = Math.round(Math.random() * 15) + 10;
-								theSpeed = Math.round(Math.random() * 100) + 100;
-								theDmg = Math.round(Math.random() * 10) + 10;
-								if(theDmg >= 16)
-								{
-									model = 5;
-									theDmg = Math.round(Math.random() * 10) + 10;
-									Cores = Math.round(Math.random() * 15) + 10;
-									points = 6;
-								}else 
-								{
-									points = 5;
-									model = 4;
-									theDmg = Math.round(Math.random() * 9) + 9;
-									Cores = Math.round(Math.random() * 5) + 1;
-								}
-								width = 21;
-								height = 31;
-								break;
-							}
-							case 3:
-							{//Enemy Type 4
-								theLife = Math.round(Math.random() * 20) + 20;
-								theSpeed = Math.round(Math.random() * 35) + 35;
-								theDmg = Math.round(Math.random() * 15) + 15;
-								if(theDmg >= 23)
-								{
-									points = 8;
-									model = 8;
-									theDmg = Math.round(Math.random() * 17) + 17;
-									Cores = Math.round(Math.random() * 30) + 20;
-									width = 37;
-									height = 31;
-								}else 
-								{
-									points = 7;
-									model = 6;
-									Cores = Math.round(Math.random() * 25) + 10;
-									width = 29;
-									height = 30;
-								}//Missiles 15 x 31
-								break;
-							}
-							case 4:
-							{//Enemy Type 5
-								theLife = Math.round(Math.random() * 25) + 15;
-								theSpeed = Math.round(Math.random() * 35) + 35;
-								theDmg = Math.round(Math.random() * 17) + 17;
-								if(theDmg >= 28)
-								{
-									points = 10;
-									theLife = Math.round(Math.random() * 25) + 25;
-									model = 11;
-									Cores = Math.round(Math.random() * 30) + 20;
-									width = 26;
-									height = 21;
-								}else 
-								{
-									points = 9;
-									model = 10;
-									Cores = Math.round(Math.random() * 25) + 10;
-									width = 26;
-									height = 21;
-								}//Missiles 15 x 31
-								break;
-							}
-							case 5:
-							{//Boss
-								this.hasBoss = true;
-								theLife = 500;
-								theSpeed = 75;
-								theDmg = 75;
-								model = 14;
-								points = 1000;
-								Cores = 1000;
-								width = 116;
-								height = 72;
-								break;
-							}
-						}
-						
-						enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType, points);
-						enemies.push(enemy);
-					}
-				}
-			}
+            if(!this.hasBoss)
+            {
+                if(ticks != this.onTick)
+                {
+                    this.onTick = ticks;
+                    //Random enemy spawning with random levels
+                    for(var i = 0; i <= lev; i++)
+                    {
+                        var rand = Math.floor(Math.random() * 30);
+                        if(rand == 10)
+                        {
+                            var theType = -1;
+                            while(true)
+                            {//logic to only generate 1 boss
+                                theType = Math.round(Math.random() * (lev - 1));
+                                if(gco.level > 5)
+                                {
+                                    if(theType == 5 && this.hasBoss)
+                                    {
+                                        continue;
+                                    } else {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            var startingX = Math.floor(Math.random() * _buffer.width);
+                            var theSpeed = 0;
+                            var theDmg = 0;
+                            var theLife = 0;
+                            var Cores = 0;
+                            var height = 0;
+                            var width = 0;
+                            var model = 0;
+                            var points = 0;
+                            switch(theType)
+                            {
+                                case 0:
+                                {//Drones
+                                    theLife = Math.round(Math.random() * 4) + 2;
+                                    theSpeed = Math.round(Math.random() * 50) + 50;
+                                    theDmg = Math.round(Math.random() * 5) + 5;
+                                    Cores = Math.round(Math.random() * 2) + 1;
+                                    if(theDmg > 7){model = 1; points = 2;} else {model = 0; points = 1;}
+                                    width = 15;
+                                    height = 25;
+                                    break;
+                                }
+                                case 1:
+                                {//Weavers
+                                    theLife = Math.round(Math.random() * 10) + 7;
+                                    theSpeed = Math.round(Math.random() * 50) + 50;
+                                    theDmg = Math.round(Math.random() * 7) + 7;
+                                    Cores = Math.round(Math.random() * 5) + 1;
+                                    if(theDmg > 10){model = 3; points = 4;} else {model = 2; points = 3;}
+                                    width = 31;
+                                    height = 21;
+                                    break;
+                                }
+                                case 2:
+                                {//Kamakaze Ships
+                                    theLife = Math.round(Math.random() * 15) + 10;
+                                    theSpeed = Math.round(Math.random() * 100) + 100;
+                                    theDmg = Math.round(Math.random() * 10) + 10;
+                                    if(theDmg >= 16)
+                                    {
+                                        model = 5;
+                                        theDmg = Math.round(Math.random() * 10) + 10;
+                                        Cores = Math.round(Math.random() * 15) + 10;
+                                        points = 6;
+                                    }else 
+                                    {
+                                        points = 5;
+                                        model = 4;
+                                        theDmg = Math.round(Math.random() * 9) + 9;
+                                        Cores = Math.round(Math.random() * 5) + 1;
+                                    }
+                                    width = 21;
+                                    height = 31;
+                                    break;
+                                }
+                                case 3:
+                                {//Splitters
+                                    theLife = Math.round(Math.random() * 20) + 20;
+                                    theSpeed = Math.round(Math.random() * 35) + 35;
+                                    theDmg = Math.round(Math.random() * 15) + 15;
+                                    if(theDmg >= 23)
+                                    {
+                                        points = 8;
+                                        model = 8;
+                                        theDmg = Math.round(Math.random() * 17) + 17;
+                                        Cores = Math.round(Math.random() * 30) + 20;
+                                        width = 37;
+                                        height = 31;
+                                    }else 
+                                    {
+                                        points = 7;
+                                        model = 6;
+                                        Cores = Math.round(Math.random() * 25) + 10;
+                                        width = 29;
+                                        height = 30;
+                                    }//Missiles 15 x 31
+                                    break;
+                                }
+                                case 4:
+                                {//Teleporters
+                                    theLife = Math.round(Math.random() * 25) + 15;
+                                    theSpeed = Math.round(Math.random() * 35) + 35;
+                                    theDmg = Math.round(Math.random() * 17) + 17;
+                                    if(theDmg >= 28)
+                                    {
+                                        points = 10;
+                                        theLife = Math.round(Math.random() * 25) + 25;
+                                        model = 11;
+                                        Cores = Math.round(Math.random() * 30) + 20;
+                                        width = 26;
+                                        height = 21;
+                                    }else 
+                                    {
+                                        points = 9;
+                                        model = 10;
+                                        Cores = Math.round(Math.random() * 25) + 10;
+                                        width = 26;
+                                        height = 21;
+                                    }//Missiles 15 x 31
+                                    break;
+                                }
+                                case 5:
+                                {//Boss
+                                    this.hasBoss = true;
+                                    theLife = 500;
+                                    theSpeed = 75;
+                                    theDmg = 75;
+                                    model = 14;
+                                    points = 1000;
+                                    Cores = 1000;
+                                    width = 116;
+                                    height = 72;
+                                    break;
+                                }
+                            }
+                            
+                            enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, startingX, 0, theType, points);
+                            enemies.push(enemy);
+                        }
+                    }
+                }
+            }
 		}
 	}
 	
@@ -848,6 +851,7 @@ function Game()
 		this.shootTimer = 2;
 		this.didShoot = false;
         this.phase = 0;
+        this.spawnEnemy = 0;
         
 		this.laserTimer = 0;
 		this.laser = false;
@@ -881,6 +885,7 @@ function Game()
 			}
 			case 5:
 			{
+                this.speed = 10;
 				this.ystop = 150;
 				this.xMoveSpeed = this.speed;
                 this.waveLength = 100;
@@ -1102,14 +1107,17 @@ function Game()
                     switch(this.phase)
                     {
                         case -1:
+                        {
                             // Move to proper position
                             if(!this.didTeleport){this.y += this.speed * delta; this.speed = this.ystop - this.y;}
                             
                             // Center boss
                             if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase++; this.startX = this.x;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase++; this.startX = this.x;}}}
                         break;
+                        }
                         
                         case 0:
+                        {
                             // Weapons
                             if(this.laser)
                             {
@@ -1134,12 +1142,88 @@ function Game()
                                     this.laserTimer = 0;
                                 }
                             }
+                            if(this.onTick % 9 == 0)
+                            {
+                                this.shoot(102);
+                                this.shoot(103);
+                            }
+                            if(this.onTick == 0)
+                            {
+                                switch(this.spawnEnemy)
+                                {
+                                    case 0:
+                                    {
+                                        var theLife = Math.round(Math.random() * 15) + 10;
+                                        var theSpeed = Math.round(Math.random() * 150) + 150;
+                                        var theDmg = Math.round(Math.random() * 10) + 10;
+                                        var model;
+                                        var Cores;
+                                        var points;
+                                        if(theDmg >= 16)
+                                        {
+                                            model = 5;
+                                            theDmg = Math.round(Math.random() * 10) + 10;
+                                            Cores = Math.round(Math.random() * 15) + 10;
+                                            points = 6;
+                                        }else 
+                                        {
+                                            points = 5;
+                                            model = 4;
+                                            theDmg = Math.round(Math.random() * 9) + 9;
+                                            Cores = Math.round(Math.random() * 5) + 1;
+                                        }
+                                        width = 21;
+                                        height = 31;
+                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x - 35, this.y + 25, 2, points);
+                                        enemies.push(enemy);
+                                        this.spawnEnemy++;
+                                        break;
+                                    }
+                                    
+                                    case 1:
+                                    {
+                                        var theLife = Math.round(Math.random() * 15) + 10;
+                                        var theSpeed = Math.round(Math.random() * 150) + 150;
+                                        var theDmg = Math.round(Math.random() * 10) + 10;
+                                        var model;
+                                        var Cores;
+                                        var points;
+                                        if(theDmg >= 16)
+                                        {
+                                            model = 5;
+                                            theDmg = Math.round(Math.random() * 10) + 10;
+                                            Cores = Math.round(Math.random() * 15) + 10;
+                                            points = 6;
+                                        }else 
+                                        {
+                                            points = 5;
+                                            model = 4;
+                                            theDmg = Math.round(Math.random() * 9) + 9;
+                                            Cores = Math.round(Math.random() * 5) + 1;
+                                        }
+                                        width = 21;
+                                        height = 31;
+                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x + 35, this.y + 25, 2, points);
+                                        enemies.push(enemy);
+                                        this.spawnEnemy++;
+                                        break;
+                                    }
+                                    
+                                    case 2:
+                                    {
+                                        this.spawnEnemy = 0;
+                                        break;
+                                    }
+                                }
+                            }
                             
                             // Movement
                             this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
                         break;
+                        }
                         
                         case 1:
+                        {
                             // Weapons
                             if(this.laser)
                             {
@@ -1170,33 +1254,42 @@ function Game()
                             this.y = this.startY + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
                             
                         break;
+                        }
                         
                         case 2:
+                        {
                             // Weapons
                             
                             // Movement
                             this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
                         break;
+                        }
                         
                         case 3:
+                        {
                             // Weapons
                             
                             // Movement
                             this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
                             this.y = this.startY + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
                         break;
+                        }
                         
                         case 4:
+                        {
                             // Weapons
                             
                             // Movement
                         break;
+                        }
                         
                         case 5:
+                        {
                             // Weapons
                             
                             // Movement
                         break;
+                        }
                     }
 
 					if(this.life <= 0)
@@ -1286,6 +1379,20 @@ function Game()
 					missiles.push(missile);
 					break;
 				}
+                case 102:
+                {
+                    this.totalMissiles += 1;
+					missile = new Missile(missiles.length, 300, missileType, this.x - 20, this.y + 25, this.damage / 5);
+					missiles.push(missile);
+					break;
+                }
+                case 103:
+                {
+                    this.totalMissiles += 1;
+					missile = new Missile(missiles.length, 300, missileType, this.x + 20, this.y + 25, this.damage / 2);
+					missiles.push(missile);
+					break;
+                }
 			}
         }
     }
@@ -1547,6 +1654,28 @@ function Game()
 				}
 				case 101:
 				{//Level 5 enemy bomb
+					this.x1 = this.x;
+					this.y1 = this.y + (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y - (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y - (this.height / 2);
+					this.y += this.speed * delta;
+					break;
+				}
+                case 102:
+				{//Boss shotA
+					this.x1 = this.x;
+					this.y1 = this.y + (this.height / 2);
+					this.x2 = this.x - (this.width / 2);
+					this.y2 = this.y - (this.height / 2);
+					this.x3 = this.x + (this.width / 2);
+					this.y3 = this.y - (this.height / 2);
+					this.y += this.speed * delta;
+					break;
+				}
+                case 103:
+				{//Boss shotB
 					this.x1 = this.x;
 					this.y1 = this.y + (this.height / 2);
 					this.x2 = this.x - (this.width / 2);
@@ -2790,6 +2919,30 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					break;
 				}
 				case 101:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 0)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
+                case 102:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 0)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
+                case 103:
 				{
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(0, 255, 0)";

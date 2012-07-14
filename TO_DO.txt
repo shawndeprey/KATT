@@ -4,6 +4,9 @@
 -Credits
 -Easter Eggs
 
+-Options Menu
+    -Audio settings
+    
 -Items to track
 	-Number of Kills
 	-Number of Cores Acquired
@@ -29,5 +32,4 @@
     
     
 *** Bugs ***
-- In IE9 when bgm.currentTime is set to 0 (like when going from menu to in game) game crashes
 - Game freeze once gco.win == true;
