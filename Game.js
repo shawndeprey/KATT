@@ -21,7 +21,7 @@ function Game()
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
-	var NULL_GUI_STATE = 7;// Should always be above current state limit
+	var NULL_GUI_STATE = 8;// Should always be above current state limit
 	//State GUIs
 	// 0 = Main Menu
 	// 1 = Pause Menu
@@ -30,6 +30,7 @@ function Game()
 	// 4 = Level Up Menu
 	// 5 = Game Over Menu
 	// 6 = Options Menu
+	// 7 = Submit Score Menu
 	//Non-State Guis
 	// Debug
 	// Life & other ingame info(can't be on any state gui's)
@@ -2222,6 +2223,7 @@ function Game()
 		else if(gameState == 1 && gco.win)
 		{//The game is won at this point. Do what happens exactly after game is beat here.
 			if(sfx.laserPlaying){sfx.pause(1);}
+			currentGui = 7;
 		}
     }
 
@@ -2432,6 +2434,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				}
 				break;
 			}
+			case 7:
+			{// Submit Score Menu
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					self.submitScore("http://www.blackmodulestudio.com/games/katt/update_database.php", self.buildScoresHash(), "POST");
+				}
+				break;
+			}
 		}
 	}
     
@@ -2588,8 +2598,39 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         }
     }
 
+	this.buildScoresHash = function()
+	{
+		var scores = {};
+		scores['kills'] = enemiesKilled;
+		scores['cores'] = totalCores;
+		scores['highest_score'] = score;
+		scores['items_used'] = itemsUsed;
+		scores['from_game'] = "fromgame";
+		return scores;
+	}
     /******************************************************/
-
+	this.submitScore = function(path, params, method)
+	{
+        method = method || "post"; // Set method to post by default, if not specified.
+        // The rest of this code assumes you are not using a library.
+        // It can be made less wordy if you use one.
+        var form = document.createElement("form");
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+        for(var key in params)
+        {
+            if(params.hasOwnProperty(key))
+            {
+                var form_child = document.createElement("input");
+                form_child.setAttribute("type", "hidden");
+                form_child.setAttribute("name", key);
+                form_child.setAttribute("value", params[key]);
+                form.appendChild(form_child);
+             }
+        }
+        document.body.appendChild(form);
+        form.submit();
+    }
 
     /******************************************************/
     // Draw
@@ -3777,6 +3818,20 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 							guiText[6] = new GUIText("Needs Shinies :(", 51, 110, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
 					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
 							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+				}
+				break;
+			}
+			case 7:
+			{// Submit Score Menu
+				guiText[0] = new GUIText("Score: " + score + "  Kills: " + enemiesKilled + "  Cores: " + totalCores + "  Items Used: " + itemsUsed, _canvas.width / 2, _canvas.height / 2 - 100, 
+										 "20px Helvetica", "center", "top", "rgb(255, 0, 0)");
+										 
+        		if(mouseX > (_canvas.width / 2 + 10) - 75 && mouseX < (_canvas.width / 2 + 10) + 60 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Submit Score", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				} else
+				{
+					guiText[1] = new GUIText("Submit Score", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
 				}
 				break;
 			}

@@ -1,6 +1,6 @@
 <?php
 define('IN_PHPBB', true);
-$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : '../forum/';
+$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : '../../forum/';
 //echo $phpbb_root_path;
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
 include($phpbb_root_path . 'common.' . $phpEx);
@@ -31,10 +31,8 @@ if($from_game == "fromgame")
 	if($user->data['user_id'] != ANONYMOUS)
 	{//if user isn't logged in and isn't submitting from the game, redirect to login screen
 		$user_record = mysql_query("SELECT * FROM KATT WHERE user = '" . $user->data['username'] . "' LIMIT 1");
-		//echo $user_record;
 		if(mysql_num_rows($user_record) != 0)
 		{//if user has existing record, update that record
-			echo "User Record Found";
 			$row = mysql_fetch_array($user_record) or die(mysql_error());
 			$kills += $row['kills'];
 			$cores += $row['cores'];
@@ -46,10 +44,10 @@ if($from_game == "fromgame")
 								   ,acc_score=".$acc_score.",items_used=".$items_used.",wins=".$wins." WHERE user='".$user->data['username']."'") or die(mysql_error());
 		} else
 		{//if user doesn't have existing record, make a new record
-			echo "User Record Not Found";
 			$result = mysql_query("INSERT DELAYED INTO KATT(user, kills, cores, highest_score, acc_score, items_used, wins, count) 
 								   VALUES('".$user->data['username']."', $kills, $cores, $highest_score, $acc_score, $items_used, $wins, '')") or die(mysql_error());
 		}
+		header('Location: http://www.blackmodulestudio.com/games/katt');
 	} else
 	{
 		header('Location: http://forum.blackmodulestudio.com/ucp.php?mode=login');
