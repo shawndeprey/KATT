@@ -1219,7 +1219,7 @@ function Game()
                             this.startY = this.y;
                             console.log(this.phase);
                             this.life = 500 * this.phase;
-                            console.log("Boss Life: " + this.life);
+                            //console.log("Boss Life: " + this.life);
                         }
 						return 2;
 					}

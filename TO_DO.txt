@@ -10,6 +10,7 @@
 	-Highest Score
 	-Accumulative Score
 	-Items Used
+	-Number Of Wins
     
 -Collision detection fixes
     -Shield
