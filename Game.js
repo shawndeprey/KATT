@@ -853,6 +853,7 @@ function Game()
 		this.didShoot = false;
         this.phase = 0;
         this.spawnEnemy = 0;
+		this.shootTick = 0;
         
 		this.laserTimer = 0;
 		this.laser = false;
@@ -886,7 +887,6 @@ function Game()
 			}
 			case 5:
 			{
-                this.speed = 10;
 				this.ystop = 150;
 				this.xMoveSpeed = this.speed;
                 this.waveLength = 100;
@@ -1120,11 +1120,11 @@ function Game()
                         case 0:
                         {
                             // Weapons
+							this.laserX = this.x;
+							this.laserY = this.y + 25;
                             if(this.laser)
                             {
                                 if(!sfx.bossLaserPlaying){ sfx.play(2); }
-                                this.laserX = this.x;
-                                this.laserY = this.y + 25;
                                 this.laserHeight = _canvas.height - this.y + 25;
                             } else
                             {
@@ -1143,11 +1143,19 @@ function Game()
                                     this.laserTimer = 0;
                                 }
                             }
-                            if(this.onTick % 9 == 0)
+							
+                            if(this.shootTick != tick)
                             {
-                                this.shoot(102);
-                                this.shoot(103);
+								this.shootTick = tick;
+								if(this.shootTick % 2 = 0)
+								{
+									this.shoot(102);
+								} else
+								{
+									this.shoot(103);
+								}
                             }
+							
                             if(this.onTick == 0)
                             {
                                 switch(this.spawnEnemy)
@@ -1283,14 +1291,6 @@ function Game()
                             // Movement
                         break;
                         }
-                        
-                        case 5:
-                        {
-                            // Weapons
-                            
-                            // Movement
-                        break;
-                        }
                     }
 
 					if(this.life <= 0)
@@ -1299,8 +1299,9 @@ function Game()
                         this.phase++;
 						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
+						this.speed = 10;
                         
-                        if(this.phase >= 6)
+                        if(this.phase >= 5)
                         {
                             //Update Mission Data
                             gco.levelMission.UpdateProgress(this.type);
@@ -1309,11 +1310,11 @@ function Game()
                         }
                         else
                         {
+							this.laser = false;
                             this.startX = this.x;
                             this.startY = this.y;
                             console.log(this.phase);
                             this.life = 500 * this.phase;
-                            //console.log("Boss Life: " + this.life);
                         }
 						return 2;
 					}
@@ -1390,7 +1391,7 @@ function Game()
                 case 103:
                 {
                     this.totalMissiles += 1;
-					missile = new Missile(missiles.length, 300, missileType, this.x + 20, this.y + 25, this.damage / 2);
+					missile = new Missile(missiles.length, 300, missileType, this.x + 20, this.y + 25, this.damage / 5);
 					missiles.push(missile);
 					break;
                 }
