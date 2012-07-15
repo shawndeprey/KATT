@@ -854,7 +854,13 @@ function Game()
         this.phase = 0;
         this.spawnEnemy = 0;
 		this.shootTick = 0;
-        
+        this.moveX = 0;
+		this.moveY = 0;
+		this.doRealMovement = false;
+		this.moveYSpeed = 25;
+		this.foundCircle = false;
+		this.circleYStop = 0;
+		
 		this.laserTimer = 0;
 		this.laser = false;
 		this.laserX = this.x;
@@ -888,6 +894,7 @@ function Game()
 			case 5:
 			{
 				this.ystop = 150;
+				this.circleYStop = 165;
 				this.xMoveSpeed = this.speed;
                 this.waveLength = 100;
 				this.isBoss = true;
@@ -1111,9 +1118,8 @@ function Game()
                         {
                             // Move to proper position
                             if(!this.didTeleport){this.y += this.speed * delta; this.speed = this.ystop - this.y;}
-                            
                             // Center boss
-                            if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase++; this.startX = this.x;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase++; this.startX = this.x;}}}
+                            if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase = 2; this.speed = 10; this.startX = this.x; this.startY = this.y;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase = 2; this.speed = 10; this.startX = this.x; this.startY = this.y;}}}
                         break;
                         }
                         
@@ -1122,14 +1128,8 @@ function Game()
                             // Weapons
 							this.laserX = this.x;
 							this.laserY = this.y + 25;
-                            if(this.laser)
-                            {
-                                if(!sfx.bossLaserPlaying){ sfx.play(2); }
-                                this.laserHeight = _canvas.height - this.y + 25;
-                            } else
-                            {
-                                if(sfx.bossLaserPlaying){ sfx.pause(2); }
-                            }
+							this.laserHeight = _canvas.height - this.y + 25;
+                            if(this.laser){ if(!sfx.bossLaserPlaying){ sfx.play(2); } } else { if(sfx.bossLaserPlaying){ sfx.pause(2); } }
                             if(this.onTick == 0)
                             {
                                 this.laserTimer += 1;
@@ -1143,11 +1143,10 @@ function Game()
                                     this.laserTimer = 0;
                                 }
                             }
-							
-                            if(this.shootTick != tick)
+                            if(this.shootTick != ticks)
                             {
-								this.shootTick = tick;
-								if(this.shootTick % 2 = 0)
+								this.shootTick = ticks;
+								if(this.shootTick % 2 == 0)
 								{
 									this.shoot(102);
 								} else
@@ -1155,8 +1154,37 @@ function Game()
 									this.shoot(103);
 								}
                             }
-							
+							// Movement
+							if(!this.doRealMovement){
+								this.moveX = this.startX + (50 * Math.cos(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+								if(this.moveX > this.x){ if(this.moveX - this.x <= 5){this.doRealMovement = true;}} else { if(this.x - this.moveX <= 5){this.doRealMovement = true;}}
+							} else { 
+								this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+							}
+                        break;
+                        }
+                        case 1:
+                        {
+                            // Weapons
+							this.laserX = this.x;
+							this.laserY = this.y + 25;
+							this.laserHeight = _canvas.height - this.y + 25;
+                            if(this.laser){ if(!sfx.bossLaserPlaying){ sfx.play(2); } } else { if(sfx.bossLaserPlaying){ sfx.pause(2); } }
                             if(this.onTick == 0)
+                            {
+                                this.laserTimer += 1;
+                                if(this.laserTimer >= 1 && !this.laser)
+                                {
+                                    this.laser = true;
+                                } else
+                                if(this.laserTimer >= 2)
+                                {
+                                    this.laser = false;
+                                    this.laserTimer = 0;
+                                }
+                            }
+							if(this.shootTick != ticks){ this.shootTick = ticks; if(this.shootTick % 2 == 0){ } else { this.shoot(103); } }
+							if(this.onTick == 0)
                             {
                                 switch(this.spawnEnemy)
                                 {
@@ -1188,7 +1216,6 @@ function Game()
                                         this.spawnEnemy++;
                                         break;
                                     }
-                                    
                                     case 1:
                                     {
                                         var theLife = Math.round(Math.random() * 15) + 10;
@@ -1217,7 +1244,6 @@ function Game()
                                         this.spawnEnemy++;
                                         break;
                                     }
-                                    
                                     case 2:
                                     {
                                         this.spawnEnemy = 0;
@@ -1227,40 +1253,18 @@ function Game()
                             }
                             
                             // Movement
-                            this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
-                        break;
-                        }
-                        
-                        case 1:
-                        {
-                            // Weapons
-                            if(this.laser)
-                            {
-                                if(!sfx.bossLaserPlaying){ sfx.play(2); }
-                                this.laserX = this.x;
-                                this.laserY = this.y + 25;
-                                this.laserHeight = _canvas.height - this.y + 25;
-                            } else
-                            {
-                                if(sfx.bossLaserPlaying){ sfx.pause(2); }
-                            }
-                            if(this.onTick == 0)
-                            {
-                                this.laserTimer += 1;
-                                if(this.laserTimer >= 1 && !this.laser)
-                                {
-                                    this.laser = true;
-                                } else
-                                if(this.laserTimer >= 2)
-                                {
-                                    this.laser = false;
-                                    this.laserTimer = 0;
-                                }
-                            }
-                            
-                            // Movement
-                            this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
-                            this.y = this.startY + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+							if(!this.doRealMovement){
+								this.moveX = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+								this.moveY = this.startY + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+								var lenX = this.moveX - this.x;
+								var lenY = this.moveY - this.y;
+								var distance = Math.sqrt(lenX * lenX + lenY * lenY);
+								if(distance < 5){ this.doRealMovement = true; } else { this.y += 25 * delta; }
+								if(!this.foundCircle){this.y += this.moveYSpeed * delta; this.moveYSpeed = this.circleYStop - this.y;}
+							} else { 
+								this.x = this.startX + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+								this.y = this.startY + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+							}
                             
                         break;
                         }
@@ -1268,9 +1272,57 @@ function Game()
                         case 2:
                         {
                             // Weapons
-                            
+                            if(this.shootTick != ticks){ this.shootTick = ticks; if(this.shootTick % 2 == 0){ } else { this.shoot(103); } }
+							
+							//Timed Explosive
+							
+							if(this.onTick == 0)
+                            {
+                                switch(this.spawnEnemy)
+                                {
+                                    case 0:
+                                    {
+                                        var theLife = Math.round(Math.random() * 15) + 10;
+                                        var theSpeed = Math.round(Math.random() * 150) + 150;
+                                        var theDmg = Math.round(Math.random() * 10) + 10;
+                                        var model;
+                                        var Cores;
+                                        var points;
+                                        if(theDmg >= 16)
+                                        {
+                                            model = 5;
+                                            theDmg = Math.round(Math.random() * 10) + 10;
+                                            Cores = Math.round(Math.random() * 15) + 10;
+                                            points = 6;
+                                        }else 
+                                        {
+                                            points = 5;
+                                            model = 4;
+                                            theDmg = Math.round(Math.random() * 9) + 9;
+                                            Cores = Math.round(Math.random() * 5) + 1;
+                                        }
+                                        width = 21;
+                                        height = 31;
+                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x - 35, this.y + 25, 2, points);
+                                        enemies.push(enemy);
+                                        this.spawnEnemy++;
+                                        break;
+                                    }
+                                    case 1:
+                                    {
+                                        this.spawnEnemy = 0;
+                                        break;
+                                    }
+                                }
+                            }
                             // Movement
-                            this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+							if(!this.doRealMovement){
+								this.moveX = this.startX + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+								if(this.moveX > this.x){ if(this.moveX - this.x <= 5){this.doRealMovement = true;}} else { if(this.x - this.moveX <= 5){this.doRealMovement = true;}}
+							} else { 
+								this.y = this.startY + (10 * Math.cos(this.speed * Math.PI * (this.waveLength * 2) * (this.timeAlive / 1000))) * this.sinOffset;
+								this.x = this.startX + (75 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+							}
                         break;
                         }
                         
@@ -1300,7 +1352,11 @@ function Game()
 						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
 						this.speed = 10;
-                        
+                        this.doRealMovement = false;
+						if(sfx.bossLaserPlaying){ sfx.pause(2); }
+						this.startX = this.x;
+						this.startY = this.y;
+						this.circleYStop = this.y + 25;
                         if(this.phase >= 5)
                         {
                             //Update Mission Data
@@ -1313,7 +1369,6 @@ function Game()
 							this.laser = false;
                             this.startX = this.x;
                             this.startY = this.y;
-                            console.log(this.phase);
                             this.life = 500 * this.phase;
                         }
 						return 2;
