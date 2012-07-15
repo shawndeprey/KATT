@@ -836,7 +836,8 @@ function Game()
 		this.didTeleport = false;
 		this.points = pts;
 		this.inCenter = false;
-		
+		this.moveLeft = false;
+        
         this.width = wdth;
         this.height = hght;
 		this.damage = dmg;
@@ -1110,10 +1111,41 @@ function Game()
                         case -1:
                         {
                             // Move to proper position
-                            if(!this.didTeleport){this.y += this.speed * delta; this.speed = this.ystop - this.y;}
+                            if(Math.round(this.y) <= this.ystop)
+                            {
+                                this.y += this.speed * delta;
+                                this.speed = this.ystop - this.y;
+                            }
                             
                             // Center boss
-                            if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase++; this.startX = this.x;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase++; this.startX = this.x;}}}
+                            if(!this.inCenter)
+                            {
+                                if(this.x >= _buffer.width / 2)
+                                {
+                                    this.x -= this.xMoveSpeed * delta;
+                                    this.xMoveSpeed = this.x - this.xstop;
+                                    if(this.x - this.xstop < 15)
+                                    {
+                                        this.inCenter = true;
+                                    }
+                                }
+                                else
+                                {
+                                    this.x += this.xMoveSpeed * delta;
+                                    this.xMoveSpeed = this.xstop - this.x;
+                                    if(this.x > this.xstop - 15)
+                                    {
+                                        this.inCenter = true;
+                                    }
+                                }
+                            }
+                            if(this.inCenter == true && Math.round(this.y) >= this.ystop)
+                            {
+                                this.phase++;
+                                this.speed = 10;
+                                this.startX = this.x;
+                                this.startY = this.y;
+                            }
                         break;
                         }
                         
@@ -1144,10 +1176,10 @@ function Game()
                                 }
                             }
 							
-                            if(this.shootTick != tick)
+                            if(this.shootTick != ticks)
                             {
-								this.shootTick = tick;
-								if(this.shootTick % 2 = 0)
+								this.shootTick = ticks;
+								if(this.shootTick % 2 == 0)
 								{
 									this.shoot(102);
 								} else
@@ -1277,18 +1309,172 @@ function Game()
                         case 3:
                         {
                             // Weapons
+                            // Laser
+                            if(this.laser)
+                            {
+                                if(!sfx.bossLaserPlaying){sfx.play(2);}
+                                this.laserX = this.x;
+                                this.laserY = this.y + 25;
+                                this.laserHeight = _canvas.height - this.y + 25;
+                            } else
+                            {
+                                if(sfx.bossLaserPlaying){sfx.pause(2);}
+                            }
+                            if(this.onTick == 0)
+                            {
+                                this.laserTimer += 1;
+                                if(this.laserTimer >= 1 && !this.laser)
+                                {
+                                    this.laser = true;
+                                } else
+                                if(this.laserTimer >= 2)
+                                {
+                                    this.laser = false;
+                                    this.laserTimer = 0;
+                                }
+                            }
+                            
+                            // Timed Explosives
+                            if(this.shootTick != ticks)
+                            {
+								this.shootTick = ticks;
+								if(this.shootTick % 20 == 0)
+								{
+									this.shoot(104);
+								}
+                            }
+                            
+                            // Spawn fighter squadron
+                            if(this.onTick == 0)
+                            {
+                                switch(this.spawnEnemy)
+                                {
+                                    case 0:
+                                    {
+                                        this.spawnEnemy++;
+                                        break;
+                                    }
+                                    
+                                    case 1:
+                                    {
+                                        var theLife = Math.round(Math.random() * 15) + 10;
+                                        var theSpeed = Math.round(Math.random() * 150) + 150;
+                                        var theDmg = Math.round(Math.random() * 10) + 10;
+                                        var model;
+                                        var Cores;
+                                        var points;
+                                        if(theDmg >= 16)
+                                        {
+                                            model = 5;
+                                            theDmg = Math.round(Math.random() * 10) + 10;
+                                            Cores = Math.round(Math.random() * 15) + 10;
+                                            points = 6;
+                                        }else 
+                                        {
+                                            points = 5;
+                                            model = 4;
+                                            theDmg = Math.round(Math.random() * 9) + 9;
+                                            Cores = Math.round(Math.random() * 5) + 1;
+                                        }
+                                        width = 21;
+                                        height = 31;
+                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x + 35, this.y + 25, 2, points);
+                                        enemies.push(enemy);
+                                        this.spawnEnemy++;
+                                        break;
+                                    }
+                                    
+                                    case 2:
+                                    {
+                                        this.spawnEnemy = 0;
+                                        break;
+                                    }
+                                }
+                            }
                             
                             // Movement
-                            this.x = this.startX + (50 * Math.cos(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
-                            this.y = this.startY + (50 * Math.sin(this.speed * Math.PI * this.waveLength * (this.timeAlive / 1000))) * this.sinOffset;
+                            if(this.x <= 50)
+                            {
+                                this.moveLeft = false;
+                                
+                            }
+                            else if(this.x >= _buffer.width - 50)
+                            {
+                                this.moveLeft = true;
+                            }
+                            
+                            if(this.moveLeft)
+                            {
+                                this.x -= (this.speed * 5) * delta;
+                            }
+                            else
+                            {
+                                this.x += (this.speed * 5) * delta;
+                            }
+                            
+                            this.y = this.startY + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
                         break;
                         }
                         
                         case 4:
                         {
                             // Weapons
+                            // Laser
+                            if(this.laser)
+                            {
+                                if(!sfx.bossLaserPlaying){sfx.play(2);}
+                                this.laserX = this.x;
+                                this.laserY = this.y + 25;
+                                this.laserHeight = _canvas.height - this.y + 25;
+                            } else
+                            {
+                                if(sfx.bossLaserPlaying){sfx.pause(2);}
+                            }
+                            if(this.onTick == 0)
+                            {
+                                this.laserTimer += 1;
+                                if(this.laserTimer >= 1 && !this.laser)
+                                {
+                                    this.laser = true;
+                                } else
+                                if(this.laserTimer >= 2)
+                                {
+                                    this.laser = false;
+                                    this.laserTimer = 0;
+                                }
+                            }
+                            
+                            // Timed Explosives
+                            if(this.shootTick != ticks)
+                            {
+								this.shootTick = ticks;
+								if(this.shootTick % 20 == 0)
+								{
+									this.shoot(104);
+								}
+                            }
                             
                             // Movement
+                            if(this.x <= 50)
+                            {
+                                this.moveLeft = false;
+                                
+                            }
+                            else if(this.x >= _buffer.width - 50)
+                            {
+                                this.moveLeft = true;
+                            }
+                            
+                            if(this.moveLeft)
+                            {
+                                this.x -= (this.speed * 5) * delta;
+                            }
+                            else
+                            {
+                                this.x += (this.speed * 5) * delta;
+                            }
+                            
+                            this.y = this.startY + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
                         break;
                         }
                     }
@@ -1299,7 +1485,6 @@ function Game()
                         this.phase++;
 						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
-						this.speed = 10;
                         
                         if(this.phase >= 5)
                         {
@@ -1392,6 +1577,13 @@ function Game()
                 {
                     this.totalMissiles += 1;
 					missile = new Missile(missiles.length, 300, missileType, this.x + 20, this.y + 25, this.damage / 5);
+					missiles.push(missile);
+					break;
+                }
+                case 104:
+                {
+                    this.totalMissiles += 1;
+					missile = new Missile(missiles.length, 100, missileType, this.x, this.y, this.damage);
 					missiles.push(missile);
 					break;
                 }
@@ -1519,7 +1711,8 @@ function Game()
 		this.startX = this.x;
 		this.timeAlive = 0;
 		this.sinOffset = 1;
-		
+        this.timer = 0;
+		this.detonated = false;
 		//Special Init logic
 		this.missileTarget = 1000;//missile target will remain 1000 is no target selected
 		switch(this.missileType)
@@ -1550,12 +1743,17 @@ function Game()
 				}
 				break;
 			}
+            case 104:
+            {
+                this.timer = Math.floor(Math.random() * (4)) + 2;
+                break;
+            }
 		}
 		
         this.Update = function(i)
         {
 			this.timeAlive += delta;
-			if(this.y < 0)
+			if(this.y < 0 || this.y > buffer.height)
             {
                 self.popArray(missiles, i);
             }
@@ -1685,6 +1883,45 @@ function Game()
 					this.x3 = this.x + (this.width / 2);
 					this.y3 = this.y - (this.height / 2);
 					this.y += this.speed * delta;
+					break;
+				}
+                case 104:
+				{//Boss timed explosive
+                    if(!this.detonated)
+                    {
+                        if(this.timer > 0)
+                        {
+                            console.log("Timer: " + this.timer);
+                            if(ticks % 20 == 0)
+                            {
+                                this.timer--;
+                            }
+                            this.x1 = this.x;
+                            this.y1 = this.y + (this.height / 2);
+                            this.x2 = this.x - (this.width / 2);
+                            this.y2 = this.y - (this.height / 2);
+                            this.x3 = this.x + (this.width / 2);
+                            this.y3 = this.y - (this.height / 2);
+                            this.y += this.speed * delta;
+                        }
+                        else
+                        {
+                            this.detonated = true;
+                            this.width = 60;
+                            this.height = 60;
+                            this.timer = 10;
+                        }
+                    }
+                    else
+                    {
+                        console.log("Detonated");
+                        this.timer--;
+                        if(this.timer <= 0)
+                        {
+                            console.log("Dead");
+                            this.life = 0;
+                        }
+                    }
 					break;
 				}
 			}
@@ -2057,7 +2294,18 @@ function Game()
                     player.Update();
                 }
                 
-                for(var i = 0; i < missiles.length; i++){ missiles[i].Update(i); }
+                for(var i = 0; i < missiles.length; i++)
+                {
+                    missiles[i].Update(i);
+                    if(missiles[i].missileType == 104 && missiles[i].life <= 0)
+                    {
+                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 0.1, 0.1);
+                        explosions.push(explosion);
+                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 3, 0.1);
+                        explosions.push(explosion);
+                        self.popArray(missiles, i);
+                    }
+                }
                 
                 for(var i = 0; i < enemies.length; i++)
                 {
@@ -2609,7 +2857,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		scores['from_game'] = "fromgame";
 		return scores;
 	}
-    /******************************************************/
+    
 	this.submitScore = function(path, params, method)
 	{
         method = method || "post"; // Set method to post by default, if not specified.
@@ -2633,6 +2881,9 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         form.submit();
     }
 
+    /******************************************************/
+    
+    
     /******************************************************/
     // Draw
     /******************************************************/
@@ -2985,6 +3236,18 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					break;
 				}
                 case 103:
+				{
+					buffer.beginPath();
+						buffer.strokeStyle = "rgb(0, 255, 0)";
+						buffer.moveTo(missiles[i].x1, missiles[i].y1);
+						buffer.lineTo(missiles[i].x2, missiles[i].y2);
+						buffer.lineTo(missiles[i].x3, missiles[i].y3);
+						buffer.lineTo(missiles[i].x1, missiles[i].y1);
+						buffer.stroke();
+					buffer.closePath();
+					break;
+				}
+                case 104:
 				{
 					buffer.beginPath();
 						buffer.strokeStyle = "rgb(0, 255, 0)";
