@@ -147,6 +147,7 @@ function Game()
 	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_dorian").addEventListener("ended",swapBGM,false);
     
     /******************************************************/
     
@@ -449,7 +450,7 @@ function Game()
 	
 	function swapBGM()
 	{
-		switch(Math.round(Math.random() * 3))
+		switch(Math.round(Math.random() * 4))
 		{
 			case 0:
 			{
@@ -464,6 +465,11 @@ function Game()
 			case 2:
 			{
 				gco.bgm = document.getElementById('bgm_soar');
+				break;
+			}
+			case 3:
+			{
+				gco.bgm = document.getElementById('bgm_dorian');
 				break;
 			}
 			default:{}
@@ -494,12 +500,12 @@ function Game()
 				this.explosion.channel.push(a);
 			}
 		//Lasers
-			if(this.soundType == 0){this.laser = new Audio('Audio/laser.mp3');} else {this.laser = new Audio('Audio/laser.ogg');}
+			if(this.soundType == 0){this.laser = new Audio('Audio/lasorz.mp3');} else {this.laser = new Audio('Audio/lasorz.ogg');}
 			this.laser.volume = 0.5;
 			this.laser.preload = 'auto';
 			this.laser.loop = true;
 			
-			if(this.soundType == 0){this.bossLaser = new Audio('Audio/laser.mp3');} else {this.bossLaser = new Audio('Audio/laser.ogg');}
+			if(this.soundType == 0){this.bossLaser = new Audio('Audio/lasorz.mp3');} else {this.bossLaser = new Audio('Audio/lasorz.ogg');}
 			this.bossLaser.volume = 0.5;
 			this.bossLaser.preload = 'auto';
 			this.bossLaser.loop = true;
