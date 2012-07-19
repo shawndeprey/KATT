@@ -5,6 +5,13 @@
 	<script src="Game.js"></script>
 	<script type="text/javascript">
 		function soundsLoaded() { play.InitSounds(); }
+		window.onkeydown=function(e){
+		  if(e.keyCode==32){ return false; }
+		  if(e.keyCode==37){ return false; }
+		  if(e.keyCode==38){ return false; }
+		  if(e.keyCode==39){ return false; }
+		  if(e.keyCode==40){ return false; }
+		};
 	</script>
 </head>
 <body>

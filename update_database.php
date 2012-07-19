@@ -48,12 +48,7 @@ if($from_game == "fromgame")
 								   VALUES('".$user->data['username']."', $kills, $cores, $highest_score, $acc_score, $items_used, $wins, '')") or die(mysql_error());
 		}
 		header('Location: http://www.blackmodulestudio.com/games/katt');
-	} else
-	{
-		header('Location: http://forum.blackmodulestudio.com/ucp.php?mode=login');
 	}
-} else
-{
-	header('Location: http://forum.blackmodulestudio.com/ucp.php?mode=login');
 }
+header('Location: http://www.blackmodulestudio.com/games/katt/highscores.php?mode=limited');
 ?>
