@@ -77,7 +77,23 @@ $user->setup();
 <div class="wrapperHead">
 	<div class="containerHead">
     	<div class="header">
-        
+			<div class="login_form">
+				<?php
+				if($user->data['is_registered'])
+				{
+					echo("<span>" . $user->data['username'] . "</span> &nbsp;&nbsp; <a href=" . $phpbb_root_path . 'ucp.php?mode=logout' . '&sid=' . $user->data['session_id'] . "&redirect=http://www.blackmodulestudio.com" . $_SERVER['REQUEST_URI'] . ">Logout</a>");
+				}
+				else
+				{
+					echo('<form action="' . $phpbb_root_path . 'ucp.php" method="post" enctype="multipart/form-data">
+					<input type="text" name="username" value="username" onblur="if(this.value == \'\') { this.value=\'username\';}" onfocus="if (this.value == \'username\') {this.value=\'\';}" />
+					<input type="password" name="password" value="password"  onblur="if(this.value == \'\') { this.value=\'password\';}" onfocus="if (this.value == \'password\') {this.value=\'\';}" />
+					<input type="hidden" name="redirect" value="http://www.blackmodulestudio.com' . $_SERVER['REQUEST_URI'] . '" />
+					<input class="submit_btn" id="submit" type="submit" value="login" name="login" />
+					</form>');
+				}
+				?>
+			</div>
         </div>
     </div>
 </div>
@@ -112,6 +128,7 @@ $user->setup();
 -->
 <br />
 <?php
+
 $username = "downloadbms";
 $password2 = "Never4get";
 $hostname = "downloadbms.db.8856365.hostedresource.com";	
@@ -123,15 +140,6 @@ $selected = mysql_select_db("downloadbms",$dbh)
 $out_mode = $_GET['mode'];
 $out_count = 0;
 $result = mysql_query ("SELECT * FROM `KATT` ORDER BY highest_score DESC") or die("Could not select from KATT");
-
-if($user->data['user_id'] == ANONYMOUS)
-{
-	echo '
-	<div style="display:none;" id="addcomment">
-	<h2 class="h2_1">Please <a href="http://forum.blackmodulestudio.com/ucp.php?mode=login">Login</a> become part of Kill all the Things!</h2>
-	</div><br />
-	';
-}
 
 echo '
 <center>
