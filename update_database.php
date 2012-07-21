@@ -47,7 +47,6 @@ if($from_game == "fromgame")
 			$result = mysql_query("INSERT DELAYED INTO KATT(user, kills, cores, highest_score, acc_score, items_used, wins, count) 
 								   VALUES('".$user->data['username']."', $kills, $cores, $highest_score, $acc_score, $items_used, $wins, '')") or die(mysql_error());
 		}
-		header('Location: http://www.blackmodulestudio.com/games/katt');
 	}
 }
 header('Location: http://www.blackmodulestudio.com/games/katt/highscores.php?mode=limited');

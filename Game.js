@@ -69,7 +69,7 @@ function Game()
         }
         
         var enemyImages = [];
-        for(var i = 0; i < 15; i++)
+        for(var i = 0; i < 16; i++)
         {
             enemyImages[i] = new Image();
             enemyImages[i].src = ('Graphics/ship_' + i + '.png');
@@ -277,6 +277,11 @@ function Game()
 		this.bgm = null;
 		this.playingBossMusic = false;
 		
+		this.bossX = 0;//Final Boss X set when boss dies
+		this.bossY = 0;//Final Boss Y set when boss dies
+		
+		this.credits = new Credits();
+		
 		this.Init = function()
 		{
 			this.levelMission.GenerateObjectives();
@@ -428,23 +433,44 @@ function Game()
 			{
 				this.onTick = ticks;
 				
-				if(this.onTick == 19 && player.isAlive() && this.level < 6)
-				{//Update Fuel
-					if(player.currentFuel == 0)
-					{
-						if(this.levelMission.CheckCompletion())
+				if(!gco.win)
+				{
+					if(this.onTick == 19 && player.isAlive() && this.level < 6)
+					{//Update Fuel
+						if(player.currentFuel == 0)
 						{
-							currentGui = 4;//Go to level up menu
-							gameState = 0;
-						} else
-						{
-							self.softReset();
-							this.GoToUpgradeMenu();	
+							if(this.levelMission.CheckCompletion())
+							{
+								currentGui = 4;//Go to level up menu
+								gameState = 0;
+							} else
+							{
+								self.softReset();
+								this.GoToUpgradeMenu();	
+							}
 						}
+						player.currentFuel -= 1;
 					}
-					player.currentFuel -= 1;
+				} else
+				{
+					if(Math.floor(Math.random() * 4) == 1)
+					{
+						this.RandomBossExplosion();
+					}
 				}
 			}
+		}
+		
+		this.RandomBossExplosion = function()
+		{
+			var randX = Math.floor(Math.random() * 51) - 25;
+			var randY = Math.floor(Math.random() * 27) - 13;
+			var R = Math.floor(Math.random() * 2);
+			var G = Math.floor(Math.random() * 2);
+			var B = Math.floor(Math.random() * 2);
+			if(R == 1){R = 3} else {R = 0.1}; if(G == 1){G = 3} else {G = 0.1}; if(B == 1){B = 3} else {B = 0.1};
+			explosion = new Explosion(this.bossX + randX, this.bossY + randY, 75, 4, 200, R, G, B);
+			explosions.push(explosion);
 		}
 	}
 	
@@ -556,9 +582,6 @@ function Game()
 	
 	function LevelMission()
 	{
-		//Enemy Types
-		//0 = red: level 1
-		//1 = yellow: level 2
 		this.objectives = [];
 		this.progress = [];
 		
@@ -566,7 +589,8 @@ function Game()
 		{
 			for(var i = 0; i < gco.level; i++)
 			{//For each level, a new enemy type objective is placed on the mission stack.
-				this.objectives.push(Math.floor(Math.random() * 25) + 35);//between 25 and 60 enemies.
+				if(gco.level >= 6){ this.objectives.push(0); }
+				else{ this.objectives.push(Math.floor(Math.random() * 25) + 35); }
 				this.progress.push(0);
 			}
 		}
@@ -578,18 +602,24 @@ function Game()
 		
 		this.CheckCompletion = function()
 		{//returns true if level is complete, else returns false
-			var completion = [];
-			for(var i = 0; i < gco.level; i++)
+			if(gco.level < 6)
 			{
-				if(this.progress[i] >= this.objectives[i])
+				var completion = [];
+				for(var i = 0; i < gco.level; i++)
 				{
-					//Awesome
-				} else
-				{
-					return false;
+					if(this.progress[i] >= this.objectives[i])
+					{
+						//Awesome
+					} else
+					{
+						return false;
+					}
 				}
+				return true;
+			} else
+			{
+				return false;
 			}
-			return true;
 		}
 		
 		this.GetCompletionPercent = function()
@@ -859,6 +889,7 @@ function Game()
 		this.shootTimer = 2;
 		this.didShoot = false;
         this.phase = 0;
+		this.phaseSave = 0;
         this.spawnEnemy = 0;
 		this.shootTick = 0;
         this.moveX = 0;
@@ -900,7 +931,7 @@ function Game()
 			}
 			case 5:
 			{
-				this.ystop = 150;
+				this.ystop = 200;
 				this.circleYStop = 165;
 				this.xMoveSpeed = this.speed;
                 this.waveLength = 100;
@@ -1125,19 +1156,23 @@ function Game()
                         {
                             // Move to proper position
                             if(Math.round(this.y) <= this.ystop)
-                            {
+							{
                                 this.y += this.speed * delta;
                                 this.speed = this.ystop - this.y;
                             }
+							if(Math.abs(this.y - this.ystop) < 5)
+							{
+								this.didTeleport = true;
+							}
                             
                             // Center boss
-                            if(!this.inCenter)
+                            /*if(!this.inCenter)
                             {
                                 if(this.x >= _buffer.width / 2)
                                 {
                                     this.x -= this.xMoveSpeed * delta;
                                     this.xMoveSpeed = this.x - this.xstop;
-                                    if(this.x - this.xstop < 15)
+                                    if(Math.abs(this.x - this.xstop) < 15)
                                     {
                                         this.inCenter = true;
                                     }
@@ -1146,7 +1181,7 @@ function Game()
                                 {
                                     this.x += this.xMoveSpeed * delta;
                                     this.xMoveSpeed = this.xstop - this.x;
-                                    if(this.x > this.xstop - 15)
+                                    if(Math.abs(this.x > this.xstop) - 15)
                                     {
                                         this.inCenter = true;
                                     }
@@ -1154,16 +1189,19 @@ function Game()
                             }
                             if(this.inCenter == true && Math.round(this.y) >= this.ystop)
                             {
-                                this.phase++;
+                                this.phase = this.phaseSave;
                                 this.speed = 10;
                                 this.startX = this.x;
                                 this.startY = this.y;
-                            }
-/*
-                            if(!this.didTeleport){this.y += this.speed * delta; this.speed = this.ystop - this.y;}
+                            }*/
+
+                            
                             // Center boss
-                            if(!this.inCenter){if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(this.x - this.xstop < 15){this.inCenter = true; this.phase = 2; this.speed = 10; this.startX = this.x; this.startY = this.y;}} else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > this.xstop - 15){this.inCenter = true; this.phase = 2; this.speed = 10; this.startX = this.x; this.startY = this.y;}}}
-*/
+                            if(!this.inCenter){
+							if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(Math.abs(this.x - this.xstop) < 15 && this.didTeleport){this.inCenter = true; this.phase = this.phaseSave; this.speed = 10; this.startX = this.x; this.startY = this.y;}}
+							else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > Math.abs(this.xstop - 15) && this.didTeleport){this.inCenter = true; this.phase = this.phaseSave; this.speed = 10; this.startX = this.x; this.startY = this.y;}}
+							}
+
                         break;
                         }
                         
@@ -1370,16 +1408,10 @@ function Game()
                         {
                             // Weapons
                             // Laser
-                            if(this.laser)
-                            {
-                                if(!sfx.bossLaserPlaying){sfx.play(2);}
-                                this.laserX = this.x;
-                                this.laserY = this.y + 25;
-                                this.laserHeight = _canvas.height - this.y + 25;
-                            } else
-                            {
-                                if(sfx.bossLaserPlaying){sfx.pause(2);}
-                            }
+							this.laserX = this.x;
+							this.laserY = this.y + 25;
+							this.laserHeight = _canvas.height - this.y + 25;
+                            if(this.laser){ if(!sfx.bossLaserPlaying){sfx.play(2);} } else { if(sfx.bossLaserPlaying){sfx.pause(2);} }
                             if(this.onTick == 0)
                             {
                                 this.laserTimer += 1;
@@ -1456,21 +1488,14 @@ function Game()
                             if(!this.doRealMovement){this.moveX = this.startX + (150 * Math.cos(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;if(this.moveX > this.x){if(this.moveX - this.x <= 5){this.doRealMovement = true;}}else{if(this.x - this.moveX <= 5){this.doRealMovement = true;}}}else{this.x = this.startX + (150 * Math.cos(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;}
                         break;
                         }
-                        
                         case 4:
                         {
                             // Weapons
                             // Laser
-                            if(this.laser)
-                            {
-                                if(!sfx.bossLaserPlaying){sfx.play(2);}
-                                this.laserX = this.x;
-                                this.laserY = this.y + 25;
-                                this.laserHeight = _canvas.height - this.y + 25;
-                            } else
-                            {
-                                if(sfx.bossLaserPlaying){sfx.pause(2);}
-                            }
+							this.laserX = this.x;
+							this.laserY = this.y + 25;
+							this.laserHeight = _canvas.height - this.y + 25;
+                            if(this.laser){ if(!sfx.bossLaserPlaying){sfx.play(2);} } else { if(sfx.bossLaserPlaying){sfx.pause(2);} }
                             if(this.onTick == 0)
                             {
                                 this.laserTimer += 1;
@@ -1496,26 +1521,26 @@ function Game()
                             }
                             
                             // Movement
-                            if(this.x <= 50)
-                            {
-                                this.moveLeft = false;
-                                
-                            }
-                            else if(this.x >= _buffer.width - 50)
-                            {
-                                this.moveLeft = true;
-                            }
-                            
-                            if(this.moveLeft)
-                            {
-                                this.x -= (this.speed * 5) * delta;
-                            }
-                            else
-                            {
-                                this.x += (this.speed * 5) * delta;
-                            }
-                            
-                            this.y = this.startY + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+							 // Movement
+							if(!this.doRealMovement){
+								if(this.moveX <= 50) { this.moveLeft = false; }
+								else if(this.moveX >= _buffer.width - 50){ this.moveLeft = true;}
+								if(this.moveLeft){ this.moveX -= (this.speed * 5) * delta; } else { this.moveX += (this.speed * 5) * delta; }
+								this.moveY = this.startY + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+								
+								var lenX = this.moveX - this.x;
+								var lenY = this.moveY - this.y;
+								var distance = Math.sqrt(lenX * lenX + lenY * lenY);
+								if(distance < 15){ this.doRealMovement = true; } else { this.y += 25 * delta; }
+								
+								if(this.x > this.moveX){ this.x -= (Math.abs(this.x - this.moveX) * 3) * delta; } else {this.x += (Math.abs(this.x - this.moveX) * 3) * delta;}
+								if(this.y > this.moveY){ this.y -= (Math.abs(this.y - this.moveY) * 3) * delta; } else {this.y += (Math.abs(this.y - this.moveY) * 3) * delta;}
+							} else { 
+								if(this.x <= 50) { this.moveLeft = false; }
+								else if(this.x >= _buffer.width - 50){ this.moveLeft = true;}
+								if(this.moveLeft){ this.x -= (this.speed * 5) * delta; } else { this.x += (this.speed * 5) * delta; }
+								this.y = this.startY + (150 * Math.sin(this.speed * Math.PI * (this.waveLength / 2) * (this.timeAlive / 1000))) * this.sinOffset;
+							}
                         break;
                         }
                     }
@@ -1523,7 +1548,6 @@ function Game()
 					if(this.life <= 0)
 					{
 						destroys += 1;
-                        this.phase++;
 						explosion = new Explosion(this.x, this.y, 75, 4, 200, 3, 3, 3);
 						explosions.push(explosion);
 						this.speed = 10;
@@ -1532,19 +1556,23 @@ function Game()
 						this.startX = this.x;
 						this.startY = this.y;
 						this.circleYStop = this.y + 25;
-                        if(this.phase >= 5)
+						console.log("Boss Died");
+						this.phaseSave++;
+                        if(this.phaseSave >= 5)
                         {
                             //Update Mission Data
                             gco.levelMission.UpdateProgress(this.type);
                             gco.win = true;
+							gco.bossX = this.x;
+							gco.bossY = this.y;
                             return 3;
                         }
                         else
                         {
 							this.laser = false;
-                            this.startX = this.x;
-                            this.startY = this.y;
-                            this.life = 500 * this.phase;
+							this.inCenter = false;
+                            this.life = 500 * this.phaseSave;
+							this.phase = -1;
                         }
 						return 2;
 					}
@@ -1936,7 +1964,6 @@ function Game()
                     {
                         if(this.timer > 0)
                         {
-                            console.log("Timer: " + this.timer);
                             if(ticks % 20 == 0)
                             {
                                 this.timer--;
@@ -1959,11 +1986,9 @@ function Game()
                     }
                     else
                     {
-                        console.log("Detonated");
                         this.timer--;
                         if(this.timer <= 0)
                         {
-                            console.log("Dead");
                             this.life = 0;
                         }
                     }
@@ -2234,6 +2259,91 @@ function Game()
 		this.alignY = aY;
 		this.color = col;
     }
+	
+	function Credits()
+	{
+		this.overlayAlpha = 0.0;
+		this.center = _buffer.width / 2;
+		this.credits = [];
+		this.lines = 24;
+		this.lineHeight = 50;
+		this.yOffset = 0;
+		this.scrollSpeed = 25;
+		this.isBlackedOut = false;
+		var out = "";
+		var size = "";
+		var color = "";
+		for(var i = 0; i < this.lines; i++)
+		{
+			switch(i)
+			{
+				case 0:{out = "Congradulations!!!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 1:{out = "You Killed all the Things!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 2:{out = "Produced by Blackmodule Studio"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 3:{out = "Program Managers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 4:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 5:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 6:{out = "Lead Game System Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 7:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 8:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 9:{out = "Lead Software Engineers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 10:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 11:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 12:{out = "Programmers in Test"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 13:{out = "Andrew Muller"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 14:{out = "Graphic Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 15:{out = "David Van Laar-Veth"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 16:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 17:{out = "Tyler Madden"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 18:{out = "Sound Artists"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 19:{out = "David Van Laar-Veth (The Badass)"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 20:{out = "Story"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 21:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 22:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 23:{out = "Thanks for playing!"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+			}
+			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
+		}
+		
+		this.Update = function()
+		{
+			if(this.overlayAlpha >= 1){ this.isBlackedOut = true; } else { this.overlayAlpha += delta / 16; }
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.yOffset += this.scrollSpeed * delta; }
+			else if(this.isBlackedOut && this.CreditsFinished() && currentGui != 7){ currentGui = 7; }
+		}
+		
+		this.Draw = function()
+		{
+			this.DrawOverlay();
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.DrawCredits(); }
+		}
+		
+		this.DrawOverlay = function()
+		{
+			buffer.fillStyle = "rgba(0, 0, 0, " + this.overlayAlpha + ")";
+			buffer.fillRect(0, 0, _buffer.width, _buffer.height);
+		}
+		
+		this.DrawCredits = function()
+		{
+			buffer.beginPath();
+			for(var i = 0; i < this.credits.length; i++)
+			{
+				buffer.fillStyle = this.credits[i].color;
+				buffer.font = this.credits[i].fontStyle;
+				buffer.textAlign = this.credits[i].alignX;
+				buffer.textBaseline = this.credits[i].alignY;
+				buffer.fillText(this.credits[i].text, this.credits[i].x, this.credits[i].y - this.yOffset);
+			}
+			buffer.closePath();
+		}
+		
+		this.CreditsFinished = function()
+		{
+			if(this.credits[this.credits.length - 1].y - this.yOffset < -20){ return true; } else { return false; }
+		}
+	}
     
     /******************************************************/
     
@@ -2342,7 +2452,7 @@ function Game()
                 for(var i = 0; i < missiles.length; i++)
                 {
                     missiles[i].Update(i);
-                    if(missiles[i].missileType == 104 && missiles[i].life <= 0)
+                    if(missiles[i].life <= 0)
                     {
                         explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 0.1, 0.1);
                         explosions.push(explosion);
@@ -2375,17 +2485,11 @@ function Game()
                         break;
                         
                         case 2:
-                            if(enemies[i].isBoss)
-                            {
-                                console.log("Boss Phase " + enemies[i].phase + " complete!");
-                            }
+                            if(enemies[i].isBoss){ /*console.log("Boss Phase " + enemies[i].phase + " complete!");*/ }
                         break;
                         
                         case 3:
-                            if(enemies[i].isBoss)
-                            {
-                                console.log("Boss defeated!");
-                            }
+                            if(enemies[i].isBoss){ /*console.log("Boss defeated!");*/ }
                         break;
                     }
                 }
@@ -2517,7 +2621,15 @@ function Game()
 		else if(gameState == 1 && gco.win)
 		{//The game is won at this point. Do what happens exactly after game is beat here.
 			if(sfx.laserPlaying){sfx.pause(1);}
-			currentGui = 7;
+			gco.credits.Update();
+			if(!gco.credits.isBlackedOut){ gco.Update(); }//Will do random boss explosions
+			for(var i = 0; i < explosions.length; i++)
+			{
+				if(explosions[i].Update() != 0)
+				{
+					self.popArray(explosions, i);
+				}
+			}
 		}
     }
 
@@ -2825,7 +2937,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         if(Keys[17] == 1) // Escape
         {
 			if(gameState == 1 && player.isAlive())
-			{   gco.TogglePauseGame();
+			{   if(!gco.win){ gco.TogglePauseGame(); }
 				if(!paused){ currentGui = NULL_GUI_STATE;} else { currentGui = 1; }
 			}
 			
@@ -2950,7 +3062,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		// Stars
         self.drawStars();
 		
-        if(gameState == 1)
+        if(gameState == 1 && !gco.credits.isBlackedOut)
         {
 			//Money
 			self.drawMoney();
@@ -2983,6 +3095,10 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
             // GUI
             self.drawHUD();
         }
+		if(gco.win)
+		{
+			gco.credits.Draw();
+		}
 		self.drawGUI();
         canvas.drawImage(_buffer, 0, 0);
     }
@@ -3037,6 +3153,10 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         for(var i = 0; i < enemies.length; i++)
         {
 			buffer.drawImage(enemyImages[enemies[i].Model], enemies[i].x - (enemies[i].width / 2), enemies[i].y - (enemies[i].height / 2), enemies[i].width, enemies[i].height);
+			if(enemies[i].isBoss)
+			{
+				buffer.drawImage(playerImages[0], enemies[i].moveX - (player.width / 2), enemies[i].moveY - (player.height / 2), player.width, player.height);
+			}
 			if(enemies[i].laser == true){ drawLaser = true; x = enemies[i].laserX; y = enemies[i].laserY; h = enemies[i].laserHeight; w = enemies[i].laserWidth; }
         }
 		buffer.closePath();
@@ -3154,6 +3274,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				case 3:
 				{	
 					buffer.fillStyle = 'rgb(200, 200, 255)';
+					buffer.shadowColor = 'rgb(200, 200, 255)';
 					buffer.shadowBlur = 10;
 						buffer.drawImage(itemImages[0], randomItems[i].x - (randomItems[i].width / 2), randomItems[i].y - (randomItems[i].height / 2), 25, 25);
 					buffer.shadowBlur = 0;
@@ -4157,69 +4278,62 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		}
 		buffer.closePath();
 		delete guiText;
-		
-		//Stateless Menu Items
-		var guiText = [];
-		//Debug
-		if(debug)
-		{
-			guiText[0] = new GUIText("Shot: " + player.totalMissiles, 32, 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[1] = new GUIText("In Air: " + missiles.length, _canvas.width - 100, 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[2] = new GUIText("Enemies: " + enemies.length, _canvas.width - 250, 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[3] = new GUIText("Explosions: " + explosions.length, _canvas.width - 150, _canvas.height - 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[4] = new GUIText("FPS: " + FPS, 182, 32, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[5] = new GUIText("Seconds: " + seconds, 182, 52, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[6] = new GUIText("Tick: " + ticks, 182, 72, 
-								     "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			buffer.beginPath();
-			for(var i = 0; i < guiText.length; i++)
+		if(!gco.win)
+		{//Stateless Menu Items
+			var guiText = [];
+			//Debug
+			if(debug)
 			{
-				buffer.fillStyle = guiText[i].color;
-				buffer.font = guiText[i].fontStyle;
-				buffer.textAlign = guiText[i].alignX;
-				buffer.textBaseline = guiText[i].alignY;
-				buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
+				guiText[0] = new GUIText("Shot: " + player.totalMissiles, 32, 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[1] = new GUIText("In Air: " + missiles.length, _canvas.width - 100, 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[2] = new GUIText("Enemies: " + enemies.length, _canvas.width - 250, 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[3] = new GUIText("Explosions: " + explosions.length, _canvas.width - 150, _canvas.height - 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[4] = new GUIText("FPS: " + FPS, 182, 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[5] = new GUIText("Seconds: " + seconds, 182, 52, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[6] = new GUIText("Tick: " + ticks, 182, 72, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				buffer.beginPath();
+				for(var i = 0; i < guiText.length; i++)
+				{
+					buffer.fillStyle = guiText[i].color;
+					buffer.font = guiText[i].fontStyle;
+					buffer.textAlign = guiText[i].alignX;
+					buffer.textBaseline = guiText[i].alignY;
+					buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
+				}
+				buffer.closePath();
 			}
+			delete guiText;
+			//End Debug
+			
+			// Player Info
+			var guiText = [];
+			if(playerInfo)
+			{
+				guiText[0] = new GUIText("Fuel: " + player.currentFuel, 105, _canvas.height - 78, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[1] = new GUIText("Shield: " + Math.floor(player.shield), 105, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[2] = new GUIText("Hull: " + player.life, 105, _canvas.height - 28, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[3] = new GUIText("Destroyed: " + destroys, _canvas.width / 2, _canvas.height - 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[5] = new GUIText("Score: " + score, _canvas.width - 100, 20, "12px Helvetica", "left", "top", "rgb(96, 255, 96)");
+			} else
+			{
+				if(gameState == 1)
+				{
+					guiText[0] = new GUIText("[E] Player Info", 105, _canvas.height - 28, 
+											 "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				}
+			}
+			buffer.beginPath();
+				for(var i = 0; i < guiText.length; i++)
+				{
+					buffer.fillStyle = guiText[i].color;
+					buffer.font = guiText[i].fontStyle;
+					buffer.textAlign = guiText[i].alignX;
+					buffer.textBaseline = guiText[i].alignY;
+					buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
+				}
 			buffer.closePath();
 		}
-		delete guiText;
-		//End Debug
-		
-		// Player Info
-		var guiText = [];
-		if(playerInfo)
-		{
-            guiText[0] = new GUIText("Fuel: " + player.currentFuel, 105, _canvas.height - 78, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-            guiText[1] = new GUIText("Shield: " + Math.floor(player.shield), 105, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[2] = new GUIText("Hull: " + player.life, 105, _canvas.height - 28, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[3] = new GUIText("Destroyed: " + destroys, _canvas.width / 2, _canvas.height - 32, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[4] = new GUIText("Cores: " + player.money, _canvas.width / 2, _canvas.height - 53, "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			guiText[5] = new GUIText("Score: " + score, _canvas.width - 100, 20, "12px Helvetica", "left", "top", "rgb(96, 255, 96)");
-		} else
-		{
-			if(gameState == 1)
-			{
-				guiText[0] = new GUIText("[E] Player Info", 105, _canvas.height - 28, 
-										 "18px Helvetica", "left", "top", "rgb(96, 255, 96)");
-			}
-		}
-		buffer.beginPath();
-			for(var i = 0; i < guiText.length; i++)
-			{
-				buffer.fillStyle = guiText[i].color;
-				buffer.font = guiText[i].fontStyle;
-				buffer.textAlign = guiText[i].alignX;
-				buffer.textBaseline = guiText[i].alignY;
-				buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
-			}
-		buffer.closePath();
-		
 		delete guiText;
 		// End Player Info
     }

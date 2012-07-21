@@ -1,19 +1,10 @@
 -Create 48 x 48 sprites for gui menu.
 -Create Sprites for bullets, missiles, and mines. Height and width should be the height and width of ingame objects.
 -New Core Sprites
--Credits
 -Easter Eggs
 
 -Options Menu
     -Audio settings
-    
--Items to track
-	-Number of Kills
-	-Number of Cores Acquired
-	-Highest Score
-	-Accumulative Score
-	-Items Used
-	-Number Of Wins
     
 -Collision detection fixes
     -Shield
@@ -21,16 +12,9 @@
     -Power-Ups
 	
 -Boss Level
+	-Make boss use new boss sprites
 	-If on boss Level, make all other objectives 0/0 and make level 6 always read 100% on level meter.
-	-Make boss go back and forth in a sinwave if he is inCenter.
-	-Create explosion finale around boss on game win.
-	-Make screen fade to black with overlay on game win.
-		-When screen fades to black be sure to delete all game objects.
 	-Create credit roll which starts with the story ending.
-
--If game has been won
-	-Don't let any more explosions happen. Specifically you can still hit e after winning the game, which creates explosions upon hitting e again.
     
     
-*** Bugs ***
-- Game freeze once gco.win == true;
+-If not logged in, display screen that says to login to play game.
