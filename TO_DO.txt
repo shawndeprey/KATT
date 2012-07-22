@@ -5,16 +5,17 @@
 
 -Options Menu
     -Audio settings
+-On pause menu, make link to Options
     
 -Collision detection fixes
     -Shield
     -Cores
     -Power-Ups
 	
+-Create Story Gui
+	
 -Boss Level
 	-Make boss use new boss sprites
-	-If on boss Level, make all other objectives 0/0 and make level 6 always read 100% on level meter.
 	-Create credit roll which starts with the story ending.
-    
     
 -If not logged in, display screen that says to login to play game.
