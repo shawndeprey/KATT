@@ -16,7 +16,6 @@ function Game()
     var keyPressed;
     var debug = false;
 	var playerInfo = false;
-	var FIRE_THE_LASER = false;
 	
 	//GUI Info
 	var currentGui = 0;
@@ -60,18 +59,42 @@ function Game()
     var buffer = null;
     
     // Resources
+	var imagesLoaded = false;
+	this.loadedImage = function()
+	{
+		numImagesLoaded++;
+		console.log("Loaded image: " + numImagesLoaded + "/" + numOfImages);
+		if(numImagesLoaded >= numOfImages)
+		{
+			imagesLoaded = true;
+		} else
+		{
+			imagesLoaded = false;
+		}
+	}
+	var numImagesLoaded = 0;
         // Graphics
+		var starImages = [];
+        for(var i = 0; i < 6; i++)
+        {
+            starImages[i] = new Image();
+			starImages[i].addEventListener('load', self.loadedImage, false);
+            starImages[i].src = ('Graphics/star_' + i + '.png');
+        }
+		
         var images = [];
         for(var i = 0; i < 11; i++)
         {
             images[i] = new Image();
+			images[i].addEventListener('load', self.loadedImage, false);
             images[i].src = ('Graphics/GUI_0' + i + '.png');
         }
         
         var enemyImages = [];
-        for(var i = 0; i < 16; i++)
+        for(var i = 0; i < 21; i++)
         {
             enemyImages[i] = new Image();
+			enemyImages[i].addEventListener('load', self.loadedImage, false);
             enemyImages[i].src = ('Graphics/ship_' + i + '.png');
         }
         
@@ -79,6 +102,7 @@ function Game()
         for(var i = 0; i < 1; i++)
         {
             playerImages[i] = new Image();
+			playerImages[i].addEventListener('load', self.loadedImage, false);
             playerImages[i].src = ('Graphics/player_' + i + '.png');
         }
         
@@ -86,9 +110,13 @@ function Game()
         for(var i = 0; i < 5; i++)
         {
             itemImages[i] = new Image();
+			itemImages[i].addEventListener('load', self.loadedImage, false);
             itemImages[i].src = ('Graphics/item_0' + i + '.png')
         }
 
+	var numOfImages = (starImages.length + images.length + enemyImages.length + playerImages.length + itemImages.length);
+	
+	
     // Containers
     var stars = [];
     var guiText = [];
@@ -237,6 +265,7 @@ function Game()
 		player.resetShield();
 		sfx.pause(1);//Pause laser sound on round end
 		enemyGeneration.hasBoss = false;
+		starGeneration.hasPlanet = false;
 	}
     
     this.popArray = function(Array, popThis)
@@ -471,6 +500,7 @@ function Game()
 			if(R == 1){R = 3} else {R = 0.1}; if(G == 1){G = 3} else {G = 0.1}; if(B == 1){B = 3} else {B = 0.1};
 			explosion = new Explosion(this.bossX + randX, this.bossY + randY, 75, 4, 200, R, G, B);
 			explosions.push(explosion);
+			sfx.play(0);
 		}
 	}
 	
@@ -516,7 +546,7 @@ function Game()
 		this.Init = function()
 		{
 		//Explosions
-			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 10;
+			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 20;
 			for(var i = 0; i < this.explosion.channels; i++)
 			{
 				var a = null;
@@ -648,7 +678,7 @@ function Game()
         {
             var X = Math.floor(Math.random() * _buffer.width);
             var Y = Math.floor(Math.random() * _buffer.height);
-            star = new Star(X, Y, 255, 255, 255);
+            star = new Star(X, Y, 0, 10, false, 1);
             stars.push(star);
         }
     }
@@ -656,30 +686,96 @@ function Game()
     function StarGeneration()
 	{
 		this.onTick = 0;
+		this.hasPlanet = false;
 		this.generate = function()
 		{
 			if(ticks != this.onTick)
 			{
 				this.onTick = ticks;
-                if(stars.length < numStars - 1)
+                if(stars.length < numStars)
                 {
-                    var X = Math.floor(Math.random() * _buffer.width);
-                    star = new Star(X, 0);
+					var starType = 0;
+					if(this.hasPlanet){ starType = Math.floor(Math.random() * 3); } else { starType = Math.floor(Math.random() * 4); }
+					var X = Math.floor(Math.random() * _buffer.width);
+					var Y = 0;
+					var model = 0;
+					var speed = 10;
+					var isPlanet = false;
+					var height = 1;
+					switch(starType)
+                    {
+						case 0:
+						{
+							model = 0;
+							speed = 10;
+							break;
+						}
+						case 1:
+						{
+							model = 1;
+							speed = 17;
+							height = 5;
+							break;
+						}
+						case 2:
+						{
+							model = 2;
+							speed = 25;
+							height = 11;
+							break;
+						}
+						case 3:
+						{//Planets
+							var planetType = Math.floor(Math.random() * 3);
+							switch(planetType)
+							{
+								case 0:
+								{
+									Y = -178;
+									height = 356;
+									break;
+								}
+								case 1:
+								{
+									Y = -359;
+									height = 718;
+									break;
+								}
+								case 2:
+								{
+									Y = -368;
+									height = 735;
+									break;
+								}
+							}
+							speed = 100;
+							model = 3 + planetType;
+							isPlanet = true;
+							this.hasPlanet = true;
+							break;
+						}
+					}
+                    star = new Star(X, Y, model, speed, isPlanet, height);
                     stars.push(star);
                 }
 			}
 		}
 	}
     
-    function Star(X, Y)
+    function Star(X, Y, mdl, spd, isPlnt, hght)
     {
         this.x = X;
         this.y = Y;
+		this.Model = mdl;
+		this.speed = spd;
+		this.isPlanet = isPlnt;
+		this.height = hght;
+		this.killY = _canvas.height + (this.height / 2);
         
         this.Update = function()
         {
-            this.y += 10 * delta;
-            if(this.y > _canvas.height)
+            this.y += this.speed * delta;
+            if(this.y > this.killY)
             {
                 return 1;
             }
@@ -827,7 +923,7 @@ function Game()
                                     theLife = 500;
                                     theSpeed = 75;
                                     theDmg = 75;
-                                    model = 14;
+                                    model = 16;
                                     points = 1000;
                                     Cores = 1000;
                                     width = 116;
@@ -1166,37 +1262,6 @@ function Game()
 							}
                             
                             // Center boss
-                            /*if(!this.inCenter)
-                            {
-                                if(this.x >= _buffer.width / 2)
-                                {
-                                    this.x -= this.xMoveSpeed * delta;
-                                    this.xMoveSpeed = this.x - this.xstop;
-                                    if(Math.abs(this.x - this.xstop) < 15)
-                                    {
-                                        this.inCenter = true;
-                                    }
-                                }
-                                else
-                                {
-                                    this.x += this.xMoveSpeed * delta;
-                                    this.xMoveSpeed = this.xstop - this.x;
-                                    if(Math.abs(this.x > this.xstop) - 15)
-                                    {
-                                        this.inCenter = true;
-                                    }
-                                }
-                            }
-                            if(this.inCenter == true && Math.round(this.y) >= this.ystop)
-                            {
-                                this.phase = this.phaseSave;
-                                this.speed = 10;
-                                this.startX = this.x;
-                                this.startY = this.y;
-                            }*/
-
-                            
-                            // Center boss
                             if(!this.inCenter){
 							if(this.x >= _buffer.width / 2){this.x -= this.xMoveSpeed * delta; this.xMoveSpeed = this.x - this.xstop; if(Math.abs(this.x - this.xstop) < 15 && this.didTeleport){this.inCenter = true; this.phase = this.phaseSave; this.speed = 10; this.startX = this.x; this.startY = this.y;}}
 							else {this.x += this.xMoveSpeed * delta; this.xMoveSpeed = this.xstop - this.x; if(this.x > Math.abs(this.xstop - 15) && this.didTeleport){this.inCenter = true; this.phase = this.phaseSave; this.speed = 10; this.startX = this.x; this.startY = this.y;}}
@@ -1470,7 +1535,7 @@ function Game()
                                         }
                                         width = 21;
                                         height = 31;
-                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x + 35, this.y + 25, 2, points);
+                                        var enemy = new Enemy(theSpeed, theDmg, theLife, Cores, width, height, model, this.x - 35, this.y + 25, 2, points);
                                         enemies.push(enemy);
                                         this.spawnEnemy++;
                                         break;
@@ -1569,10 +1634,12 @@ function Game()
                         }
                         else
                         {
+							this.Model++;
 							this.laser = false;
 							this.inCenter = false;
                             this.life = 500 * this.phaseSave;
 							this.phase = -1;
+							sfx.play(0);
                         }
 						return 2;
 					}
@@ -1989,6 +2056,7 @@ function Game()
                         this.timer--;
                         if(this.timer <= 0)
                         {
+							sfx.play(0);
                             this.life = 0;
                         }
                     }
@@ -2424,9 +2492,11 @@ function Game()
 			{
 				if(stars[i].Update() != 0)
 				{
+					if(stars[i].isPlanet){starGeneration.hasPlanet = false;console.log("poping planet");}
 					self.popArray(stars, i);
 				}
 			}
+			console.log(starGeneration.hasPlanet);
 		}
 				
         if(gameState == 1 && !gco.win)
@@ -3105,16 +3175,26 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 
     this.drawStars = function()
     {
-		
+		var p = -1;//p is for planet
         for(i = 0; i < stars.length; i++)
         {
-           buffer.fillStyle = 'rgb(200, 200, 255)';
-		   buffer.beginPath();
-                buffer.arc(stars[i].x, stars[i].y, 2, 0, Math.PI * 2, true);
-           buffer.closePath();
-           buffer.fill();
+			if(stars[i].isPlanet){p = i; continue;}
+			if (imagesLoaded)
+			{
+				buffer.drawImage(starImages[stars[i].Model], stars[i].x - (starImages[stars[i].Model].width / 2), stars[i].y - (starImages[stars[i].Model].height / 2), starImages[stars[i].Model].width, starImages[stars[i].Model].height);
+			} else
+			{
+				buffer.fillStyle = 'rgb(200, 200, 255)';
+				buffer.beginPath();
+					buffer.arc(stars[i].x, stars[i].y, 2, 0, Math.PI * 2, true);
+				buffer.closePath();
+				buffer.fill();
+			}
         }
-		
+		if(p != -1)
+		{//ensure planets are drawn in front of stars
+			buffer.drawImage(starImages[stars[p].Model], stars[p].x - (starImages[stars[p].Model].width / 2), stars[p].y - (starImages[stars[p].Model].height / 2), starImages[stars[p].Model].width, starImages[stars[p].Model].height);
+		}
     }
 
     this.drawPlayer = function()

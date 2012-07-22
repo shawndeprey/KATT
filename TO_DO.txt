@@ -15,7 +15,6 @@
 -Create Story Gui
 	
 -Boss Level
-	-Make boss use new boss sprites
 	-Create credit roll which starts with the story ending.
     
 -If not logged in, display screen that says to login to play game.
