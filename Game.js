@@ -3558,10 +3558,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
     this.drawGUI = function()
     {
 		//State GUIs
-		// 0 = Main Menu
-		// 1 = Pause Menu
-		// 2 = Level Up Menu
-		// 3 = Game Over Menu
+			// 0 = Main Menu
+            // 1 = Pause Menu
+            // 2 = Level Up Menu
+            // 3 = Continue Menu
+            // 4 = Level Up Menu
+            // 5 = Game Over Menu
+            // 6 = Options Menu
+            // 7 = Submit Score Menu
 		//Non-State Guis
 		// Debug
 		// Life & other ingame info(can't be on any state gui's)
@@ -4122,14 +4126,19 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				}
 				//particleOffset
 				guiText[2] = new GUIText("Particles", 10, 55, "20px Helvetica", "left", "top", "rgb(96, 150, 96)");
+                
+                buffer.drawImage(itemImages[1], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
+                buffer.drawImage(itemImages[1], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
 				guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
 				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
 					guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
 				}
+                
 				guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
 				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
 					guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
 				}
+                
 				switch(particleOffset)
 				{
 					case 1:{guiText[5] = new GUIText("5", 43, 80, "26px Helvetica", "left", "top", "rgb(255, 0, 0)");

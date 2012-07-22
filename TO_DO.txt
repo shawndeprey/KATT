@@ -1,8 +1,10 @@
 -Create 48 x 48 sprites for gui menu.
 -Easter Eggs
+-Achievements
 
 -Options Menu
     -Audio settings
+    
 -On pause menu, make link to Options
     
 -Collision detection fixes
