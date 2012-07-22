@@ -17,6 +17,8 @@ function Game()
     var debug = false;
 	var playerInfo = false;
 	
+	var logged = false;
+	
 	//GUI Info
 	var currentGui = 0;
 	var lastGui = 0;
@@ -1621,7 +1623,6 @@ function Game()
 						this.startX = this.x;
 						this.startY = this.y;
 						this.circleYStop = this.y + 25;
-						console.log("Boss Died");
 						this.phaseSave++;
                         if(this.phaseSave >= 5)
                         {
@@ -2420,7 +2421,7 @@ function Game()
     // Initialization
     /******************************************************/
     
-    this.Init = function()
+    this.Init = function(isLoggedIn)
     {
         _canvas = document.getElementById('canvas');
         if(_canvas && _canvas.getContext)
@@ -2437,7 +2438,7 @@ function Game()
             buffer.font = "bold 25px sans-serif";
         }
 
-        
+        logged = isLoggedIn;
 
         player = new Player(24, 40);
 		enemyGeneration = new EnemyGeneration();
@@ -2492,11 +2493,10 @@ function Game()
 			{
 				if(stars[i].Update() != 0)
 				{
-					if(stars[i].isPlanet){starGeneration.hasPlanet = false;console.log("poping planet");}
+					if(stars[i].isPlanet){starGeneration.hasPlanet = false;}
 					self.popArray(stars, i);
 				}
 			}
-			console.log(starGeneration.hasPlanet);
 		}
 				
         if(gameState == 1 && !gco.win)
@@ -2555,11 +2555,11 @@ function Game()
                         break;
                         
                         case 2:
-                            if(enemies[i].isBoss){ /*console.log("Boss Phase " + enemies[i].phase + " complete!");*/ }
+                            if(enemies[i].isBoss){ }
                         break;
                         
                         case 3:
-                            if(enemies[i].isBoss){ /*console.log("Boss defeated!");*/ }
+                            if(enemies[i].isBoss){ }
                         break;
                     }
                 }
@@ -2787,13 +2787,16 @@ function Game()
 		{
 			case 0:
 			{//Main Menu
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				if(logged)
 				{
-					currentGui = 2;//default case will Trigger
-				}
-				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
-				{
-					currentGui = 6; lastGui = 0;	
+					if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+					{
+						currentGui = 2;//default case will Trigger
+					}
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+					{
+						currentGui = 6; lastGui = 0;	
+					}
 				}
 				break;
 			}
@@ -3652,18 +3655,25 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		{
 			case 0:
 			{// Main Menu
-				guiText[0] = new GUIText("Kill All the Things!", _canvas.width / 2, _canvas.height / 2 - 100, 
-										 "28px Helvetica", "center", "top", "rgb(255, 0, 255)");
-				guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
-				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				if(!logged)
 				{
-					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
-				}
-				guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
-				if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+					guiText[0] = new GUIText("Please Login above to play", _canvas.width / 2, _canvas.height / 2 - 100, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					guiText[1] = new GUIText("Kill all the Things!", _canvas.width / 2, _canvas.height / 2 - 50, "28px Helvetica", "center", "top", "rgb(255, 0, 255)");
+				} else
 				{
-					guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					guiText[0] = new GUIText("Kill all the Things!", _canvas.width / 2, _canvas.height / 2 - 100, "28px Helvetica", "center", "top", "rgb(255, 0, 255)");
+					guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+					{
+						guiText[1] = new GUIText("Start New Game", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					}
+					guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
+					{
+						guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					}
 				}
+				
 				break;
 			}
 			case 1:

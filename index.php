@@ -85,7 +85,14 @@ $user->setup();
     </canvas>
 <script type="text/javascript">
 	var play = new Game();
-	play.Init();
+	var logged = false;
+	<?php
+	if($user->data['is_registered'])
+	{
+		echo("logged = true;");
+	}
+	?>
+	play.Init(logged);
 	play.Run();
 </script>
 </div>
