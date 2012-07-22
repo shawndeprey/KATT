@@ -1,6 +1,4 @@
 -Create 48 x 48 sprites for gui menu.
--Create Sprites for bullets, missiles, and mines. Height and width should be the height and width of ingame objects.
--New Core Sprites
 -Easter Eggs
 
 -Options Menu

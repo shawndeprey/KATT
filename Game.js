@@ -107,11 +107,11 @@ function Game()
         }
         
         var itemImages = [];
-        for(var i = 0; i < 1; i++)
+        for(var i = 0; i < 5; i++)
         {
             itemImages[i] = new Image();
 			itemImages[i].addEventListener('load', self.loadedImage, false);
-            itemImages[i].src = ('Graphics/item_' + i + '.png');
+            itemImages[i].src = ('Graphics/item_0' + i + '.png')
         }
 
 	var numOfImages = (starImages.length + images.length + enemyImages.length + playerImages.length + itemImages.length);
@@ -1842,8 +1842,8 @@ function Game()
         this.x = inX;
         this.y = inY;
         this.speed = theSpeed;
-        this.width = 5;
-        this.height = 10;
+        this.width = 25;
+        this.height = 25;
         this.life = 1;
 		this.damage = dmg;
 		this.missileType = missType;
@@ -2056,6 +2056,7 @@ function Game()
                         this.timer--;
                         if(this.timer <= 0)
                         {
+							sfx.play(0);
                             this.life = 0;
                         }
                     }
@@ -3372,136 +3373,30 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			switch(missiles[i].missileType)
 			{
 				case 0:
-				{//Pea Shooter
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(255, 255, 255)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
 				case 1:
-			    {//Pea Shooter Pro
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(255, 255, 255)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
 				case 2:
 				{//Pea Shooter Ultra
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(255, 255, 255)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
+					buffer.drawImage(itemImages[1], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
 					break;
 				}
 				case 50:
-				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(255, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
 				case 51:
 				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(255, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
+					buffer.drawImage(itemImages[2], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
 					break;
 				}
                 case 52:
 				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 255)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x1, missiles[i].y2);
-                        buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
+					buffer.drawImage(itemImages[3], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
 					break;
 				}
 				case 100:
-				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
 				case 101:
-				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
                 case 102:
-				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
                 case 103:
-				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
-					break;
-				}
                 case 104:
 				{
-					buffer.beginPath();
-						buffer.strokeStyle = "rgb(0, 255, 0)";
-						buffer.moveTo(missiles[i].x1, missiles[i].y1);
-						buffer.lineTo(missiles[i].x2, missiles[i].y2);
-						buffer.lineTo(missiles[i].x3, missiles[i].y3);
-						buffer.lineTo(missiles[i].x1, missiles[i].y1);
-						buffer.stroke();
-					buffer.closePath();
+					buffer.drawImage(itemImages[4], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
 					break;
 				}
 			}
