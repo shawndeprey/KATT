@@ -2393,7 +2393,10 @@ function Game()
 		this.Update = function()
 		{
 			if(this.overlayAlpha >= 1){ this.isBlackedOut = true; } else { this.overlayAlpha += delta / 2; }
-			if(this.isBlackedOut && !this.CreditsFinished()){ this.yOffset += this.scrollSpeed * delta; }
+			if(this.isBlackedOut && !this.CreditsFinished())
+            {
+                this.yOffset += this.scrollSpeed * delta;
+            }
 			else if(this.isBlackedOut && this.CreditsFinished())
 			{
 				this.overlayAlpha -= delta;
@@ -3384,6 +3387,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			if(enemies[i].isBoss)
 			{
 				buffer.drawImage(playerImages[0], enemies[i].moveX - (player.width / 2), enemies[i].moveY - (player.height / 2), player.width, player.height);
+                self.drawBossLifeMeter(enemies[i]);
 			}
 			if(enemies[i].laser == true){ drawLaser = true; x = enemies[i].laserX; y = enemies[i].laserY; h = enemies[i].laserHeight; w = enemies[i].laserWidth; }
         }
@@ -3697,7 +3701,6 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         var y1 = _buffer.height - 25;
         var x2 = width;
         var y2 = y1 + height;
-		var red
 
         var grd = buffer.createLinearGradient(x1, y1, x2, y2);
         grd.addColorStop(0, "rgb("+ ((player.maxLife - player.life) * 2) +", 0, 0)");
@@ -3716,7 +3719,31 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                 buffer.lineTo(x1, y1);
             buffer.stroke();
         buffer.closePath();
-		
+    }
+    
+    this.drawBossLifeMeter = function(boss)
+    {
+        var BLM_width = 100;
+        var BLM_height = 10;
+        var BLM_x1 = (boss.x + 8) - boss.width / 2;
+        var BLM_y1 = boss.y - 75;
+        var BLM_x2 = BLM_x1 + BLM_width;
+        var BLM_y2 = BLM_y1 + BLM_height;
+
+        buffer.beginPath();
+            buffer.fillStyle = "rgb(255, 0, 0)";
+            buffer.fillRect(BLM_x1, BLM_y1, ((boss.life / boss.currentMaxLife) * 100), BLM_height);
+        buffer.closePath();
+        
+        buffer.beginPath();
+            buffer.strokeStyle = "rgb(255, 255, 255)";
+                buffer.moveTo(BLM_x1, BLM_y1);
+                buffer.lineTo(BLM_x2, BLM_y1);
+                buffer.lineTo(BLM_x2, BLM_y2);
+                buffer.lineTo(BLM_x1, BLM_y2);
+                buffer.lineTo(BLM_x1, BLM_y1);
+            buffer.stroke();
+        buffer.closePath();
     }
     
     this.drawShieldMeter = function()
@@ -3788,7 +3815,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 		//State GUIs
 			// 0 = Main Menu
             // 1 = Pause Menu
-            // 2 = Level Up Menu
+            // 2 = Upgrade Up Menu
             // 3 = Continue Menu
             // 4 = Level Up Menu
             // 5 = Game Over Menu

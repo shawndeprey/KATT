@@ -1,16 +1,11 @@
 -Make Gui Sprites for gui items that don't have their own.
 -Easter Eggs
 -Achievements
-
--Options Menu
-    -Audio settings
     
 -On pause menu, make link to Options
 
 -Collision detection fixes
     -Shield
-    -Cores
-    -Power-Ups
 
 -Boss Level
 	-Make boss life bar.
