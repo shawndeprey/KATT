@@ -3916,13 +3916,12 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         buffer.lineTo(LPM_x1, LPM_y1);
                     buffer.stroke();
                 buffer.closePath();
-
                 
                 if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (280) && mouseY > (250))
                 {//Start Level
                     guiText[5] = new GUIText("Start Level", _canvas.width - 100, 250, 
                                          "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
-                    if(player.weapon == 49){guiText[guiText.length] = new GUIText("Must equip main weapon", _canvas.width - 100, 280, 
+                    if(player.weapon == 49){guiText[12] = new GUIText("Must equip main weapon", _canvas.width - 100, 280,
                                          "12px Helvetica", "center", "top", "rgb(255, 50, 50)");}
                 } else
                 {
