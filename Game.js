@@ -312,6 +312,8 @@ function Game()
 		this.bossY = 0;//Final Boss Y set when boss dies
 		
 		this.credits = new Credits();
+		this.story = new Story();
+		this.playStory = false;
 		
 		this.Init = function()
 		{
@@ -503,6 +505,12 @@ function Game()
 			explosion = new Explosion(this.bossX + randX, this.bossY + randY, 75, 4, 200, R, G, B);
 			explosions.push(explosion);
 			sfx.play(0);
+		}
+		
+		this.EndStoryMode = function()
+		{
+			this.playStory = false;
+			this.story = new Story();
 		}
 	}
 	
@@ -2329,6 +2337,88 @@ function Game()
 		this.color = col;
     }
 	
+	function Story()
+	{
+		this.overlayAlpha = 0.0;
+		this.center = _buffer.width / 2;
+		this.credits = [];
+		this.lines = 16;
+		this.lineHeight = 30;
+		this.yOffset = 0;
+		this.scrollSpeed = 25;
+		this.isBlackedOut = false;
+		var out = "";
+		var size = "";
+		var color = "";
+		for(var i = 0; i < this.lines; i++)
+		{
+			switch(i)
+			{
+				case 0:{out = "In the year 30XX, humans and Drones clashed for control of the universe."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 1:{out = "After decades of fierce conflict, humanity's presence in international"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 2:{out = "space began to dwindle and the Drones overran all major human civilization."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 3:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 4:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 5:{out = "It was a total loss. International Space Command HQ was reduced to ash."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 6:{out = "Whatever was left of the fleet scattered across the far reaches of"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 7:{out = "space to hide from the dreaded armies of the Drones."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 8:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 9:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 10:{out = "Although the future of humanity is left bleak by the Drone bombardment,"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 11:{out = "an ace pilot now races through space towards the heart of the Drone army."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 12:{out = "There is only one mission to complete now: "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 13:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 14:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 15:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+			}
+			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
+		}
+		
+		this.Update = function()
+		{
+			if(this.overlayAlpha >= 1){ this.isBlackedOut = true; } else { this.overlayAlpha += delta / 2; }
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.yOffset += this.scrollSpeed * delta; }
+			else if(this.isBlackedOut && this.CreditsFinished())
+			{
+				this.overlayAlpha -= delta;
+				console.log(this.overlayAlpha);
+				if(this.overlayAlpha <= 0){ gco.EndStoryMode(); }
+			}
+		}
+		
+		this.Draw = function()
+		{
+			this.DrawOverlay();
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.DrawCredits(); }
+		}
+		
+		this.DrawOverlay = function()
+		{
+			buffer.fillStyle = "rgba(0, 0, 0, " + this.overlayAlpha + ")";
+			buffer.fillRect(0, 0, _buffer.width, _buffer.height);
+		}
+		
+		this.DrawCredits = function()
+		{
+			buffer.beginPath();
+			for(var i = 0; i < this.credits.length; i++)
+			{
+				buffer.fillStyle = this.credits[i].color;
+				buffer.font = this.credits[i].fontStyle;
+				buffer.textAlign = this.credits[i].alignX;
+				buffer.textBaseline = this.credits[i].alignY;
+				buffer.fillText(this.credits[i].text, this.credits[i].x, this.credits[i].y - this.yOffset);
+			}
+			buffer.closePath();
+		}
+		
+		this.CreditsFinished = function()
+		{
+			if(this.credits[this.credits.length - 1].y - this.yOffset < -20){ return true; } else { return false; }
+		}
+	}
+	
 	function Credits()
 	{
 		this.overlayAlpha = 0.0;
@@ -2476,6 +2566,7 @@ function Game()
     
     this.Update = function()
     {
+		if(gco.playStory){ gco.story.Update(); }
 		//Stop Sound Check
 		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.pause(1);}
 		if((gameState != 1) && sfx.bossLaserPlaying){sfx.pause(2);}
@@ -2787,7 +2878,7 @@ function Game()
 		{
 			case 0:
 			{//Main Menu
-				if(logged)
+				if(logged && !gco.playStory)
 				{
 					if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 					{
@@ -2796,6 +2887,10 @@ function Game()
 					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
 					{
 						currentGui = 6; lastGui = 0;	
+					}
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 110) + 20 && mouseY > (_canvas.height / 2 + 110) - 10)
+					{
+						gco.playStory = true;
 					}
 				}
 				break;
@@ -3168,11 +3263,11 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
             // GUI
             self.drawHUD();
         }
-		if(gco.win)
-		{
-			gco.credits.Draw();
-		}
+		
+		if(gco.win){ gco.credits.Draw(); }
 		self.drawGUI();
+		if(gco.playStory){ gco.story.Draw(); }
+		
         canvas.drawImage(_buffer, 0, 0);
     }
 
@@ -3671,6 +3766,11 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 60) + 20 && mouseY > (_canvas.height / 2 + 60) - 10)
 					{
 						guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					}
+					guiText[3] = new GUIText("Story", _canvas.width / 2, (_canvas.height / 2) + 100, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 110) + 20 && mouseY > (_canvas.height / 2 + 110) - 10)
+					{
+						guiText[3] = new GUIText("Story", _canvas.width / 2, (_canvas.height / 2) + 100, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
 					}
 				}
 				

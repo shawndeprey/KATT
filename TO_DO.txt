@@ -14,3 +14,4 @@
 	
 -Boss Level
 	-Create credit roll which starts with the story ending.
+	-Make boss invulnerable while he is centering.
