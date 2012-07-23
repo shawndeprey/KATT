@@ -544,7 +544,8 @@ function Game()
 		this.laserPlaying = false;
 		this.bossLaser = 0;
 		this.bossLaserPlaying = false;
-		
+        this.masterVolume = 0.2;
+        
 		this.Init = function()
 		{
 		//Explosions
@@ -553,18 +554,18 @@ function Game()
 			{
 				var a = null;
 				if(this.soundType == 0){a = new Audio('Audio/Explode.mp3');} else {a = new Audio('Audio/Explode.ogg');}
-				a.volume = 0.2;
+				a.volume = this.masterVolume;
 				a.preload = 'auto';
 				this.explosion.channel.push(a);
 			}
 		//Lasers
 			if(this.soundType == 0){this.laser = new Audio('Audio/lasorz.mp3');} else {this.laser = new Audio('Audio/lasorz.ogg');}
-			this.laser.volume = 0.5;
+			this.laser.volume = this.masterVolume;
 			this.laser.preload = 'auto';
 			this.laser.loop = true;
 			
 			if(this.soundType == 0){this.bossLaser = new Audio('Audio/lasorz.mp3');} else {this.bossLaser = new Audio('Audio/lasorz.ogg');}
-			this.bossLaser.volume = 0.5;
+			this.bossLaser.volume = this.masterVolume;
 			this.bossLaser.preload = 'auto';
 			this.bossLaser.loop = true;
 		}
@@ -609,6 +610,17 @@ function Game()
 					break;
 				}
 			}
+		}
+        
+        this.volume = function(value)
+		{
+            for(var i = 0; i < this.explosion.channel.length; i++)
+            {
+                this.explosion.channel[i].volume = value;
+            }
+            this.laser.volume = value;
+            this.bossLaser.volume = value;
+            this.masterVolume = value;
 		}
 	}
 	
@@ -2902,19 +2914,45 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			}
 			case 6:
 			{//Options Menu
-				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
-				{//Back
-					currentGui = lastGui; lastGui = 6;
-				}
-                buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
-				if(mouseX > (_canvas.width / 4) && mouseX < (_canvas.width / 4) + 25 && mouseY > 150 && mouseY < 200) {
+                // Back button
+				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45){currentGui = lastGui; lastGui = 6;}
+                
+                // Graphics
+				if(mouseX > 200 && mouseX < 225 && mouseY > 150 && mouseY < 200)
+                {
 					particleOffset -= 1;
 					if(particleOffset < 1){particleOffset = 1;}
 				}
-				if(mouseX >= 575 && mouseX < 600 && mouseY > 150 && mouseY < 200) {
+				if(mouseX >= 575 && mouseX < 600 && mouseY > 150 && mouseY < 200)
+                {
 					particleOffset += 1;
                     if(particleOffset > 5){particleOffset = 5;}
 				}
+                
+                // BGM Volume
+                if(mouseX > 200 && mouseX < 225 && mouseY > 290 && mouseY < 340)
+                {
+                    if(gco.bgm.volume < 0.1){break;}
+                    else{gco.bgm.volume = Math.round(gco.bgm.volume * 100) / 100 - 0.1;}
+				}
+				if(mouseX >= 575 && mouseX < 600 && mouseY > 290 && mouseY < 340)
+                {
+                    if(gco.bgm.volume > 0.91){break;}
+                    else{gco.bgm.volume = Math.round(gco.bgm.volume * 100) / 100 + 0.1;}
+				}
+                
+                // SFX Volume
+                if(mouseX > 200 && mouseX < 225 && mouseY > 430 && mouseY < 480)
+                {
+                    if(sfx.masterVolume < 0.1){break;}
+                    else{sfx.volume(Math.round(sfx.masterVolume * 100) / 100 - 0.1);sfx.play(0);}
+				}
+				if(mouseX >= 575 && mouseX < 600 && mouseY > 430 && mouseY < 480)
+                {
+                    if(sfx.masterVolume > 0.91){break;}
+                    else{sfx.volume(Math.round(sfx.masterVolume * 100) / 100 + 0.1);sfx.play(0);}
+				}
+                
 				break;
 			}
 			case 7:
@@ -4211,14 +4249,16 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				break;
 			}
 			case 6:
-			{//Options Menu
+			{
+                //Options Menu
 				guiText[0] = new GUIText("Options", _canvas.width / 2, 25, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
 				guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 150, 96)");
 				if(mouseX > 0 && mouseX < 90 && mouseY < _canvas.height && mouseY > _canvas.height - 45)
 				{
 					guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 255, 96)");
 				}
-				//particleOffset
+                
+				// Graphics
 				guiText[2] = new GUIText("Particles", (_canvas.width / 2), 125, "20px Helvetica", "center", "top", "rgb(96, 150, 96)");
                 
                 if(mouseX >= 200 && mouseX <= 225 && mouseY >= 150 && mouseY <= 200)
@@ -4234,22 +4274,62 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                     buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
                 }
 				
-                buffer.drawImage(images[14], (19 + (87.5 * particleOffset) - 88) + (_canvas.width / 4), 161, 13, 28);
+                buffer.drawImage(images[14], (19 + (87.5 * particleOffset) - 87.5) + (_canvas.width / 4), 161, 13, 28);
                 
 				switch(particleOffset)
 				{
-					case 1:{guiText[3] = new GUIText("1", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					case 1:{guiText[3] = new GUIText(particleOffset, _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
 							guiText[4] = new GUIText("Need new computer...", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
-					case 2:{guiText[3] = new GUIText("2", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(120, 200, 60)");
+					case 2:{guiText[3] = new GUIText(particleOffset, _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(120, 200, 60)");
 							guiText[4] = new GUIText("Needs Shinies :(", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
-					case 3:{guiText[3] = new GUIText("3", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(150, 100, 20)");
+					case 3:{guiText[3] = new GUIText(particleOffset, _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(150, 100, 20)");
 							guiText[4] = new GUIText("Less Shinies.", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
-					case 4:{guiText[3] = new GUIText("4", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(200, 25, 0)");
+					case 4:{guiText[3] = new GUIText(particleOffset, _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(200, 25, 0)");
 							guiText[4] = new GUIText("Shinies!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
-					case 5:{guiText[3] = new GUIText("5", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(255, 0, 0)");
+					case 5:{guiText[3] = new GUIText(particleOffset, _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(255, 0, 0)");
 							guiText[4] = new GUIText("OMFG SPARKLES!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
 				}
-				break;
+				
+                // BGM Volume
+				guiText[5] = new GUIText("BGM Volume", (_canvas.width / 2), 265, "20px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                
+                if(mouseX >= 200 && mouseX <= 225 && mouseY >= 290 && mouseY <= 340)
+                {
+					buffer.drawImage(images[12], (_canvas.width / 4), 290, 400, 50);
+				}
+                else if(mouseX >= 575 && mouseX <= 600 && mouseY >= 290 && mouseY <= 340)
+                {
+                    buffer.drawImage(images[13], (_canvas.width / 4), 290, 400, 50);
+                }
+                else
+                {
+                    buffer.drawImage(images[11], (_canvas.width / 4), 290, 400, 50);
+                }
+				
+                buffer.drawImage(images[14], (19 + (35 * Math.round(gco.bgm.volume * 10))) + (_canvas.width / 4), 301, 13, 28);
+                
+                guiText[6] = new GUIText(Math.round(gco.bgm.volume * 100) + "%", _canvas.width / 2, 345, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
+                
+                // SFX Volume
+				guiText[7] = new GUIText("SFX Volume", (_canvas.width / 2), 405, "20px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                
+                if(mouseX >= 200 && mouseX <= 225 && mouseY >= 430 && mouseY <= 480)
+                {
+					buffer.drawImage(images[12], (_canvas.width / 4), 430, 400, 50);
+				}
+                else if(mouseX >= 575 && mouseX <= 600 && mouseY >= 430 && mouseY <= 480)
+                {
+                    buffer.drawImage(images[13], (_canvas.width / 4), 430, 400, 50);
+                }
+                else
+                {
+                    buffer.drawImage(images[11], (_canvas.width / 4), 430, 400, 50);
+                }
+				
+                buffer.drawImage(images[14], (19 + (35 * Math.round(sfx.masterVolume * 10))) + (_canvas.width / 4), 441, 13, 28);
+                
+                guiText[8] = new GUIText(Math.round(sfx.masterVolume * 100) + "%", _canvas.width / 2, 485, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
+                break;
 			}
 			case 7:
 			{// Submit Score Menu
