@@ -3726,7 +3726,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         var BLM_width = 100;
         var BLM_height = 10;
         var BLM_x1 = (boss.x + 8) - boss.width / 2;
-        var BLM_y1 = boss.y - 75;
+        var BLM_y1 = boss.y - 50;
         var BLM_x2 = BLM_x1 + BLM_width;
         var BLM_y2 = BLM_y1 + BLM_height;
 
