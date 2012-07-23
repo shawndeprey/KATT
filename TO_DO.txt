@@ -4,8 +4,3 @@
 
 -Collision detection fixes
     -Shield
-    -Cores
-    -Power-Ups
-
--Boss Level
-	-Make boss life bar.
