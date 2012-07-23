@@ -2,11 +2,6 @@
 -Easter Eggs
 -Achievements
 
--Options Menu
-    -Audio settings
-    
--On pause menu, make link to Options
-
 -Collision detection fixes
     -Shield
     -Cores
