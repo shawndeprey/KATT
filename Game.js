@@ -83,7 +83,7 @@ function Game()
         }
 		
         var images = [];
-        for(var i = 0; i < 11; i++)
+        for(var i = 0; i < 15; i++)
         {
             images[i] = new Image();
 			images[i].addEventListener('load', self.loadedImage, false);
@@ -2080,7 +2080,7 @@ function Game()
     function Explosion(X, Y, NumParticles, Size, MaxAge, R, G, B)
     {
         this.particles = [];
-        this.numParticles = NumParticles / particleOffset;
+        this.numParticles = (NumParticles / 5) * particleOffset;
         this.size = Size;
         this.age = 0;
         this.maxAge = MaxAge;
@@ -2778,11 +2778,14 @@ function Game()
 	function doMouseClick(e)
 	{
 		//State GUIs
-		// 0 = Main Menu
-		// 1 = Pause Menu
-		// 2 = Level Up Menu
-		// 3 = Game Over Menu
-		// 4 = Continue Menu
+            // 0 = Main Menu
+            // 1 = Pause Menu
+            // 2 = Level Up Menu
+            // 3 = Continue Menu
+            // 4 = Level Up Menu
+            // 5 = Game Over Menu
+            // 6 = Options Menu
+            // 7 = Submit Score Menu
 		switch(currentGui)
 		{
 			case 0:
@@ -2900,13 +2903,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				{//Back
 					currentGui = lastGui; lastGui = 6;
 				}
-				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
-					particleOffset += 1;
-					if(particleOffset > 5){particleOffset = 5;}
-				}
-				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+                buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
+				if(mouseX > (_canvas.width / 4) && mouseX < (_canvas.width / 4) + 25 && mouseY > 150 && mouseY < 200) {
 					particleOffset -= 1;
 					if(particleOffset < 1){particleOffset = 1;}
+				}
+				if(mouseX >= 575 && mouseX < 600 && mouseY > 150 && mouseY < 200) {
+					particleOffset += 1;
+                    if(particleOffset > 5){particleOffset = 5;}
 				}
 				break;
 			}
@@ -4205,32 +4209,35 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 255, 96)");
 				}
 				//particleOffset
-				guiText[2] = new GUIText("Particles", 10, 55, "20px Helvetica", "left", "top", "rgb(96, 150, 96)");
+				guiText[2] = new GUIText("Particles", (_canvas.width / 2), 125, "20px Helvetica", "center", "top", "rgb(96, 150, 96)");
                 
-                buffer.drawImage(itemImages[1], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
-                buffer.drawImage(itemImages[1], missiles[i].x - (missiles[i].width / 2), missiles[i].y - (missiles[i].height / 2), missiles[i].width, missiles[i].height);
-				guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
-				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
-					guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+                if(mouseX >= 200 && mouseX <= 225 && mouseY >= 150 && mouseY <= 200)
+                {
+					buffer.drawImage(images[12], (_canvas.width / 4), 150, 400, 50);
 				}
-                
-				guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
-				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
-					guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
-				}
+                else if(mouseX >= 575 && mouseX <= 600 && mouseY >= 150 && mouseY <= 200)
+                {
+                    buffer.drawImage(images[13], (_canvas.width / 4), 150, 400, 50);
+                }
+                else
+                {
+                    buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
+                }
+				
+                buffer.drawImage(images[14], (19 + (87.5 * particleOffset) - 88) + (_canvas.width / 4), 161, 13, 28);
                 
 				switch(particleOffset)
 				{
-					case 1:{guiText[5] = new GUIText("5", 43, 80, "26px Helvetica", "left", "top", "rgb(255, 0, 0)");
-							guiText[6] = new GUIText("OMFG SPARKLES!", 51, 110, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
-					case 2:{guiText[5] = new GUIText("4", 43, 80, "26px Helvetica", "left", "top", "rgb(200, 25, 0)");
-							guiText[6] = new GUIText("Shinies!", 51, 110, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
-					case 3:{guiText[5] = new GUIText("3", 43, 80, "26px Helvetica", "left", "top", "rgb(150, 100, 20)");
-							guiText[6] = new GUIText("Less Shinies.", 51, 110, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
-					case 4:{guiText[5] = new GUIText("2", 43, 80, "26px Helvetica", "left", "top", "rgb(120, 200, 60)");
-							guiText[6] = new GUIText("Needs Shinies :(", 51, 110, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
-					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
-							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+					case 1:{guiText[3] = new GUIText("1", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
+							guiText[4] = new GUIText("Need new computer...", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+					case 2:{guiText[3] = new GUIText("2", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(120, 200, 60)");
+							guiText[4] = new GUIText("Needs Shinies :(", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
+					case 3:{guiText[3] = new GUIText("3", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(150, 100, 20)");
+							guiText[4] = new GUIText("Less Shinies.", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
+					case 4:{guiText[3] = new GUIText("4", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(200, 25, 0)");
+							guiText[4] = new GUIText("Shinies!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
+					case 5:{guiText[3] = new GUIText("5", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(255, 0, 0)");
+							guiText[4] = new GUIText("OMFG SPARKLES!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
 				}
 				break;
 			}
