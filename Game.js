@@ -85,7 +85,7 @@ function Game()
         }
 		
         var images = [];
-        for(var i = 0; i < 11; i++)
+        for(var i = 0; i < 15; i++)
         {
             images[i] = new Image();
 			images[i].addEventListener('load', self.loadedImage, false);
@@ -2089,7 +2089,7 @@ function Game()
     function Explosion(X, Y, NumParticles, Size, MaxAge, R, G, B)
     {
         this.particles = [];
-        this.numParticles = NumParticles / particleOffset;
+        this.numParticles = (NumParticles / 5) * particleOffset;
         this.size = Size;
         this.age = 0;
         this.maxAge = MaxAge;
@@ -2342,7 +2342,7 @@ function Game()
 		this.overlayAlpha = 0.0;
 		this.center = _buffer.width / 2;
 		this.credits = [];
-		this.lines = 16;
+		this.lines = 15;
 		this.lineHeight = 30;
 		this.yOffset = 0;
 		this.scrollSpeed = 25;
@@ -2356,7 +2356,7 @@ function Game()
 			{
 				case 0:{out = "In the year 30XX, humans and Drones clashed for control of the universe."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 1:{out = "After decades of fierce conflict, humanity's presence in international"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 2:{out = "space began to dwindle and the Drones overran all major human civilization."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 2:{out = "space began to dwindle, and, the Drones overran all major human civilization."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 3:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 4:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 5:{out = "It was a total loss. International Space Command HQ was reduced to ash."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
@@ -2368,8 +2368,7 @@ function Game()
 				case 11:{out = "an ace pilot now races through space towards the heart of the Drone army."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 12:{out = "There is only one mission to complete now: "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				case 13:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 14:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 15:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 14:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
 				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 			}
 			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
@@ -2424,7 +2423,7 @@ function Game()
 		this.overlayAlpha = 0.0;
 		this.center = _buffer.width / 2;
 		this.credits = [];
-		this.lines = 24;
+		this.lines = 28;
 		this.lineHeight = 50;
 		this.yOffset = 0;
 		this.scrollSpeed = 25;
@@ -2436,30 +2435,34 @@ function Game()
 		{
 			switch(i)
 			{
-				case 0:{out = "Congradulations!!!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 1:{out = "You Killed all the Things!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 2:{out = "Produced by Blackmodule Studio"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 3:{out = "Program Managers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 4:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 5:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 6:{out = "Lead Game System Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 7:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 8:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 9:{out = "Lead Software Engineers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 10:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 11:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 12:{out = "Programmers in Test"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 13:{out = "Andrew Muller"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 14:{out = "Graphic Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 15:{out = "David Van Laar-Veth"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 16:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 17:{out = "Tyler Madden"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 18:{out = "Sound Artists"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 19:{out = "David Van Laar-Veth (The Badass)"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 20:{out = "Story"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 21:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 22:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 23:{out = "Thanks for playing!"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 0:{out = "Humanity is Saved"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 1:{out = "Our ace pilot has defeated the drone core in enough time to save humanity."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 2:{out = "The task of rebuilding civilization, however difficult, can still never"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 3:{out = "match the devotion and courage it took for our ace pilot to..."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 4:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 5:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 6:{out = "Produced by Blackmodule Studio"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 7:{out = "Program Managers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 8:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 9:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 10:{out = "Lead Game System Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 11:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 12:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 13:{out = "Lead Software Engineers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 14:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 15:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 16:{out = "Programmers in Test"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 17:{out = "Andrew Muller"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 18:{out = "Graphic Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 19:{out = "David Van Laar-Veth"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 20:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 21:{out = "Tyler Madden"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 22:{out = "Sound Artists"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 23:{out = "David Van Laar-Veth (The Badass)"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 24:{out = "Story"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 25:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 26:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 27:{out = "Thanks for playing!"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 			}
 			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
@@ -2869,11 +2872,14 @@ function Game()
 	function doMouseClick(e)
 	{
 		//State GUIs
-		// 0 = Main Menu
-		// 1 = Pause Menu
-		// 2 = Level Up Menu
-		// 3 = Game Over Menu
-		// 4 = Continue Menu
+            // 0 = Main Menu
+            // 1 = Pause Menu
+            // 2 = Level Up Menu
+            // 3 = Continue Menu
+            // 4 = Level Up Menu
+            // 5 = Game Over Menu
+            // 6 = Options Menu
+            // 7 = Submit Score Menu
 		switch(currentGui)
 		{
 			case 0:
@@ -2998,13 +3004,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 				{//Back
 					currentGui = lastGui; lastGui = 6;
 				}
-				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
-					particleOffset += 1;
-					if(particleOffset > 5){particleOffset = 5;}
-				}
-				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
+                buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
+				if(mouseX > (_canvas.width / 4) && mouseX < (_canvas.width / 4) + 25 && mouseY > 150 && mouseY < 200) {
 					particleOffset -= 1;
 					if(particleOffset < 1){particleOffset = 1;}
+				}
+				if(mouseX >= 575 && mouseX < 600 && mouseY > 150 && mouseY < 200) {
+					particleOffset += 1;
+                    if(particleOffset > 5){particleOffset = 5;}
 				}
 				break;
 			}
@@ -3736,10 +3743,14 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
     this.drawGUI = function()
     {
 		//State GUIs
-		// 0 = Main Menu
-		// 1 = Pause Menu
-		// 2 = Level Up Menu
-		// 3 = Game Over Menu
+			// 0 = Main Menu
+            // 1 = Pause Menu
+            // 2 = Level Up Menu
+            // 3 = Continue Menu
+            // 4 = Level Up Menu
+            // 5 = Game Over Menu
+            // 6 = Options Menu
+            // 7 = Submit Score Menu
 		//Non-State Guis
 		// Debug
 		// Life & other ingame info(can't be on any state gui's)
@@ -4311,27 +4322,35 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					guiText[1] = new GUIText("Back", 10, _canvas.height - 35, "28px Helvetica", "left", "top", "rgb(96, 255, 96)");
 				}
 				//particleOffset
-				guiText[2] = new GUIText("Particles", 10, 55, "20px Helvetica", "left", "top", "rgb(96, 150, 96)");
-				guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
-				if(mouseX > 0 && mouseX < 47 && mouseY < 105 && mouseY > 75) {
-					guiText[3] = new GUIText("<", 10, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
+				guiText[2] = new GUIText("Particles", (_canvas.width / 2), 125, "20px Helvetica", "center", "top", "rgb(96, 150, 96)");
+                
+                if(mouseX >= 200 && mouseX <= 225 && mouseY >= 150 && mouseY <= 200)
+                {
+					buffer.drawImage(images[12], (_canvas.width / 4), 150, 400, 50);
 				}
-				guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 150, 96)");
-				if(mouseX >= 47 && mouseX < 95 && mouseY < 105 && mouseY > 75) {
-					guiText[4] = new GUIText(">", 72, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
-				}
+                else if(mouseX >= 575 && mouseX <= 600 && mouseY >= 150 && mouseY <= 200)
+                {
+                    buffer.drawImage(images[13], (_canvas.width / 4), 150, 400, 50);
+                }
+                else
+                {
+                    buffer.drawImage(images[11], (_canvas.width / 4), 150, 400, 50);
+                }
+				
+                buffer.drawImage(images[14], (19 + (87.5 * particleOffset) - 88) + (_canvas.width / 4), 161, 13, 28);
+                
 				switch(particleOffset)
 				{
-					case 1:{guiText[5] = new GUIText("5", 43, 80, "26px Helvetica", "left", "top", "rgb(255, 0, 0)");
-							guiText[6] = new GUIText("OMFG SPARKLES!", 51, 110, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
-					case 2:{guiText[5] = new GUIText("4", 43, 80, "26px Helvetica", "left", "top", "rgb(200, 25, 0)");
-							guiText[6] = new GUIText("Shinies!", 51, 110, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
-					case 3:{guiText[5] = new GUIText("3", 43, 80, "26px Helvetica", "left", "top", "rgb(150, 100, 20)");
-							guiText[6] = new GUIText("Less Shinies.", 51, 110, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
-					case 4:{guiText[5] = new GUIText("2", 43, 80, "26px Helvetica", "left", "top", "rgb(120, 200, 60)");
-							guiText[6] = new GUIText("Needs Shinies :(", 51, 110, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
-					case 5:{guiText[5] = new GUIText("1", 41, 80, "26px Helvetica", "left", "top", "rgb(96, 255, 96)");
-							guiText[6] = new GUIText("Need new computer...", 51, 110, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+					case 1:{guiText[3] = new GUIText("1", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(96, 255, 96)");
+							guiText[4] = new GUIText("Need new computer...", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(96, 255, 96)");break;}
+					case 2:{guiText[3] = new GUIText("2", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(120, 200, 60)");
+							guiText[4] = new GUIText("Needs Shinies :(", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(120, 200, 60)");break;}
+					case 3:{guiText[3] = new GUIText("3", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(150, 100, 20)");
+							guiText[4] = new GUIText("Less Shinies.", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(150, 100, 20)");break;}
+					case 4:{guiText[3] = new GUIText("4", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(200, 25, 0)");
+							guiText[4] = new GUIText("Shinies!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(200, 55, 0)");break;}
+					case 5:{guiText[3] = new GUIText("5", _canvas.width / 2, 205, "26px Helvetica", "center", "top", "rgb(255, 0, 0)");
+							guiText[4] = new GUIText("OMFG SPARKLES!", _canvas.width / 2, 235, "10px Helvetica", "center", "top", "rgb(255, 0, 0)");break;}
 				}
 				break;
 			}
