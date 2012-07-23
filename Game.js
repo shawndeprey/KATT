@@ -2907,6 +2907,7 @@ function Game()
 			}
 			case 1:
 			{//Pause Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10){ currentGui = 6; lastGui = 1; }
 				break;
 			}
 			case 2:
@@ -3116,7 +3117,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         if(Keys[17] == 1) // Escape
         {
 			if(gameState == 1 && player.isAlive())
-			{   if(!gco.win){ gco.TogglePauseGame(); }
+			{   if(!gco.win){ if(currentGui != 6){ gco.TogglePauseGame(); } }
 				if(!paused){ currentGui = NULL_GUI_STATE;} else { currentGui = 1; }
 			}
 			
@@ -3793,8 +3794,12 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			}
 			case 1:
 			{// Pause Menu
-				guiText[0] = new GUIText("Paused", _canvas.width / 2, _canvas.height / 2 - 125,
-										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				guiText[0] = new GUIText("Paused", _canvas.width / 2, _canvas.height / 2 - 100, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				guiText[1] = new GUIText("Options", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Options", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				}
 				break;
 			}
 			case 2:
