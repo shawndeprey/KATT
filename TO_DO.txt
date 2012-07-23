@@ -1,4 +1,4 @@
--Create 48 x 48 sprites for gui menu.
+-Make Gui Sprites for gui items that don't have their own.
 -Easter Eggs
 -Achievements
 
@@ -11,9 +11,6 @@
     -Shield
     -Cores
     -Power-Ups
-	
--Create Story Gui
-	
+
 -Boss Level
 	-Make boss life bar.
-	-Make boss invulnerable while he is centering.
