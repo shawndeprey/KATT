@@ -81,7 +81,7 @@ $user->setup();
 				<?php
 				if($user->data['is_registered'])
 				{
-					echo("<span>" . $user->data['username'] . "</span> &nbsp;&nbsp; <a href=" . $phpbb_root_path . 'ucp.php?mode=logout' . '&sid=' . $user->data['session_id'] . "&redirect=http://www.blackmodulestudio.com" . $_SERVER['REQUEST_URI'] . ">Logout</a>");
+					echo("<span class='usr'>" . $user->data['username'] . "</span> &nbsp;&nbsp; <a class='bar_link' href=" . $phpbb_root_path . 'ucp.php?mode=logout' . '&sid=' . $user->data['session_id'] . "&redirect=http://www.blackmodulestudio.com" . $_SERVER['REQUEST_URI'] . "><span>Logout</span></a>");
 				}
 				else
 				{
@@ -90,6 +90,7 @@ $user->setup();
 					<input type="password" name="password" value="password"  onblur="if(this.value == \'\') { this.value=\'password\';}" onfocus="if (this.value == \'password\') {this.value=\'\';}" />
 					<input type="hidden" name="redirect" value="http://www.blackmodulestudio.com' . $_SERVER['REQUEST_URI'] . '" />
 					<input class="submit_btn" id="submit" type="submit" value="login" name="login" />
+					<a href="http://forum.blackmodulestudio.com/ucp.php?mode=register">Register</a>
 					</form>');
 				}
 				?>

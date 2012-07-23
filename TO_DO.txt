@@ -1,4 +1,4 @@
--Create 48 x 48 sprites for gui menu.
+-Make Gui Sprites for gui items that don't have their own.
 -Easter Eggs
 -Achievements
 
@@ -6,13 +6,11 @@
     -Audio settings
     
 -On pause menu, make link to Options
-    
+
 -Collision detection fixes
     -Shield
     -Cores
     -Power-Ups
-	
--Create Story Gui
-	
+
 -Boss Level
-	-Create credit roll which starts with the story ending.
+	-Make boss life bar.

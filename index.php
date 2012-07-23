@@ -43,6 +43,7 @@ $user->setup();
 				<input type="password" name="password" value="password"  onblur="if(this.value == \'\') { this.value=\'password\';}" onfocus="if (this.value == \'password\') {this.value=\'\';}" />
 				<input type="hidden" name="redirect" value="http://www.blackmodulestudio.com' . $_SERVER['REQUEST_URI'] . '" />
 				<input class="submit_btn" id="submit" type="submit" value="login" name="login" />
+				<a href="http://forum.blackmodulestudio.com/ucp.php?mode=register">Register</a>
 				</form>');
 			}
 			?>

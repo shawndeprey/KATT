@@ -312,6 +312,8 @@ function Game()
 		this.bossY = 0;//Final Boss Y set when boss dies
 		
 		this.credits = new Credits();
+		this.story = new Story();
+		this.playStory = false;
 		
 		this.Init = function()
 		{
@@ -503,6 +505,12 @@ function Game()
 			explosion = new Explosion(this.bossX + randX, this.bossY + randY, 75, 4, 200, R, G, B);
 			explosions.push(explosion);
 			sfx.play(0);
+		}
+		
+		this.EndStoryMode = function()
+		{
+			this.playStory = false;
+			this.story = new Story();
 		}
 	}
 	
@@ -1016,6 +1024,8 @@ function Game()
 		this.laserWidth = 10;
 		this.laserHeight = _canvas.height - this.y + 25;
 		
+		this.currentMaxLife = this.life;
+		
 		switch(this.type)
 		{//Special Case Initialization
 			case 2:
@@ -1264,6 +1274,7 @@ function Game()
                     {
                         case -1:
                         {
+							this.life = this.currentMaxLife;
                             // Move to proper position
                             if(Math.round(this.y) <= this.ystop)
 							{
@@ -1651,6 +1662,7 @@ function Game()
 							this.laser = false;
 							this.inCenter = false;
                             this.life = 500 * this.phaseSave;
+							this.currentMaxLife = this.life;
 							this.phase = -1;
 							sfx.play(0);
                         }
@@ -2341,12 +2353,93 @@ function Game()
 		this.color = col;
     }
 	
+	function Story()
+	{
+		this.overlayAlpha = 0.0;
+		this.center = _buffer.width / 2;
+		this.credits = [];
+		this.lines = 15;
+		this.lineHeight = 30;
+		this.yOffset = 0;
+		this.scrollSpeed = 25;
+		this.isBlackedOut = false;
+		var out = "";
+		var size = "";
+		var color = "";
+		for(var i = 0; i < this.lines; i++)
+		{
+			switch(i)
+			{
+				case 0:{out = "In the year 30XX, humans and Drones clashed for control of the universe."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 1:{out = "After decades of fierce conflict, humanity's presence in international"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 2:{out = "space began to dwindle, and, the Drones overran all major human civilization."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 3:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 4:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 5:{out = "It was a total loss. International Space Command HQ was reduced to ash."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 6:{out = "Whatever was left of the fleet scattered across the far reaches of"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 7:{out = "space to hide from the dreaded armies of the Drones."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 8:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 9:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 10:{out = "Although the future of humanity is left bleak by the Drone bombardment,"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 11:{out = "an ace pilot now races through space towards the heart of the Drone army."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 12:{out = "There is only one mission to complete now: "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 13:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 14:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+			}
+			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
+		}
+		
+		this.Update = function()
+		{
+			if(this.overlayAlpha >= 1){ this.isBlackedOut = true; } else { this.overlayAlpha += delta / 2; }
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.yOffset += this.scrollSpeed * delta; }
+			else if(this.isBlackedOut && this.CreditsFinished())
+			{
+				this.overlayAlpha -= delta;
+				console.log(this.overlayAlpha);
+				if(this.overlayAlpha <= 0){ gco.EndStoryMode(); }
+			}
+		}
+		
+		this.Draw = function()
+		{
+			this.DrawOverlay();
+			if(this.isBlackedOut && !this.CreditsFinished()){ this.DrawCredits(); }
+		}
+		
+		this.DrawOverlay = function()
+		{
+			buffer.fillStyle = "rgba(0, 0, 0, " + this.overlayAlpha + ")";
+			buffer.fillRect(0, 0, _buffer.width, _buffer.height);
+		}
+		
+		this.DrawCredits = function()
+		{
+			buffer.beginPath();
+			for(var i = 0; i < this.credits.length; i++)
+			{
+				buffer.fillStyle = this.credits[i].color;
+				buffer.font = this.credits[i].fontStyle;
+				buffer.textAlign = this.credits[i].alignX;
+				buffer.textBaseline = this.credits[i].alignY;
+				buffer.fillText(this.credits[i].text, this.credits[i].x, this.credits[i].y - this.yOffset);
+			}
+			buffer.closePath();
+		}
+		
+		this.CreditsFinished = function()
+		{
+			if(this.credits[this.credits.length - 1].y - this.yOffset < -20){ return true; } else { return false; }
+		}
+	}
+	
 	function Credits()
 	{
 		this.overlayAlpha = 0.0;
 		this.center = _buffer.width / 2;
 		this.credits = [];
-		this.lines = 24;
+		this.lines = 28;
 		this.lineHeight = 50;
 		this.yOffset = 0;
 		this.scrollSpeed = 25;
@@ -2358,30 +2451,34 @@ function Game()
 		{
 			switch(i)
 			{
-				case 0:{out = "Congradulations!!!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 1:{out = "You Killed all the Things!"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 2:{out = "Produced by Blackmodule Studio"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 3:{out = "Program Managers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 4:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 5:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 6:{out = "Lead Game System Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 7:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 8:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 9:{out = "Lead Software Engineers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 10:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 11:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 12:{out = "Programmers in Test"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 13:{out = "Andrew Muller"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 14:{out = "Graphic Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 15:{out = "David Van Laar-Veth"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 16:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 17:{out = "Tyler Madden"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 18:{out = "Sound Artists"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 19:{out = "David Van Laar-Veth (The Badass)"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 20:{out = "Story"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
-				case 21:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 22:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
-				case 23:{out = "Thanks for playing!"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 0:{out = "Humanity is Saved"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 1:{out = "Our ace pilot has defeated the drone core in enough time to save humanity."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 2:{out = "The task of rebuilding civilization, however difficult, can still never"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 3:{out = "match the devotion and courage it took for our ace pilot to..."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 4:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 5:{out = "Kill all the Things"; size = "32px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 6:{out = "Produced by Blackmodule Studio"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 7:{out = "Program Managers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 8:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 9:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 10:{out = "Lead Game System Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 11:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 12:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 13:{out = "Lead Software Engineers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 14:{out = "Shawn Deprey"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 15:{out = "Justin Hammond"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 16:{out = "Programmers in Test"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 17:{out = "Andrew Muller"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 18:{out = "Graphic Designers"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 19:{out = "David Van Laar-Veth"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 20:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 21:{out = "Tyler Madden"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 22:{out = "Sound Artists"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 23:{out = "David Van Laar-Veth (The Badass)"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 24:{out = "Story"; size = "26px Helvetica"; color = "rgb(255, 127, 255)"; break;}
+				case 25:{out = "Mico Picache"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 26:{out = " "; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
+				case 27:{out = "Thanks for playing!"; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 				default:{out = "Line not added."; size = "18px Helvetica"; color = "rgb(96, 255, 96)"; break;}
 			}
 			this.credits[i] = new GUIText(out, this.center, _buffer.height + (this.lineHeight * i), size, "center", "top", color);
@@ -2488,6 +2585,7 @@ function Game()
     
     this.Update = function()
     {
+		if(gco.playStory){ gco.story.Update(); }
 		//Stop Sound Check
 		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.pause(1);}
 		if((gameState != 1) && sfx.bossLaserPlaying){sfx.pause(2);}
@@ -2802,7 +2900,7 @@ function Game()
 		{
 			case 0:
 			{//Main Menu
-				if(logged)
+				if(logged && !gco.playStory)
 				{
 					if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
 					{
@@ -2812,11 +2910,16 @@ function Game()
 					{
 						currentGui = 6; lastGui = 0;	
 					}
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 110) + 20 && mouseY > (_canvas.height / 2 + 110) - 10)
+					{
+						gco.playStory = true;
+					}
 				}
 				break;
 			}
 			case 1:
 			{//Pause Menu
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10){ currentGui = 6; lastGui = 1; }
 				break;
 			}
 			case 2:
@@ -3052,7 +3155,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         if(Keys[17] == 1) // Escape
         {
 			if(gameState == 1 && player.isAlive())
-			{   if(!gco.win){ gco.TogglePauseGame(); }
+			{   if(!gco.win){ if(currentGui != 6){ gco.TogglePauseGame(); } }
 				if(!paused){ currentGui = NULL_GUI_STATE;} else { currentGui = 1; }
 			}
 			
@@ -3210,11 +3313,11 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
             // GUI
             self.drawHUD();
         }
-		if(gco.win)
-		{
-			gco.credits.Draw();
-		}
+		
+		if(gco.win){ gco.credits.Draw(); }
 		self.drawGUI();
+		if(gco.playStory){ gco.story.Draw(); }
+		
         canvas.drawImage(_buffer, 0, 0);
     }
 
@@ -3718,14 +3821,23 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					{
 						guiText[2] = new GUIText("Options", _canvas.width / 2, (_canvas.height / 2) + 50, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
 					}
+					guiText[3] = new GUIText("Story", _canvas.width / 2, (_canvas.height / 2) + 100, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+					if(mouseX > (_canvas.width / 2 + 10) - 65 && mouseX < (_canvas.width / 2 + 10) + 40 && mouseY < (_canvas.height / 2 + 110) + 20 && mouseY > (_canvas.height / 2 + 110) - 10)
+					{
+						guiText[3] = new GUIText("Story", _canvas.width / 2, (_canvas.height / 2) + 100, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+					}
 				}
 				
 				break;
 			}
 			case 1:
 			{// Pause Menu
-				guiText[0] = new GUIText("Paused", _canvas.width / 2, _canvas.height / 2 - 125,
-										 "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				guiText[0] = new GUIText("Paused", _canvas.width / 2, _canvas.height / 2 - 100, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				guiText[1] = new GUIText("Options", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 150, 96)");
+				if(mouseX > (_canvas.width / 2 + 10) - 115 && mouseX < (_canvas.width / 2 + 10) + 100 && mouseY < (_canvas.height / 2 + 10) + 20 && mouseY > (_canvas.height / 2 + 10) - 10)
+				{
+					guiText[1] = new GUIText("Options", _canvas.width / 2, _canvas.height / 2, "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
+				}
 				break;
 			}
 			case 2:
@@ -3842,13 +3954,12 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         buffer.lineTo(LPM_x1, LPM_y1);
                     buffer.stroke();
                 buffer.closePath();
-
                 
                 if(mouseX > (_canvas.width - 175) && mouseX < (_canvas.width - 25) && mouseY < (280) && mouseY > (250))
                 {//Start Level
                     guiText[5] = new GUIText("Start Level", _canvas.width - 100, 250, 
                                          "28px Helvetica", "center", "top", "rgb(96, 255, 96)");
-                    if(player.weapon == 49){guiText[guiText.length] = new GUIText("Must equip main weapon", _canvas.width - 100, 280, 
+                    if(player.weapon == 49){guiText[12] = new GUIText("Must equip main weapon", _canvas.width - 100, 280,
                                          "12px Helvetica", "center", "top", "rgb(255, 50, 50)");}
                 } else
                 {
