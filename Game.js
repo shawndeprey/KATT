@@ -1012,6 +1012,8 @@ function Game()
 		this.laserWidth = 10;
 		this.laserHeight = _canvas.height - this.y + 25;
 		
+		this.currentMaxLife = this.life;
+		
 		switch(this.type)
 		{//Special Case Initialization
 			case 2:
@@ -1260,6 +1262,7 @@ function Game()
                     {
                         case -1:
                         {
+							this.life = this.currentMaxLife;
                             // Move to proper position
                             if(Math.round(this.y) <= this.ystop)
 							{
@@ -1647,6 +1650,7 @@ function Game()
 							this.laser = false;
 							this.inCenter = false;
                             this.life = 500 * this.phaseSave;
+							this.currentMaxLife = this.life;
 							this.phase = -1;
 							sfx.play(0);
                         }
