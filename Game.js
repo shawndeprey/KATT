@@ -288,7 +288,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 6;//Starting at 1
+		this.level = 1;//Starting at 1
 		this.win = false;
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
@@ -1926,57 +1926,27 @@ function Game()
 			{
 				case 0:
 				{//Pea Shooter
-					this.x1 = this.x;
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y + (this.height / 2);
 					this.y -= this.speed * delta;
 					break;
 				}
 				case 1:
 				{//Pea Shooter pro
-					this.x1 = this.x;
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y + (this.height / 2);
 					this.y -= this.speed * delta;
 					break;
 				}
 				case 2:
 				{//Master Pea Shooter
 					this.x = this.startX + (30 * Math.sin(30 * 3.14 * 100 * (this.timeAlive / 1000))) * this.sinOffset;
-					this.x1 = this.x;
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y + (this.height / 2);
 					this.y -= this.speed * delta;
 					break;
 				}
 				case 50:
 				{//Boom Bullet
-					this.x1 = this.x;
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y + (this.height / 2);
 					this.y -= this.speed * delta;
 					break;
 				}
 				case 51:
 				{//Friendly Boom Bullet
-					this.x1 = this.x;
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y + (this.height / 2);
 					this.y -= this.speed * delta;
 					if(this.missileTarget != 1000)
 					{
@@ -2000,53 +1970,25 @@ function Game()
 				}
                 case 52:
 				{//Space Mine
-					this.x1 = this.x - (this.width / 2);
-					this.y1 = this.y - (this.height / 2);
-					this.x2 = this.x + (this.width / 2);
-					this.y2 = this.y + (this.height / 2);
 					break;
 				}
 				case 100:
 				{//Level 2 enemy bullet
-					this.x1 = this.x;
-					this.y1 = this.y + (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y - (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y - (this.height / 2);
 					this.y += this.speed * delta;
 					break;
 				}
 				case 101:
 				{//Level 5 enemy bomb
-					this.x1 = this.x;
-					this.y1 = this.y + (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y - (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y - (this.height / 2);
 					this.y += this.speed * delta;
 					break;
 				}
                 case 102:
 				{//Boss shotA
-					this.x1 = this.x;
-					this.y1 = this.y + (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y - (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y - (this.height / 2);
 					this.y += this.speed * delta;
 					break;
 				}
                 case 103:
 				{//Boss shotB
-					this.x1 = this.x;
-					this.y1 = this.y + (this.height / 2);
-					this.x2 = this.x - (this.width / 2);
-					this.y2 = this.y - (this.height / 2);
-					this.x3 = this.x + (this.width / 2);
-					this.y3 = this.y - (this.height / 2);
 					this.y += this.speed * delta;
 					break;
 				}
@@ -2060,12 +2002,6 @@ function Game()
                             {
                                 this.timer--;
                             }
-                            this.x1 = this.x;
-                            this.y1 = this.y + (this.height / 2);
-                            this.x2 = this.x - (this.width / 2);
-                            this.y2 = this.y - (this.height / 2);
-                            this.x3 = this.x + (this.width / 2);
-                            this.y3 = this.y - (this.height / 2);
                             this.y += this.speed * delta;
                         }
                         else
@@ -2158,7 +2094,7 @@ function Game()
 		this.weaponFunc = true;//Used for weapon effects
 		this.didShoot = false;
 		this.onTick = 0;
-		this.money = 3000;
+		this.money = 0;
 		this.currentFuel = 60;
         this.MAX_FUEL = 60;
 		
@@ -3726,7 +3662,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         var BLM_width = 100;
         var BLM_height = 10;
         var BLM_x1 = (boss.x + 8) - boss.width / 2;
-        var BLM_y1 = boss.y - 75;
+        var BLM_y1 = boss.y - 50;
         var BLM_x2 = BLM_x1 + BLM_width;
         var BLM_y2 = BLM_y1 + BLM_height;
 

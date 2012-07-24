@@ -1,6 +1,3 @@
 -Make Gui Sprites for gui items that don't have their own.
 -Easter Eggs
 -Achievements
-
--Collision detection fixes
-    -Shield
