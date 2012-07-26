@@ -520,21 +520,25 @@ function Game()
 		{
 			case 0:
 			{
+				console.log("Playing Square");
 				gco.bgm = document.getElementById('bgm_square');
 				break;	
 			}
 			case 1:
 			{
+				console.log("Playing Fast");
 				gco.bgm = document.getElementById('bgm_fast');
 				break;	
 			}
 			case 2:
 			{
+				console.log("Playing Soar");
 				gco.bgm = document.getElementById('bgm_soar');
 				break;
 			}
 			case 3:
 			{
+				console.log("Playing Dorian");
 				gco.bgm = document.getElementById('bgm_dorian');
 				break;
 			}
@@ -1918,10 +1922,7 @@ function Game()
         this.Update = function(i)
         {
 			this.timeAlive += delta;
-			if(this.y < 0 || this.y > buffer.height)
-            {
-                self.popArray(missiles, i);
-            }
+			if(this.y < 0 || this.y > _buffer.height){ this.life = 0; }
 			switch(this.missileType)
 			{
 				case 0:
@@ -2021,6 +2022,13 @@ function Game()
                             this.life = 0;
                         }
                     }
+					if(missiles[i].life <= 0)
+					{
+                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 0.1, 0.1);
+                        explosions.push(explosion);
+                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 3, 0.1);
+                        explosions.push(explosion);
+                    }
 					break;
 				}
 			}
@@ -2085,8 +2093,7 @@ function Game()
 		this.hasShield = false;
 		
 		this.weapon = 49;// 0 - 48
-		//this.secondary = 49;//Starts at 50, 49 = no secondary.
-		this.secondary = 9000;
+		this.secondary = 49;//Starts at 50, 49 = no secondary.
 		this.secondaryAmmo = 50;
 		this.secondaryAmmoLevel = 1;
 		this.maxSecondaryAmmo = 50 * this.secondaryAmmoLevel;
@@ -2569,17 +2576,10 @@ function Game()
                 }
                 
                 for(var i = 0; i < missiles.length; i++)
-                {
-                    missiles[i].Update(i);
-                    if(missiles[i].life <= 0)
-                    {
-                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 0.1, 0.1);
-                        explosions.push(explosion);
-                        explosion = new Explosion(missiles[i].x, missiles[i].y, 15, 5, 60, 3, 3, 0.1);
-                        explosions.push(explosion);
-                        self.popArray(missiles, i);
-                    }
-                }
+				{ 
+					missiles[i].Update(i);
+					if(missiles[i].life <= 0){ self.popArray(missiles, i); }
+				}
                 
                 for(var i = 0; i < enemies.length; i++)
                 {
@@ -4498,10 +4498,11 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
     /******************************************************/
     // Game Loop
     /******************************************************/
-    
+    var calcFPS = 0;
     this.Loop = function()
     {
         frame++;
+		calcFPS++;
         var curTime = Date.now();
         elapsedTime = curTime - prevTime;
         prevTime = curTime;
@@ -4511,18 +4512,18 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         tickTime += delta;
         if(tickTime >= (ticks / 20))
         {
+			
             ticks++;
             if(ticks >= 20)
             {
+				FPS = calcFPS;
+				calcFPS = 0;
                 tickTime = 0;
                 ticks = 0;
                 seconds++;
             }
         }
-        if(ticks % 5 == 0)
-        {
-            FPS = Math.floor(1 / delta);
-        }
+        //if(ticks % 5 == 0){ FPS = Math.floor(1 / delta); }
 		
         self.Update();
         self.Draw();	
