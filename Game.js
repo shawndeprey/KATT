@@ -179,6 +179,10 @@ function Game()
 	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_dorian").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_square").addEventListener("error",swapBGM,false);
+	document.querySelector("#bgm_fast").addEventListener("error",swapBGM,false);
+	document.querySelector("#bgm_soar").addEventListener("error",swapBGM,false);
+	document.querySelector("#bgm_dorian").addEventListener("error",swapBGM,false);
     
     /******************************************************/
     
@@ -298,7 +302,7 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 3;//Starting at 1
+		this.level = 1;//Starting at 1
 		this.win = false;
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
