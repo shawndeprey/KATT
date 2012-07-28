@@ -16,6 +16,7 @@ function Game()
     var keyPressed;
     var debug = false;
 	var playerInfo = false;
+	var masterBGMVolume = 0.2;
 	
 	var logged = false;
 	
@@ -279,6 +280,15 @@ function Game()
         Array.pop();
     }
 	
+	this.checkAllSoundsPaused = function()
+	{
+		if( document.getElementById('bgm_square').paused &&
+			document.getElementById('bgm_fast').paused &&
+			document.getElementById('bgm_soar').paused &&
+			document.getElementById('bgm_dorian').paused
+		){ return true;}
+		return false;
+	}
     /******************************************************/
     
     
@@ -288,13 +298,13 @@ function Game()
 	
 	function GameControlObject()
 	{
-		this.level = 1;//Starting at 1
+		this.level = 3;//Starting at 1
 		this.win = false;
 		this.enemiesKilled = [];//[enemyNum] = 126
 		this.weaponsOwned = [];//[weaponNum] = true
 		this.weaponPrice = [];//[weaponNum] = 486 (cores)
 		this.ownLaser = false;
-		this.laserPrice = 500;
+		this.laserPrice = 1000;
 		this.levelProgress = 0.0; // Percentage
 		this.levelMission = new LevelMission();
 		this.extras = [];
@@ -315,6 +325,9 @@ function Game()
 		this.story = new Story();
 		this.playStory = false;
 		
+		this.mustPurchasePrevious = 0;
+		this.notEnoughCores = 0;
+		
 		this.Init = function()
 		{
 			this.levelMission.GenerateObjectives();
@@ -322,22 +335,23 @@ function Game()
 			this.weaponsOwned[0] = false;//Pea Shooter
 			this.weaponsOwned[1] = false;//Pea Shooter Pro
 			this.weaponsOwned[2] = false;//Master Pea Shooter
+			this.weaponsOwned[49] = true;//Missile
 			this.weaponsOwned[50] = false;//Missile
 			this.weaponsOwned[51] = false;//Homing Missile
             this.weaponsOwned[52] = false;//Space Mine
 			
 			this.weaponPrice[0] = 0;//Pea Shooter
-			this.weaponPrice[1] = 25;//Pea Shooter Pro
-			this.weaponPrice[2] = 250;//Master Pea Shooter
-			this.weaponPrice[50] = 50;//Missile
-			this.weaponPrice[51] = 100;//Homing Missile
-            this.weaponPrice[52] = 250;//Space Mine
+			this.weaponPrice[1] = 250;//Pea Shooter Pro
+			this.weaponPrice[2] = 750;//Master Pea Shooter
+			this.weaponPrice[50] = 100;//Missile
+			this.weaponPrice[51] = 300;//Homing Missile
+            this.weaponPrice[52] = 500;//Space Mine
 		}
 		
 		this.init_audio = function()
 		{
 			this.bgm.currentTime = 0;
-			this.bgm.volume = 0.2;
+			this.bgm.volume = masterBGMVolume;
 			this.bgm.play();
 		}
 		
@@ -356,14 +370,47 @@ function Game()
 		{//assumes player has the cash/doesn't own weapon
 			if(wepID < 9000)
 			{
-				this.weaponsOwned[wepID] = true;
-				player.money -= this.weaponPrice[wepID];
-				this.EquipWeapon(wepID);
+				if(wepID > 49)
+				{
+					if(this.weaponsOwned[wepID - 1])
+					{
+						this.weaponsOwned[wepID] = true;
+						player.money -= this.weaponPrice[wepID];
+						this.EquipWeapon(wepID);
+					} else
+					{
+						this.mustPurchasePrevious = 1000;
+					}
+				} else
+				{
+					if(wepID - 1 < 0)
+					{
+						this.weaponsOwned[wepID] = true;
+						this.EquipWeapon(wepID);
+					} else
+					{
+						if(this.weaponsOwned[wepID - 1])
+						{
+							this.weaponsOwned[wepID] = true;
+							player.money -= this.weaponPrice[wepID];
+							this.EquipWeapon(wepID);
+						} else
+						{
+							this.mustPurchasePrevious = 1000;
+						}
+					}
+				}
 			} else
 			{
-				this.ownLaser = true;
-				player.money -= gco.laserPrice;
-				this.EquipWeapon(wepID);
+				if(this.weaponsOwned[52])
+				{
+					this.ownLaser = true;
+					player.money -= gco.laserPrice;
+					this.EquipWeapon(wepID);
+				} else
+				{
+					this.mustPurchasePrevious = 1000;
+				}
 			}
 		}
 		
@@ -465,7 +512,6 @@ function Game()
 			if(this.onTick != ticks)
 			{
 				this.onTick = ticks;
-				
 				if(!gco.win)
 				{
 					if(this.onTick == 19 && player.isAlive() && this.level < 6)
@@ -878,7 +924,7 @@ function Game()
                                 case 2:
                                 {//Kamakaze Ships
                                     theLife = Math.round(Math.random() * 15) + 10;
-                                    theSpeed = Math.round(Math.random() * 100) + 100;
+                                    theSpeed = Math.round(Math.random() * 150) + 200;
                                     theDmg = Math.round(Math.random() * 10) + 10;
                                     if(theDmg >= 16)
                                     {
@@ -1100,9 +1146,12 @@ function Game()
 					this.y += this.speed * delta;
 					this.x = this.startX + (30 * Math.sin(6 * 3.14 * 100 * (this.timeAlive / 1000)));
 					
-					if(Math.round(Math.random() * 1000) == 1)
+					if(this.onTick % 2 == 0)
 					{
-						this.shoot(100);
+						if(Math.round(Math.random() * 100) == 1)
+						{
+							this.shoot(100);
+						}
 					}
 					
 					if(this.life <= 0)
@@ -1833,9 +1882,9 @@ function Game()
 						break;
 					}
 					case 3:
-					{
+					{// Corez!!!
 						this.used = true;
-						var newAmount = Math.round(Math.random() * 100) + 150;
+						var newAmount = 25 * gco.level;
 						player.money += newAmount;
 						totalCores += newAmount;
 						break;	
@@ -2343,7 +2392,6 @@ function Game()
 			else if(this.isBlackedOut && this.CreditsFinished())
 			{
 				this.overlayAlpha -= delta;
-				console.log(this.overlayAlpha);
 				if(this.overlayAlpha <= 0){ gco.EndStoryMode(); }
 			}
 		}
@@ -2531,6 +2579,9 @@ function Game()
     
     this.Update = function()
     {
+		if(ticks == 0){if(self.checkAllSoundsPaused()){ swapBGM(); }}
+		if(gco.mustPurchasePrevious > 0){ gco.mustPurchasePrevious -= (delta * 1000); }
+		if(gco.notEnoughCores > 0){ gco.notEnoughCores -= (delta * 1000); }
 		if(gco.playStory){ gco.story.Update(); }
 		//Stop Sound Check
 		if((currentGui != NULL_GUI_STATE) && sfx.laserPlaying){sfx.pause(1);}
@@ -2876,47 +2927,47 @@ if(mouseX > (_canvas.width - 160) && mouseX < (_canvas.width - 35) && mouseY < (
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter, Weapon ID: 0
-	if(gco.weaponsOwned[0]){ gco.EquipWeapon(0); } else { if(player.money >= gco.weaponPrice[0]){ gco.PurchaseWeapon(0); }}
+	if(gco.weaponsOwned[0]){ gco.EquipWeapon(0); } else { if(player.money >= gco.weaponPrice[0]){ gco.PurchaseWeapon(0); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 60 && mouseX < 108 && mouseY > 280 && mouseY < 328)
 {//Pea Shooter Pro, Weapon ID: 1
-	if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); }}
+	if(gco.weaponsOwned[1]){ gco.EquipWeapon(1); } else { if(player.money >= gco.weaponPrice[1]){ gco.PurchaseWeapon(1); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
 {//Master Pea Shooter, Weapon ID: 2
-	if(gco.weaponsOwned[2]){ gco.EquipWeapon(2); } else { if(player.money >= gco.weaponPrice[2]){ gco.PurchaseWeapon(2); }}
+	if(gco.weaponsOwned[2]){ gco.EquipWeapon(2); } else { if(player.money >= gco.weaponPrice[2]){ gco.PurchaseWeapon(2); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
 {//Boom Bullet, Weapon ID: 50
-	if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); }}
+	if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
 {//Friendly Boom Bullet, Weapon ID: 51
-	if(gco.weaponsOwned[51]){ gco.EquipWeapon(51); } else { if(player.money >= gco.weaponPrice[51]){ gco.PurchaseWeapon(51); }}
+	if(gco.weaponsOwned[51]){ gco.EquipWeapon(51); } else { if(player.money >= gco.weaponPrice[51]){ gco.PurchaseWeapon(51); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 110 && mouseX < 158 && mouseY > 448 && mouseY < 496)
 {//Space Mine, Weapon ID: 52
-	if(gco.weaponsOwned[52]){ gco.EquipWeapon(52); } else { if(player.money >= gco.weaponPrice[52]){ gco.PurchaseWeapon(52); }}
+	if(gco.weaponsOwned[52]){ gco.EquipWeapon(52); } else { if(player.money >= gco.weaponPrice[52]){ gco.PurchaseWeapon(52); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 160 && mouseX < 208 && mouseY > 448 && mouseY < 496)
 {//Laser: Weapon ID: 9000
-	if(gco.ownLaser){ gco.EquipWeapon(9000); } else { if(player.money >= gco.laserPrice){ gco.PurchaseWeapon(9000); } }
+	if(gco.ownLaser){ gco.EquipWeapon(9000); } else { if(player.money >= gco.laserPrice){ gco.PurchaseWeapon(9000); } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > _canvas.width - 300 && mouseX < _canvas.width - 252 && mouseY > 448 && mouseY < 496)
 {//Shield
-	if(player.money >= (player.shieldLevel + 1) * 250){gco.PurchaseExtras(0);}
+	if(player.money >= (player.shieldLevel + 1) * 250){gco.PurchaseExtras(0);} else {gco.notEnoughCores = 1000;}
 }
 if(mouseX > _canvas.width - 250 && mouseX < _canvas.width - 202 && mouseY > 448 && mouseY < 496)
 {//Max Ammo
-	if(player.money >= (player.secondaryAmmoLevel + 1) * 50){gco.PurchaseExtras(2);}
+	if(player.money >= (player.secondaryAmmoLevel + 1) * 50){gco.PurchaseExtras(2);} else {gco.notEnoughCores = 1000;}
 }
 if(mouseX > _canvas.width - 200 && mouseX < _canvas.width - 152 && mouseY > 448 && mouseY < 496)
 {//Buy Secondary Ammo
-	if(player.money >= gco.secondaryAmmoPrice && player.secondaryAmmo < player.maxSecondaryAmmo){gco.PurchaseExtras(3);}
+	if(player.money >= gco.secondaryAmmoPrice && player.secondaryAmmo < player.maxSecondaryAmmo){gco.PurchaseExtras(3);} else {gco.notEnoughCores = 1000;}
 }
 if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 && mouseY < 496)
 {//Buy Fill Health
-	if(player.money >= ((100 - player.life) * 2)){gco.PurchaseExtras(4);}
+	if(player.money >= ((100 - player.life) * 2)){gco.PurchaseExtras(4);} else {gco.notEnoughCores = 1000;}
 }
 //**********************************************************************//
 //					  END UPGRADE MENU SECTION							//
@@ -2982,6 +3033,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                     if(gco.bgm.volume > 0.91){break;}
                     else{gco.bgm.volume = Math.round(gco.bgm.volume * 100) / 100 + 0.1;}
 				}
+				masterBGMVolume = gco.bgm.volume;
                 
                 // SFX Volume
                 if(mouseX > 200 && mouseX < 225 && mouseY > 430 && mouseY < 480)
@@ -3322,7 +3374,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 			buffer.drawImage(enemyImages[enemies[i].Model], enemies[i].x - (enemies[i].width / 2), enemies[i].y - (enemies[i].height / 2), enemies[i].width, enemies[i].height);
 			if(enemies[i].isBoss)
 			{
-				buffer.drawImage(playerImages[0], enemies[i].moveX - (player.width / 2), enemies[i].moveY - (player.height / 2), player.width, player.height);
+				//buffer.drawImage(playerImages[0], enemies[i].moveX - (player.width / 2), enemies[i].moveY - (player.height / 2), player.width, player.height);
                 self.drawBossLifeMeter(enemies[i]);
 			}
 			if(enemies[i].laser == true){ drawLaser = true; x = enemies[i].laserX; y = enemies[i].laserY; h = enemies[i].laserHeight; w = enemies[i].laserWidth; }
@@ -3946,7 +3998,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Pea Shooter.";
                     } else
                     {
-                        guiText[6].text = "Pea Shooter costs 0 cores.";
+                        guiText[6].text = "Pea Shooter costs " + gco.weaponPrice[0] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[0] && player.weapon == 0)
@@ -3976,7 +4028,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Pea Shooter Pro.";
                     } else
                     {
-                        guiText[6].text = "Pea Shooter Pro costs 25 cores.";
+                        guiText[6].text = "Pea Shooter Pro costs " + gco.weaponPrice[1] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[1] && player.weapon == 1)
@@ -4006,7 +4058,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Master Pea Shooter.";
                     } else
                     {
-                        guiText[6].text = "Master Pea Shooter costs 250 cores.";
+                        guiText[6].text = "Master Pea Shooter costs " + gco.weaponPrice[2] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[2] && player.weapon == 2)
@@ -4036,7 +4088,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Boom Bullet.";
                     } else
                     {
-                        guiText[6].text = "Boom Bullet costs 50 cores.";
+                        guiText[6].text = "Boom Bullet costs " + gco.weaponPrice[50] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[50] && player.secondary == 50)
@@ -4067,7 +4119,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Friendly Boom Bullet.";
                     } else
                     {
-                        guiText[6].text = "Friendly Boom Bullet costs 100 cores.";
+                        guiText[6].text = "Friendly Boom Bullet costs " + gco.weaponPrice[51] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[51] && player.secondary == 51)
@@ -4097,7 +4149,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own Space Mine.";
                     } else
                     {
-                        guiText[6].text = "Space Mine costs 250 cores.";
+                        guiText[6].text = "Space Mine costs " + gco.weaponPrice[52] + " cores.";
                     }
                 }
                 if(gco.weaponsOwned[52] && player.secondary == 52)
@@ -4127,7 +4179,7 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                         guiText[6].text = "You already own the Phaser Laser.";
                     } else
                     {
-                        guiText[6].text = "Phaser Laser costs 500 cores.";
+                        guiText[6].text = "Phaser Laser costs " + gco.laserPrice + " cores.";
                     }
                 }
                 if(gco.ownLaser && player.secondary == 9000)
@@ -4487,6 +4539,40 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
 					buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
 				}
 			buffer.closePath();
+			delete guiText;
+			//Must Purchase Previous Weapon Dialogue
+			var guiText = [];
+			if(gameState != 1 && gco.mustPurchasePrevious > 0)
+			{
+				guiText[0] = new GUIText("Must Purchase Previous Weapon", _canvas.width / 2, _canvas.height / 2, "18px Helvetica", "center", "center", "rgb(255, 0, 0)");
+				buffer.beginPath();
+				for(var i = 0; i < guiText.length; i++)
+				{
+					buffer.fillStyle = guiText[i].color;
+					buffer.font = guiText[i].fontStyle;
+					buffer.textAlign = guiText[i].alignX;
+					buffer.textBaseline = guiText[i].alignY;
+					buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
+				}
+				buffer.closePath();
+			}
+			delete guiText;
+			//Not Enough Cores Menu
+			var guiText = [];
+			if(gameState != 1 && gco.notEnoughCores > 0)
+			{
+				guiText[0] = new GUIText("Not Enough Cores", _canvas.width / 2, (_canvas.height / 2) - 20, "18px Helvetica", "center", "center", "rgb(255, 0, 0)");
+				buffer.beginPath();
+				for(var i = 0; i < guiText.length; i++)
+				{
+					buffer.fillStyle = guiText[i].color;
+					buffer.font = guiText[i].fontStyle;
+					buffer.textAlign = guiText[i].alignX;
+					buffer.textBaseline = guiText[i].alignY;
+					buffer.fillText(guiText[i].text, guiText[i].x, guiText[i].y);
+				}
+				buffer.closePath();
+			}
 		}
 		delete guiText;
 		// End Player Info
@@ -4512,7 +4598,6 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
         tickTime += delta;
         if(tickTime >= (ticks / 20))
         {
-			
             ticks++;
             if(ticks >= 20)
             {
