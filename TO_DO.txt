@@ -1,2 +1,3 @@
 -Shade Player Ship
 -Balance the Boss. Make him harder to beat.
+-Bug: 2 Songs play when boss level first starts.
