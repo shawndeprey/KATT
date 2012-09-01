@@ -192,7 +192,7 @@ function Game()
     // Global Functions
     /******************************************************/
 
-    this.InitSounds = function()
+  this.InitSounds = function()
 	{
 		gco.bgm = document.getElementById('bgm_square');
 		gco.init_audio();
@@ -1998,99 +1998,99 @@ function Game()
         }
     }
 
-    function Player(Width, Height)
-    {
-        this.x = 400;
-        this.y = 300;
-        this.speed = 200;
-        this.width = Width;
-        this.height = Height;
-        this.totalMissiles = 0;
-        this.life = 100;
+  function Player(Width, Height)
+  {
+		this.x = 400;
+		this.y = 300;
+		this.speed = 200;
+		this.width = Width;
+		this.height = Height;
+		this.totalMissiles = 0;
+		this.life = 100;
 		this.lives = 3;
-        this.maxLife = 100;
+		this.maxLife = 100;
 		this.shieldLevel = 0;
-        this.shield = 100;
+		this.shield = 100;
 		this.maxShield = this.shield * this.shieldLevel;
 		this.hasShield = false;
-		
+	
 		this.weapon = 49;// 0 - 48
 		this.secondary = 49;//Starts at 50, 49 = no secondary.
-		this.secondaryAmmo = 50;
+		this.secondaryAmmo = 0;
 		this.secondaryAmmoLevel = 1;
 		this.maxSecondaryAmmo = 50 * this.secondaryAmmoLevel;
-		
+	
 		this.weaponFunc = true;//Used for weapon effects
 		this.didShoot = false;
 		this.onTick = 0;
 		this.money = 0;
 		this.currentFuel = 60;
-        this.MAX_FUEL = 60;
-		
+		this.MAX_FUEL = 60;
+	
 		this.laser = false;//true if laser is on
 		this.laserX = this.x;
 		this.laserY = this.y - 25;
 		this.laserWidth = 20;
 		this.laserHeight = this.y - 25;
         
-        this.isAlive = function()
-        {
-            return (this.life > 0);
-        }
+			this.isAlive = function()
+			{
+				return (this.life > 0);
+			}
 		
-		this.DamagePlayer = function(dmg)
-		{
-			if(this.hasShield && this.shield > 0)
+			this.DamagePlayer = function(dmg)
 			{
-				this.shield -= dmg * 3;
-			} else
-			{
-				this.life -= dmg;
-				if(this.life < 0){this.life = 0;}
-			}
-			if(!this.isAlive())
-			{ 
-				gco.ShowContinueScreen();
-				sfx.play(0);
-				explosion = new Explosion(player.x, player.y, 350, 5, 200, 0.1, 3, 0.1);
-                explosions.push(explosion);
-				this.laser = false;
-			}
-		}
-
-        this.Update = function()
-        {
-            this.x1 = this.x;
-            this.y1 = this.y - (this.height / 2);
-            this.x2 = this.x - (this.width / 2);
-            this.y2 = this.y + (this.height / 2);
-            this.x3 = this.x + (this.width / 2);
-            this.y3 = this.y + (this.height / 2);
-
-			//Laser Updating
-			if(this.secondary >= 9000) {
-				if(Keys[19] != 0 && this.secondaryAmmo > 0) {
-					if(!sfx.laserPlaying){ sfx.play(1); }
-					this.laser = true;
-					this.laserX = this.x;
-					this.laserY = 0;
-					this.laserHeight = this.y - 25;
-					if(ticks == 0){ this.secondaryAmmo -= 3; if(this.secondaryAmmo < 0){this.secondaryAmmo = 0;} }
-				} else { if(sfx.laserPlaying){ sfx.pause(1); } this.laser = false; }
-			} else
-			{
-				this.laser = false;
-				if(sfx.laserPlaying){ sfx.pause(1); }
-			}
-			
-			if(this.hasShield)
-			{
-				if(this.shield <= 0)
+				if(this.hasShield && this.shield > 0)
 				{
-					this.shield = 0;
+					this.shield -= dmg * 3;
+				} else
+				{
+					this.life -= dmg;
+					if(this.life < 0){this.life = 0;}
+				}
+				if(!this.isAlive())
+				{ 
+					gco.ShowContinueScreen();
+					sfx.play(0);
+					explosion = new Explosion(player.x, player.y, 350, 5, 200, 0.1, 3, 0.1);
+					explosions.push(explosion);
+					this.laser = false;
 				}
 			}
-        }
+
+			this.Update = function()
+			{
+				this.x1 = this.x;
+				this.y1 = this.y - (this.height / 2);
+				this.x2 = this.x - (this.width / 2);
+				this.y2 = this.y + (this.height / 2);
+				this.x3 = this.x + (this.width / 2);
+				this.y3 = this.y + (this.height / 2);
+
+				//Laser Updating
+				if(this.secondary >= 9000) {
+					if(Keys[19] != 0 && this.secondaryAmmo > 0) {
+						if(!sfx.laserPlaying){ sfx.play(1); }
+						this.laser = true;
+						this.laserX = this.x;
+						this.laserY = 0;
+						this.laserHeight = this.y - 25;
+						if(ticks == 0){ this.secondaryAmmo -= 3; if(this.secondaryAmmo < 0){this.secondaryAmmo = 0;} }
+					} else { if(sfx.laserPlaying){ sfx.pause(1); } this.laser = false; }
+				} else
+				{
+					this.laser = false;
+					if(sfx.laserPlaying){ sfx.pause(1); }
+				}
+				
+				if(this.hasShield)
+				{
+					if(this.shield <= 0)
+					{
+						this.shield = 0;
+					}
+				}
+			}
 		
 		this.upgradeShield = function()
 		{
@@ -2120,8 +2120,8 @@ function Game()
 			}
 		}
 
-        this.shoot = function()
-        {
+    this.shoot = function()
+    {
 			switch(this.weapon)
 			{
 				case 0:
@@ -2171,7 +2171,7 @@ function Game()
 				}
 				default:{break;}
 			}
-        }
+    }
 		this.shootSecondary = function()
 		{
 			if(this.secondaryAmmo > 0 && this.secondary < 9000)
@@ -2205,7 +2205,7 @@ function Game()
 				}
 			}
 		}
-    }
+  }
     
     function GUIText(Text, X, Y, fStyle, aX, aY, col)
     {
@@ -2812,7 +2812,7 @@ if(mouseX > 110 && mouseX < 158 && mouseY > 280 && mouseY < 328)
 }
 if(mouseX > 10 && mouseX < 58 && mouseY > 448 && mouseY < 496)
 {//Boom Bullet, Weapon ID: 50
-	if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); } else {gco.notEnoughCores = 1000;}}
+	if(gco.weaponsOwned[50]){ gco.EquipWeapon(50); } else { if(player.money >= gco.weaponPrice[50]){ gco.PurchaseWeapon(50); player.secondaryAmmo += 50; } else {gco.notEnoughCores = 1000;}}
 }
 if(mouseX > 60 && mouseX < 108 && mouseY > 448 && mouseY < 496)
 {//Friendly Boom Bullet, Weapon ID: 51
