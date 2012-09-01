@@ -16,64 +16,9 @@ $user->setup();
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Blackmodule Studio</title>
 <link rel="stylesheet" href="../../template/pix.css" type="text/css" />
-
-<!-- TinyMCE -->
 <script type="text/javascript" src="tiny_mce/tiny_mce.js"></script>
-<!--
-<script type="text/javascript">
-	tinyMCE.init({
-		// General options
-		mode : "textareas",
-		theme : "advanced",
-		plugins : "autolink,lists,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,wordcount,advlist,autosave",
-
-		// Theme options
-		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,bullist,numlist,|,link,unlink,image,|,fontselect,fontsizeselect,|,emotions,code",
-		theme_advanced_buttons2 : "",
-        theme_advanced_buttons3 : "",
-		theme_advanced_toolbar_location : "bottom",
-		theme_advanced_toolbar_align : "center",
-		theme_advanced_statusbar_location : "bottom",
-		theme_advanced_resizing : true,
-
-		// Example content CSS (should be your site CSS)
-		content_css : "css/content.css",
-
-		// Drop lists for link/image/media/template dialogs
-		template_external_list_url : "lists/template_list.js",
-		external_link_list_url : "lists/link_list.js",
-		external_image_list_url : "lists/image_list.js",
-		media_external_list_url : "lists/media_list.js",
-
-		// Style formats
-		style_formats : [
-			{title : 'Bold text', inline : 'b'},
-			{title : 'Red text', inline : 'span', styles : {color : '#ff0000'}},
-			{title : 'Red header', block : 'h1', styles : {color : '#ff0000'}},
-			{title : 'Example 1', inline : 'span', classes : 'example1'},
-			{title : 'Example 2', inline : 'span', classes : 'example2'},
-			{title : 'Table styles'},
-			{title : 'Table row 1', selector : 'tr', classes : 'tablerow1'}
-		],
-
-		// Replace values for the template plugin
-		template_replace_values : {
-			username : "Some User",
-			staffid : "991234"
-		}
-	});
-</script>-->
-<!-- /TinyMCE -->
-
 </head>
 <body>
-
-<!--Preload div is to load imaged before browser displays them, allowing for more consistent load times-->
-<div class="preload">
-
-</div>
-<!--End Preload-->
-
 <div class="wrapperHead">
 	<div class="containerHead">
     	<div class="header">
@@ -128,8 +73,13 @@ $user->setup();
 ******************************************************************************
 -->
 <br />
-<?php
 
+<?php if(!$user->data['is_registered']) : ?>
+	<h3 style="color:#991111">You must login to submit highscores. Register for a Blackmodule Studio account above and join the fun!</h2>
+	<br />
+<?php endif ?>
+
+<?php
 $username = "downloadbms";
 $password2 = "Never4get";
 $hostname = "downloadbms.db.8856365.hostedresource.com";	

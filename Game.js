@@ -175,15 +175,20 @@ function Game()
     
 	addEventListener("click", doMouseClick, false);
     
-    //Sound Event Listener	
+   //Sound Event Listener	
 	document.querySelector("#bgm_square").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_fast").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_soar").addEventListener("ended",swapBGM,false);
 	document.querySelector("#bgm_dorian").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_euphoria").addEventListener("ended",swapBGM,false);
+	document.querySelector("#bgm_energy").addEventListener("ended",swapBGM,false);
+	//Error Detection
 	document.querySelector("#bgm_square").addEventListener("error",swapBGM,false);
 	document.querySelector("#bgm_fast").addEventListener("error",swapBGM,false);
 	document.querySelector("#bgm_soar").addEventListener("error",swapBGM,false);
 	document.querySelector("#bgm_dorian").addEventListener("error",swapBGM,false);
+	document.querySelector("#bgm_euphoria").addEventListener("error",swapBGM,false);
+	document.querySelector("#bgm_energy").addEventListener("error",swapBGM,false);
     
     /******************************************************/
     
@@ -291,7 +296,9 @@ function Game()
 			document.getElementById('bgm_fast').paused &&
 			document.getElementById('bgm_soar').paused &&
 			document.getElementById('bgm_dorian').paused && 
-			document.getElementById('bgm_boss').paused
+			document.getElementById('bgm_boss').paused &&
+			document.getElementById('bgm_euphoria').paused &&
+			document.getElementById('bgm_energy').paused
 		){ return true;}
 		return false;
 	}
@@ -568,7 +575,7 @@ function Game()
 	
 	function swapBGM()
 	{
-		switch(Math.round(Math.random() * 4))
+		switch(Math.floor(Math.random() * 6))
 		{
 			case 0:
 			{
@@ -592,6 +599,18 @@ function Game()
 			{
 				console.log("Playing Dorian");
 				gco.bgm = document.getElementById('bgm_dorian');
+				break;
+			}
+			case 4:
+			{
+				console.log("Playing Euphoria");
+				gco.bgm = document.getElementById('bgm_euphoria');
+				break;
+			}
+			case 5:
+			{
+				console.log("Playing Energy Rising");
+				gco.bgm = document.getElementById('bgm_energy');
 				break;
 			}
 			default:{}
