@@ -363,7 +363,10 @@ function Game()
 		
 		this.init_audio = function()
 		{
-			this.bgm.currentTime = 0;
+			if(this.bgm.currentTime)
+			{
+				this.bgm.currentTime = 0;
+			}
 			this.bgm.volume = masterBGMVolume;
 			this.bgm.play();
 		}
@@ -658,8 +661,11 @@ function Game()
 			switch(playfx)
 			{
 				case 0: {//Explode
-					this.explosion.channel[this.explosion.index].play();
-					this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+					if(this.explosion.index)
+					{
+						this.explosion.channel[this.explosion.index].play();
+						this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
+					}
 					break;
 				}
 				case 1: {//Laser
@@ -1990,11 +1996,13 @@ function Game()
     function Explosion(X, Y, NumParticles, Size, MaxAge, R, G, B)
     {
         this.particles = [];
-        this.numParticles = (NumParticles / 5) * particleOffset;
+        this.numParticles = Math.ceil((NumParticles / 5) * particleOffset);
         this.size = Size;
         this.age = 0;
         this.maxAge = MaxAge;
-        
+				X = Math.round(X);
+				Y = Math.round(Y);
+				
         for(var i = 0; i < this.numParticles; i++)
         {
             this.particles.push(new Particle(X, Y, R, G, B));
@@ -2004,15 +2012,15 @@ function Game()
         {
             for(var i = 0; i < this.particles.length; i++)
             {
-                this.particles[i].x += this.particles[i].xv * delta;
-                this.particles[i].y += this.particles[i].yv * delta;
+							this.particles[i].x += this.particles[i].xv * delta;
+							this.particles[i].y += this.particles[i].yv * delta;
             }
             
             if(this.age >= this.maxAge)
             {
-                return 1;
+              return 1;
             }
-            this.age++;
+            this.age = this.age + 1;
             return 0;
         }
     }
@@ -2574,10 +2582,10 @@ function Game()
                 
                 for(var i = 0; i < explosions.length; i++)
                 {
-                    if(explosions[i].Update() != 0)
-                    {
-                        self.popArray(explosions, i);
-                    }
+									if(explosions[i].Update() != 0)
+									{
+										self.popArray(explosions, i);
+									}
                 }
                 
                 // Collision Detection
@@ -2611,71 +2619,71 @@ function Game()
 					
                     for(var a = 0; a < enemies.length; a++)
                     {
-                        if(player.isAlive())
-                        {
-							if(ticks % 2 == 0)
-							{//LASERS!
-								if(enemies[a].laser)
-								{//Boss Laser
-									if(self.BossLaserCollision(player, enemies[a]))
-									{
-										player.DamagePlayer(2);
-									}
-								}
-								if(player.laser)
-								{
-									if(self.LaserCollision(enemies[a]))
-									{
-										enemies[a].life -= 5;
-										explosion = new Explosion(enemies[a].x, enemies[a].y, 2, 4, 50, 0.1, 0.1, 3.0);
-										explosions.push(explosion);
-									}
-								}
-							}
-							
-                            if(self.Collision(player, enemies[a]))
-							{
-								if(enemies[a].isBoss)
-								{
-									player.DamagePlayer(9000);//once to ensure shield is gone
-									player.DamagePlayer(9000);//once to ensure player death
-								} else
-								{
-									player.DamagePlayer(enemies[a].damage);
-									explosion = new Explosion(player.x, player.y, 5, 10, 60, 0.1, 3, 0.1);
-									explosions.push(explosion);
-									enemies[a].life = 0;
-								}
-							}
-                        
-							for(var b = 0; b < missiles.length; b++)
-							{
-								if(missiles[b].missileType > 99)
-								{
-									if(self.Collision(player, missiles[b]))
-									{
-										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-										explosions.push(explosion);
-										player.DamagePlayer(missiles[b].damage);
-										this.popArray(missiles, b);
-									}
-								} else
-								{
-									if(self.Collision(missiles[b], enemies[a]))
-									{
-										explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
-										explosions.push(explosion);
-										enemies[a].life -= missiles[b].damage;
-										this.popArray(missiles, b);
-									}
-								}
-							}
-						}
+											if(player.isAlive())
+											{
+												if(ticks % 2 == 0)
+												{//LASERS!
+													if(enemies[a].laser)
+													{//Boss Laser
+														if(self.BossLaserCollision(player, enemies[a]))
+														{
+															player.DamagePlayer(2);
+														}
+													}
+													if(player.laser)
+													{
+														if(self.LaserCollision(enemies[a]))
+														{
+															enemies[a].life -= 5;
+															explosion = new Explosion(enemies[a].x, enemies[a].y, 2, 4, 50, 0.1, 0.1, 3.0);
+															explosions.push(explosion);
+														}
+													}
+												}
+												
+												if(self.Collision(player, enemies[a]))
+												{
+													if(enemies[a].isBoss)
+													{
+														player.DamagePlayer(9000);//once to ensure shield is gone
+														player.DamagePlayer(9000);//once to ensure player death
+													} else
+													{
+														player.DamagePlayer(Math.round(enemies[a].damage));
+														explosion = new Explosion(player.x, player.y, 5, 10, 60, 0.1, 3, 0.1);
+														explosions.push(explosion);
+														enemies[a].life = 0;
+													}
+												}
+																	
+												for(var b = 0; b < missiles.length; b++)
+												{
+													if(missiles[b].missileType > 99)
+													{
+														if(self.Collision(player, missiles[b]))
+														{
+															explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+															explosions.push(explosion);
+															player.DamagePlayer(missiles[b].damage);
+															this.popArray(missiles, b);
+														}
+													} else
+													{
+														if(self.Collision(missiles[b], enemies[a]))
+														{
+															explosion = new Explosion(missiles[b].x, missiles[b].y, 5, 10, 100, 1, 1, 1);
+															explosions.push(explosion);
+															enemies[a].life -= missiles[b].damage;
+															this.popArray(missiles, b);
+														}
+													}
+												}
+											}
                     }
                 }
                 else
                 {
-					score = (enemyPoints + enemiesKilled) * 10;
+										score = (enemyPoints + enemiesKilled) * 10;
                     colSwap = true;
                 }
             }
@@ -3487,9 +3495,9 @@ if(mouseX > _canvas.width - 150 && mouseX < _canvas.width - 102 && mouseY > 448 
                 var rand2 = Math.floor(Math.random() * 3) + explosions[a].particles[i].blue;
                 
                 var p = explosions[a].particles[i];
-                var r = 255 - explosions[a].age * explosions[a].size / rand;
-                var g = 255 - explosions[a].age * explosions[a].size / rand1;
-                var b = 255 - explosions[a].age * explosions[a].size / rand2;
+                var r = 255 - Math.round(explosions[a].age * explosions[a].size / rand);
+                var g = 255 - Math.round(explosions[a].age * explosions[a].size / rand1);
+                var b = 255 - Math.round(explosions[a].age * explosions[a].size / rand2);
                 //buffer.beginPath();
                     buffer.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
                     var rand3 = Math.floor(Math.random() * 6) + 1;
