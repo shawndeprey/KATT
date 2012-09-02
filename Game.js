@@ -67,7 +67,7 @@ function Game()
 	this.loadedImage = function()
 	{
 		numImagesLoaded++;
-		console.log("Loaded image: " + numImagesLoaded + "/" + numOfImages);
+		//console.log("Loaded image: " + numImagesLoaded + "/" + numOfImages);
 		if(numImagesLoaded >= numOfImages)
 		{
 			imagesLoaded = true;
@@ -579,37 +579,37 @@ function Game()
 		{
 			case 0:
 			{
-				console.log("Playing Square");
+				//console.log("Playing Square");
 				gco.bgm = document.getElementById('bgm_square');
 				break;	
 			}
 			case 1:
 			{
-				console.log("Playing Fast");
+				//console.log("Playing Fast");
 				gco.bgm = document.getElementById('bgm_fast');
 				break;	
 			}
 			case 2:
 			{
-				console.log("Playing Soar");
+				//console.log("Playing Soar");
 				gco.bgm = document.getElementById('bgm_soar');
 				break;
 			}
 			case 3:
 			{
-				console.log("Playing Dorian");
+				//console.log("Playing Dorian");
 				gco.bgm = document.getElementById('bgm_dorian');
 				break;
 			}
 			case 4:
 			{
-				console.log("Playing Euphoria");
+				//console.log("Playing Euphoria");
 				gco.bgm = document.getElementById('bgm_euphoria');
 				break;
 			}
 			case 5:
 			{
-				console.log("Playing Energy Rising");
+				//console.log("Playing Energy Rising");
 				gco.bgm = document.getElementById('bgm_energy');
 				break;
 			}
