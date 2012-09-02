@@ -59,7 +59,6 @@ $user->setup();
 <audio id="bgm_square" onloadeddata="soundsLoaded()" preload="auto" autobuffer>
 	<source src="Audio/Square.mp3" type="audio/mp3"> 
 	<source src="Audio/Square.ogg" type="audio/ogg">
-	HTML5 audio not supported. Please Upgrade your web browser.
 </audio>
 <audio id="bgm_fast" preload="auto" autobuffer>
 	<source src="Audio/Fast.mp3" type="audio/mp3"> 

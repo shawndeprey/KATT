@@ -631,11 +631,12 @@ function Game()
 		this.bossLaser = 0;
 		this.bossLaserPlaying = false;
         this.masterVolume = 0.2;
+		this.explosion.index = 0;this.explosion.channel = []; this.explosion.channels = 20;
         
 		this.Init = function()
 		{
 		//Explosions
-			this.explosion.index = 0; this.explosion.channel = []; this.explosion.channels = 20;
+			
 			for(var i = 0; i < this.explosion.channels; i++)
 			{
 				var a = null;
@@ -661,11 +662,11 @@ function Game()
 			switch(playfx)
 			{
 				case 0: {//Explode
-					if(this.explosion.index)
-					{
+						if(this.explosion.channel[this.explosion.index])
+						{
 						this.explosion.channel[this.explosion.index].play();
 						this.explosion.index += 1; if(this.explosion.index > (this.explosion.channels - 1)){this.explosion.index = 0;}
-					}
+						}
 					break;
 				}
 				case 1: {//Laser
